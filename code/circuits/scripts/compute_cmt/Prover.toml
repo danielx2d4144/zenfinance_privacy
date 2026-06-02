@@ -1,0 +1,4 @@
+asset_id = "0"
+amount = "1000000"
+spending_pubkey = "0x123"
+salt = "0xabc"

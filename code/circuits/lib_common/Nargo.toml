@@ -1,0 +1,6 @@
+[package]
+name = "lib_common"
+type = "lib"
+authors = [""]
+
+[dependencies]

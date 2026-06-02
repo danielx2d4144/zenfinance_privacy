@@ -1,0 +1,41 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+test = "test"
+script = "script"
+
+solc_version = "0.8.27"
+evm_version = "paris"
+optimizer = true
+optimizer_runs = 200
+via_ir = true
+
+# bb-generated UltraHonk verifiers contain deep inline assembly that the
+# Yul IR pipeline cannot lower (stack-too-deep). Compile them through the
+# legacy pipeline; tests/scripts that import them rely on vm.deployCode or
+# the contract's external interface, not direct typed imports of the
+# verifier itself.
+additional_compiler_profiles = [
+    { name = "no-ir", via_ir = false, optimizer = true, optimizer_runs = 1 },
+]
+
+compilation_restrictions = [
+    { paths = "src/verifiers/**", via_ir = false, max_optimizer_runs = 1 },
+]
+
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "@account-abstraction/contracts/=lib/account-abstraction/contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+fuzz = { runs = 256 }
+invariant = { runs = 256, depth = 32 }
+
+[fmt]
+line_length = 100
+tab_width = 4
+bracket_spacing = false
+int_types = "long"
+quote_style = "double"

@@ -1,0 +1,54 @@
+# Secrets — NEVER commit. Per code_standard.md sec.7.
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+
+# Build outputs
+node_modules/
+**/node_modules/
+dist/
+build/
+out/
+cache/
+target/
+*.tsbuildinfo
+lcov.info
+
+# Foundry
+forge-cache/
+broadcast/
+
+# Noir / bb generated artifacts (live under <circuit>/target/, covered by target/)
+# but list explicitly in case a circuit emits next to its source:
+*.gz
+**/vk
+**/vk_hash
+**/kurier_vk_hash
+**/proof
+**/public_inputs
+**/public_inputs.bad
+
+# External code mirrored locally for reference — each has its own upstream repo
+horizen-docs/
+zkVerify-docs/
+referenced_repos/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Claude Code local settings (machine-specific permissions, hooks, etc.)
+.claude/
+!.claude/settings.json

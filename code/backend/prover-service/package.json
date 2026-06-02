@@ -1,0 +1,30 @@
+{
+  "name": "@lending/prover-service",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Day-8 attestation pipeline: submits Noir/UltraHonk proofs to Kurier, polls for aggregation, returns receipts for on-chain consumption.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <23"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "register-vks": "tsx scripts/register-all-vks.ts",
+    "smoke": "tsx scripts/smoke-submit.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "pino": "^9.5.0",
+    "undici": "^6.21.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  }
+}

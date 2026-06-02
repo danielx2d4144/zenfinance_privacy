@@ -1,0 +1,5 @@
+asset_id = "0"
+amount = "1000000"
+commitment = "0x0186fbba8d096aee919fa8e5dacdf403a72dc9cf329dbeb437e1671b37659dc1"
+spending_pubkey = "0x123"
+salt = "0xabc"

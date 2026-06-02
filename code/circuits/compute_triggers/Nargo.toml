@@ -1,0 +1,7 @@
+[package]
+name = "compute_triggers"
+type = "bin"
+authors = [""]
+
+[dependencies]
+lib_common = { path = "../lib_common" }
