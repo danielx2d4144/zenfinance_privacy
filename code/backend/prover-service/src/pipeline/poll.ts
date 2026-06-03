@@ -30,8 +30,8 @@ export function classify(res: JobStatusResponse): JobState {
     status === TerminalStatus.AggregationPublished
   ) {
     if (!res.aggregationDetails || res.aggregationId == null) {
-      // Some Kurier deployments report Aggregated before details/id propagate.
-      // Stay in-progress so the poller waits one more tick.
+      // Defensive: server may briefly report Aggregated with partial fields.
+      // Treat as in-progress so the poller waits one more tick.
       return { kind: "in-progress", status };
     }
     return {

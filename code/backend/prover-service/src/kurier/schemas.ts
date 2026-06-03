@@ -78,9 +78,16 @@ export const JobStatusResponseSchema = z.object({
 });
 export type JobStatusResponse = z.infer<typeof JobStatusResponseSchema>;
 
-// Terminal success requires aggregationDetails (merkle path to L1). The proof
-// is "Finalized" once Volta finalizes the block containing it, but our pipeline
-// needs the aggregation merkle path — so Finalized is treated as in-progress.
+// Status semantics (verified empirically on Base Sepolia 2026-06-03):
+//   Aggregated            — root is on the destination chain proxy and
+//                           verifyProofAggregation() returns true. Terminal
+//                           success for our pipeline.
+//   AggregationPublished  — defined in zkVerify docs but never observed on
+//                           Base Sepolia testnet; treated as terminal success
+//                           if it ever appears so we don't get stuck.
+// Earlier docs reading distinguished Aggregated (zkVerify-side) from
+// AggregationPublished (destination-chain-side). On Base Sepolia the relayer
+// pushes during Aggregated; the proxy already accepts the proof.
 export const TerminalStatus = {
   Aggregated: "Aggregated",
   AggregationPublished: "AggregationPublished",

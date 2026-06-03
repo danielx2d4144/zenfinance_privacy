@@ -13,12 +13,15 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "register-vks": "tsx scripts/register-all-vks.ts",
-    "smoke": "tsx scripts/smoke-submit.ts"
+    "smoke": "tsx scripts/smoke-submit.ts",
+    "consume": "tsx scripts/consume.ts",
+    "e2e": "tsx scripts/e2e.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",
     "pino": "^9.5.0",
     "undici": "^6.21.0",
+    "viem": "^2.52.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {

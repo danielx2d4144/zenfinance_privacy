@@ -12,7 +12,7 @@ describe("poll.classify", () => {
     merkleProof: [] as string[],
   };
 
-  it("Aggregated with id+details → succeeded", () => {
+  it("Aggregated with id+details → succeeded (Base Sepolia: relayer publishes during Aggregated)", () => {
     const s = classify({
       status: "Aggregated",
       aggregationId: 42,
@@ -36,7 +36,7 @@ describe("poll.classify", () => {
     expect(s.kind).toBe("in-progress");
   });
 
-  it("Aggregated WITHOUT details → in-progress (wait for details to propagate)", () => {
+  it("Aggregated WITHOUT details → in-progress (defensive)", () => {
     const s = classify({ status: "Aggregated" });
     expect(s.kind).toBe("in-progress");
   });

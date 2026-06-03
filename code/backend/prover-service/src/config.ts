@@ -20,6 +20,16 @@ const EnvSchema = z.object({
   ZKVERIFY_VOLTA_WSS: wssUrl,
   ZKVERIFY_EXPLORER: httpsUrl,
 
+  BASE_SEPOLIA_HTTPS: httpsUrl,
+  BASE_SEPOLIA_CHAIN_ID: z.coerce
+    .number()
+    .int()
+    .refine((n) => n === 84532, "expected Base Sepolia chain id 84532"),
+  BASE_SEPOLIA_EXPLORER: httpsUrl,
+  ZKVERIFY_PROXY_BASE_SEPOLIA: hexAddress,
+  ZKVERIFY_TESTNET_DOMAIN_ID: z.coerce.number().int().positive(),
+  ZKVERIFIER_BASE_SEPOLIA: hexAddress.optional().or(z.literal("")),
+
   HORIZEN_TESTNET_HTTPS: httpsUrl,
   HORIZEN_TESTNET_WSS: wssUrl,
   HORIZEN_TESTNET_CHAIN_ID: z.coerce
