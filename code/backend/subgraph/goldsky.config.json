@@ -1,0 +1,9 @@
+{
+  "subgraph": {
+    "name": "zenfinance-privacy",
+    "version": "v0.1.0-day10",
+    "network": "base-sepolia",
+    "manifest": "./subgraph.base-sepolia.yaml",
+    "comment": "Day-10 baseline. Indexes ZkVerifier + RateModel + Oracle + AssetRegistry on Base Sepolia. PrivacyEntry / pools / InsuranceFund / AgentAccount join when deployed."
+  }
+}

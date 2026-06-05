@@ -1,0 +1,7 @@
+{
+  "extends": "@graphprotocol/graph-ts/tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true
+  },
+  "include": ["src/**/*.ts", "generated/**/*.ts"]
+}

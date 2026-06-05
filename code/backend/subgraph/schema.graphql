@@ -1,0 +1,213 @@
+"""
+Day-10 subgraph schema — Subsystem 06 §3.
+
+Designed forward-looking: contains all 8 entities the data layer eventually
+serves, even though only a subset has live mappings as of Day 10 (because
+LendingPool / Liquidator / AgentAccount / InsuranceFund are not deployed
+yet). Goldsky deployment indexes only the live data sources; the remaining
+entity types stay populated when their contracts land in later days.
+
+All amount-typed fields are BigInt (raw on-chain units, no decimals
+applied). Rates and shares are basis-points (Int) per S14. Timestamps are
+unix seconds (BigInt).
+"""
+
+# -----------------------------------------------------------------------------
+# Markets: per-asset supply/borrow state mirrored from RateModel + Oracle.
+# -----------------------------------------------------------------------------
+
+type Market @entity {
+  "Asset symbol (USDC, cbBTC) — stable id chosen by mapping."
+  id: ID!
+  "Numeric asset id (matches AssetRegistry / RateModel uint8)."
+  assetId: Int!
+  "ERC-20 token address."
+  token: Bytes!
+  "Token decimals (cached at creation; immutable after that)."
+  decimals: Int!
+  "Sum of supply notes (raw units)."
+  totalSupply: BigInt!
+  "Sum of borrow positions (raw units)."
+  totalBorrow: BigInt!
+  "RateModel supplyIndex (ray-scaled, 1e27)."
+  supplyIndex: BigInt!
+  "RateModel borrowIndex (ray-scaled, 1e27)."
+  borrowIndex: BigInt!
+  "Current utilisation in basis points (0–10000)."
+  utilizationBps: Int!
+  "Current supply APR in basis points."
+  supplyRateBps: Int!
+  "Current borrow APR in basis points."
+  borrowRateBps: Int!
+  "block.timestamp of last accrue/setTotals call."
+  lastAccrual: BigInt!
+  "Latest Stork price in 1e8 USD scale (null until Oracle wired)."
+  latestPriceUsd1e8: BigInt
+  "block.timestamp of latest Oracle update."
+  latestPriceAt: BigInt
+  "Per-asset paused flag mirrored from RateModel."
+  paused: Boolean!
+  "All commitments owned by this market (reverse lookup)."
+  commitments: [Commitment!]! @derivedFrom(field: "market")
+}
+
+# -----------------------------------------------------------------------------
+# Commitments: every leaf inserted by any pool, with spent status.
+# -----------------------------------------------------------------------------
+
+enum CommitmentPool {
+  ENTRY
+  SUPPLY
+  POSITION
+}
+
+type Commitment @entity {
+  "32-byte commitment value (0x-prefixed hex)."
+  id: ID!
+  "Which pool emitted this commitment."
+  pool: CommitmentPool!
+  "Optional market reference (set for SUPPLY/POSITION commitments tagged with an asset)."
+  market: Market
+  "Leaf index in the pool's Merkle tree at insertion time."
+  leafIndex: Int!
+  "block.timestamp of insertion."
+  insertedAt: BigInt!
+  "Block number of insertion."
+  insertedAtBlock: BigInt!
+  "Transaction hash of the inserting tx."
+  insertedAtTx: Bytes!
+  "True once the matching nullifier has been published."
+  spent: Boolean!
+  "block.timestamp of nullifier publication (null while unspent)."
+  spentAt: BigInt
+  "Nullifier that spent this commitment (null while unspent)."
+  spentBy: Bytes
+}
+
+# -----------------------------------------------------------------------------
+# Liquidations: position registrations + executions on LiquidationBoard.
+# -----------------------------------------------------------------------------
+
+type LiquidationPosition @entity {
+  "Commitment id whose triggers are registered."
+  id: ID!
+  "Computed liquidation price in 1e8 USD."
+  liquidationPrice: BigInt!
+  "True while position is registered and untriggered."
+  active: Boolean!
+  "block.timestamp of registration."
+  insertedAt: BigInt!
+  "block.timestamp of last trigger update."
+  updatedAt: BigInt!
+}
+
+type LiquidationEvent @entity(immutable: true) {
+  "txHash-logIndex."
+  id: ID!
+  "Target commitment liquidated."
+  targetCommitment: Bytes!
+  "Liquidator EOA / contract."
+  liquidator: Bytes!
+  "Debt amount covered (raw units)."
+  debtCovered: BigInt!
+  "Collateral amount seized (raw units)."
+  collateralSeized: BigInt!
+  "Portion of seizure routed to the insurance fund."
+  insuranceFundShare: BigInt!
+  "block.timestamp."
+  timestamp: BigInt!
+  "Block number."
+  blockNumber: BigInt!
+}
+
+# -----------------------------------------------------------------------------
+# Attestation pipeline: each consumed aggregation proof from ZkVerifier.
+# -----------------------------------------------------------------------------
+
+enum CircuitId {
+  ENTRY_DEPOSIT
+  ENTRY_WITHDRAW
+  SUPPLY_ASSET
+  WITHDRAW_SUPPLY
+  DEPOSIT_COLLATERAL
+  WITHDRAW_COLLATERAL
+  BORROW
+  REPAY
+  LIQUIDATE
+  CONSOLIDATE_BALANCE
+  COMPUTE_TRIGGERS
+}
+
+type Aggregation @entity(immutable: true) {
+  "domainId-aggregationId-leafIndex composite id."
+  id: ID!
+  "On-chain domain id (Base Sepolia = 2)."
+  domainId: Int!
+  "Aggregation id returned by the zkVerify proxy."
+  aggregationId: BigInt!
+  "Index of the consumed leaf inside the aggregation."
+  leafIndex: BigInt!
+  "Circuit that produced the consumed proof."
+  circuit: CircuitId!
+  "block.timestamp of consumption."
+  postedAt: BigInt!
+  "Transaction hash that consumed the proof."
+  consumedTx: Bytes!
+  "Block number of consumption."
+  blockNumber: BigInt!
+}
+
+# -----------------------------------------------------------------------------
+# Policy + sessions (placeholder until AgentAccount lands).
+# -----------------------------------------------------------------------------
+
+type Policy @entity {
+  "policyId as a decimal string."
+  id: ID!
+  "Owner EOA / smart account."
+  owner: Bytes!
+  "Pubkey authorised by this policy."
+  agentPubkey: Bytes!
+  "Per-epoch spending cap (raw units; per-asset budgets tracked separately)."
+  spendingCapPerEpoch: BigInt!
+  "Health-factor floor in basis points (e.g. 12000 = HF 1.2)."
+  hfFloorBps: Int!
+  "Policy expiry as unix seconds."
+  expiresAt: BigInt!
+  "True until owner revokes or expiry passes."
+  active: Boolean!
+  "Sessions issued under this policy."
+  sessions: [AgentSession!]! @derivedFrom(field: "policy")
+}
+
+type AgentSession @entity {
+  "AgentAccount address + sessionId."
+  id: ID!
+  "AgentAccount that issued the session."
+  account: Bytes!
+  "Policy referenced."
+  policy: Policy!
+  "Authorised agent pubkey."
+  agentPubkey: Bytes!
+  "Session expiry as unix seconds."
+  expiresAt: BigInt!
+  "Owner-driven revocation flag."
+  revoked: Boolean!
+  "block.timestamp the session was issued."
+  createdAt: BigInt!
+}
+
+# -----------------------------------------------------------------------------
+# Insurance fund: per-asset balance + lifetime totals.
+# -----------------------------------------------------------------------------
+
+type InsuranceFundBalance @entity {
+  "ERC-20 token address."
+  id: ID!
+  "Current contract balance (raw units)."
+  balance: BigInt!
+  "Lifetime deposits received."
+  totalReceived: BigInt!
+  "Lifetime amounts paid out for coverage."
+  totalPaid: BigInt!
+}

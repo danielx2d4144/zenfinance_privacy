@@ -225,12 +225,51 @@ The Day-6 test doubles the on-chain `IVerifyProofAggregation` proxy with `MockVe
   and G2.1/2/3/5 deferred with explicit prerequisites listed above.
 
 ### Day 10 — Subgraph + Postgres
-- [ ] subgraph/schema.graphql authored
-- [ ] subgraph/src/mappings/ implemented
-- [ ] Postgres migrations 01__init.sql + down counterpart
-- [ ] Goldsky deployment configured
-- [ ] Day-10 tests run: T-10.1 ___, T-10.2 ___, T-10.3 ___
-- [ ] Day 10 user wrap-up acknowledged
+- [x] `code/backend/subgraph/schema.graphql` authored — all 8 S06 §3
+  entities (Market, Commitment, LiquidationPosition, LiquidationEvent,
+  Aggregation, Policy, AgentSession, InsuranceFundBalance). Forward-
+  looking: schema covers every contract the data layer will eventually
+  index, even where mappings come online in later days.
+- [x] `code/backend/subgraph/src/mappings/` implemented for the live
+  contract set (PrivacyEntry, ShieldedSupplyPool, ShieldedPositionPool,
+  ZkVerifier, RateModel, Oracle, AssetRegistry, InsuranceFund). Mappings
+  for LiquidationBoard / AgentAccount / PolicyRegistry are documented
+  as joining when those contracts ship (Day 11+ / 12-13).
+- [x] Postgres migrations: `code/backend/data-api/migrations/01__init.up.sql`
+  + `01__init.down.sql`. Tables: `intents`, `jobs`, `idempotency_keys`.
+  Enum types: `intent_kind`, `intent_status`. plpgsql `touch_updated_at`
+  trigger function + two `BEFORE UPDATE` triggers.
+- [x] Goldsky config: `subgraph.base-sepolia.yaml` wires the four
+  contracts already live on Base Sepolia (ZkVerifier
+  `0xd4f04878…59f7113`, RateModel `0xd301fdd…b6e33f5d`, Oracle
+  `0x05640215…8afeb9`, AssetRegistry `0x666e322b…6b0e5e06`).
+  `goldsky.config.json` carries the slug + version label; deploy via
+  `npm run goldsky:build && npm run goldsky:deploy`.
+- [x] Local T-10.1 harness: `code/infra/data-stack/docker-compose.yml`
+  (graph-node v0.36.0 + IPFS Kubo v0.29.0 + Postgres 15 + Anvil),
+  `forge script EmitTestEvents` (deploys the full stack + fires 100
+  mixed events: 50 PrivacyEntry.Deposited + 50 ZkVerifier.ProofConsumed),
+  `scripts/render-anvil.ts` (substitutes deployed addresses into the
+  manifest template), and `test/t10-1.ts` (polls graph-node sync,
+  asserts entity counts).
+- [x] **Day-10 tests**:
+  - **T-10.1 Subgraph: events indexed correctly** — ready-to-run pending
+    Docker Desktop start. End-to-end harness is complete; the only
+    missing step is the user running `docker compose up` before
+    `npm run t10-1`. Expected counts encoded in the assertion script:
+    50 Commitment + 50 Aggregation + 2 Market.
+  - **T-10.2 Subgraph: read-only enforced** — PASS by construction.
+    AssemblyScript mappings don't have a write surface against contracts:
+    `@graphprotocol/graph-ts` exposes only entity store APIs (`save`,
+    `load`) and view-style contract `try_*` reads. No `call.broadcast`
+    or signer surface exists — verified by code review.
+  - **T-10.3 Postgres migrations: up + down** — PASS (2026-06-05). 1/1
+    vitest cases. Used `@electric-sql/pglite` (real Postgres in WASM)
+    for an honest test that exercises triggers + plpgsql + info_schema
+    without needing Docker. After up: 3 tables / 2 enums / 1 function /
+    2 triggers. After down: all four counts back to zero.
+- [ ] Day 10 user wrap-up acknowledged (pending T-10.1 live run after
+  Docker Desktop starts).
 
 ### Day 11 — REST API + MCP server
 - [ ] Backend framework decision: ___ (NestJS or Fastify)

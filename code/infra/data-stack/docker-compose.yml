@@ -1,0 +1,110 @@
+# Day-10 local data stack: Postgres + IPFS + graph-node + Anvil.
+#
+# Standard sourcing of pinned versions:
+#   graph-node      v0.36.0     (Goldsky-compatible mappings spec 1.2.0)
+#   postgres        15-alpine   (graph-node's documented baseline)
+#   ipfs/kubo       v0.29.0     (works for the asset-manifest / mapping upload)
+#   anvil           latest      (foundry release Anvil image)
+#
+# Bring up: `docker compose up -d`. Exposed ports:
+#   8000  GraphQL HTTP query
+#   8001  GraphQL WS query
+#   8020  graph-node admin (used by `graph create` / `graph deploy`)
+#   8030  IPFS gateway (HTTP)
+#   5001  IPFS API (used by graph-cli)
+#   5432  Postgres (subgraph store)
+#   8545  Anvil RPC
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: data-stack-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: graph
+      POSTGRES_PASSWORD: graph
+      POSTGRES_DB: graphnode
+      # graph-node insists on the C locale and en_US.UTF-8 collation.
+      POSTGRES_INITDB_ARGS: >-
+        --locale=C --encoding=UTF-8 -E UTF8 --lc-collate=C --lc-ctype=C
+    command:
+      [
+        "postgres",
+        "-cshared_preload_libraries=pg_stat_statements",
+        "-cmax_connections=200",
+      ]
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U graph -d graphnode"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  ipfs:
+    image: ipfs/kubo:v0.29.0
+    container_name: data-stack-ipfs
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+      - "8030:8080"
+    volumes:
+      - ipfs-data:/data/ipfs
+    healthcheck:
+      test: ["CMD", "ipfs", "id"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  anvil:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: data-stack-anvil
+    restart: unless-stopped
+    # Pinned chain id 31337 (Anvil default). Block time 1s keeps the e2e
+    # test fast while still producing distinct block.timestamp values.
+    entrypoint: anvil
+    command:
+      - --host=0.0.0.0
+      - --chain-id=31337
+      - --block-time=1
+      - --gas-limit=30000000
+    ports:
+      - "8545:8545"
+    healthcheck:
+      test: ["CMD-SHELL", "cast block-number --rpc-url http://localhost:8545 > /dev/null"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  graph-node:
+    image: graphprotocol/graph-node:v0.36.0
+    container_name: data-stack-graph-node
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ipfs:
+        condition: service_healthy
+      anvil:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+      - "8001:8001"
+      - "8020:8020"
+    environment:
+      postgres_host: postgres
+      postgres_user: graph
+      postgres_pass: graph
+      postgres_db: graphnode
+      ipfs: "ipfs:5001"
+      # `mainnet` is the manifest network name we use locally (graph-cli treats
+      # mainnet as a generic-evm alias; we point it at the Anvil RPC).
+      ethereum: "mainnet:http://anvil:8545"
+      GRAPH_LOG: info
+      RUST_LOG: info,graph_chain_ethereum=warn
+
+volumes:
+  postgres-data:
+  ipfs-data:

@@ -1,0 +1,26 @@
+{
+  "name": "@lending/data-api",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Day-10 Postgres migrations + Day-11 REST/MCP scaffolding for the data layer (S06).",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0 <23"
+  },
+  "scripts": {
+    "migrate:up": "tsx src/migrate.ts up",
+    "migrate:down": "tsx src/migrate.ts down",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "^0.2.13",
+    "@types/node": "^22.10.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.5"
+  }
+}

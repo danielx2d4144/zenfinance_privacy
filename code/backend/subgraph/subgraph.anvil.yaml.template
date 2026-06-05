@@ -1,0 +1,210 @@
+specVersion: 1.2.0
+description: zenfinance privacy lending protocol — local Anvil (T-10.1 e2e harness)
+schema:
+  file: ./schema.graphql
+
+# Addresses are rendered by scripts/render-anvil.ts from anvil-addrs.json
+# (emitted by code/contracts/script/EmitTestEvents.s.sol).
+# All start blocks are 0 — Anvil starts fresh per test run.
+dataSources:
+  - kind: ethereum
+    name: PrivacyEntry
+    network: mainnet
+    source:
+      address: "{{PRIVACY_ENTRY}}"
+      abi: PrivacyEntry
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/privacy-entry.ts
+      entities:
+        - Commitment
+      abis:
+        - name: PrivacyEntry
+          file: ./abis/PrivacyEntry.json
+      eventHandlers:
+        - event: Deposited(indexed address,indexed address,uint256,bytes32)
+          handler: handleDeposited
+        - event: Withdrawn(indexed address,indexed address,uint256,bytes32)
+          handler: handleWithdrawn
+        - event: BalanceSpent(indexed bytes32)
+          handler: handleBalanceSpent
+        - event: BalanceCredited(indexed bytes32)
+          handler: handleBalanceCredited
+
+  - kind: ethereum
+    name: ShieldedSupplyPool
+    network: mainnet
+    source:
+      address: "{{SHIELDED_SUPPLY_POOL}}"
+      abi: ShieldedSupplyPool
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/shielded-supply.ts
+      entities:
+        - Commitment
+        - Market
+      abis:
+        - name: ShieldedSupplyPool
+          file: ./abis/ShieldedSupplyPool.json
+      eventHandlers:
+        - event: SupplyDeposited(indexed uint8,uint32,bytes32,uint256)
+          handler: handleSupplyDeposited
+        - event: SupplyWithdrawn(indexed uint8,indexed bytes32,uint256)
+          handler: handleSupplyWithdrawn
+
+  - kind: ethereum
+    name: ShieldedPositionPool
+    network: mainnet
+    source:
+      address: "{{SHIELDED_POSITION_POOL}}"
+      abi: ShieldedPositionPool
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/shielded-position.ts
+      entities:
+        - Commitment
+        - Market
+      abis:
+        - name: ShieldedPositionPool
+          file: ./abis/ShieldedPositionPool.json
+      eventHandlers:
+        - event: PositionUpdated(indexed bytes32,indexed bytes32,uint32)
+          handler: handlePositionUpdated
+        - event: CollateralDeposited(indexed uint8,uint256)
+          handler: handleCollateralDeposited
+        - event: CollateralWithdrawn(indexed uint8,uint256)
+          handler: handleCollateralWithdrawn
+        - event: Borrowed(indexed uint8,uint256)
+          handler: handleBorrowed
+        - event: Repaid(indexed uint8,uint256)
+          handler: handleRepaid
+
+  - kind: ethereum
+    name: ZkVerifier
+    network: mainnet
+    source:
+      address: "{{ZK_VERIFIER}}"
+      abi: ZkVerifier
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/zk-verifier.ts
+      entities:
+        - Aggregation
+      abis:
+        - name: ZkVerifier
+          file: ./abis/ZkVerifier.json
+      eventHandlers:
+        - event: ProofConsumed(indexed uint8,indexed uint256,indexed uint256,uint256)
+          handler: handleProofConsumed
+
+  - kind: ethereum
+    name: RateModel
+    network: mainnet
+    source:
+      address: "{{RATE_MODEL}}"
+      abi: RateModel
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/rate-model.ts
+      entities:
+        - Market
+      abis:
+        - name: RateModel
+          file: ./abis/RateModel.json
+      eventHandlers:
+        - event: AssetInitialized(indexed uint8)
+          handler: handleAssetInitialized
+        - event: RateParamsSet(indexed uint8,uint128,uint128,uint128)
+          handler: handleRateParamsSet
+        - event: IndexAccrued(indexed uint8,uint128,uint128,uint64)
+          handler: handleIndexAccrued
+        - event: AssetPausedStateSet(indexed uint8,bool)
+          handler: handleAssetPausedStateSet
+
+  - kind: ethereum
+    name: Oracle
+    network: mainnet
+    source:
+      address: "{{ORACLE}}"
+      abi: Oracle
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/oracle.ts
+      entities:
+        - Market
+      abis:
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: PriceUpdated(indexed uint8,uint128,uint64)
+          handler: handlePriceUpdated
+        - event: StalenessWindowSet(indexed uint8,uint32)
+          handler: handleStalenessWindowSet
+        - event: StorkFeedSet(indexed uint8,bytes32)
+          handler: handleStorkFeedSet
+
+  - kind: ethereum
+    name: AssetRegistry
+    network: mainnet
+    source:
+      address: "{{ASSET_REGISTRY}}"
+      abi: AssetRegistry
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/asset-registry.ts
+      entities:
+        - Market
+      abis:
+        - name: AssetRegistry
+          file: ./abis/AssetRegistry.json
+      eventHandlers:
+        - event: AssetEnabled(indexed uint8,indexed address)
+          handler: handleAssetEnabled
+        - event: AssetConfigUpdated(indexed uint8)
+          handler: handleAssetConfigUpdated
+        - event: AssetDisabled(indexed uint8)
+          handler: handleAssetDisabled
+
+  - kind: ethereum
+    name: InsuranceFund
+    network: mainnet
+    source:
+      address: "{{INSURANCE_FUND}}"
+      abi: InsuranceFund
+      startBlock: 0
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/insurance-fund.ts
+      entities:
+        - InsuranceFundBalance
+      abis:
+        - name: InsuranceFund
+          file: ./abis/InsuranceFund.json
+      eventHandlers:
+        - event: Deposited(indexed uint8,indexed address,uint256,address)
+          handler: handleDeposited
+        - event: Covered(indexed uint8,indexed address,uint256,address)
+          handler: handleCovered

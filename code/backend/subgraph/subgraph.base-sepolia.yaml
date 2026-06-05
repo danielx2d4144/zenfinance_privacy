@@ -1,0 +1,107 @@
+specVersion: 1.2.0
+description: zenfinance privacy lending protocol — Base Sepolia (Day-10 baseline)
+schema:
+  file: ./schema.graphql
+
+# Day-10 deployed data sources. PrivacyEntry / ShieldedSupplyPool /
+# ShieldedPositionPool / InsuranceFund / AgentAccount / LiquidationBoard
+# land in later days; this manifest is updated then. The Anvil variant
+# (subgraph.anvil.yaml) wires every contract for the T-10.1 e2e test.
+dataSources:
+  - kind: ethereum
+    name: ZkVerifier
+    network: base-sepolia
+    source:
+      address: "0xd4f048785e369c7c45dc527df5e173a0a59f7113"
+      abi: ZkVerifier
+      startBlock: 42378000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/zk-verifier.ts
+      entities:
+        - Aggregation
+      abis:
+        - name: ZkVerifier
+          file: ./abis/ZkVerifier.json
+      eventHandlers:
+        - event: ProofConsumed(indexed uint8,indexed uint256,indexed uint256,uint256)
+          handler: handleProofConsumed
+
+  - kind: ethereum
+    name: RateModel
+    network: base-sepolia
+    source:
+      address: "0xd301fddfa39254c00c2e3aa9c2963254b6e33f5d"
+      abi: RateModel
+      startBlock: 42450000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/rate-model.ts
+      entities:
+        - Market
+      abis:
+        - name: RateModel
+          file: ./abis/RateModel.json
+      eventHandlers:
+        - event: AssetInitialized(indexed uint8)
+          handler: handleAssetInitialized
+        - event: RateParamsSet(indexed uint8,uint128,uint128,uint128)
+          handler: handleRateParamsSet
+        - event: IndexAccrued(indexed uint8,uint128,uint128,uint64)
+          handler: handleIndexAccrued
+        - event: AssetPausedStateSet(indexed uint8,bool)
+          handler: handleAssetPausedStateSet
+
+  - kind: ethereum
+    name: Oracle
+    network: base-sepolia
+    source:
+      address: "0x056402158030767724cbc87469cdd9cf1d8afeb9"
+      abi: Oracle
+      startBlock: 42450000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/oracle.ts
+      entities:
+        - Market
+      abis:
+        - name: Oracle
+          file: ./abis/Oracle.json
+      eventHandlers:
+        - event: PriceUpdated(indexed uint8,uint128,uint64)
+          handler: handlePriceUpdated
+        - event: StalenessWindowSet(indexed uint8,uint32)
+          handler: handleStalenessWindowSet
+        - event: StorkFeedSet(indexed uint8,bytes32)
+          handler: handleStorkFeedSet
+
+  - kind: ethereum
+    name: AssetRegistry
+    network: base-sepolia
+    source:
+      address: "0x666e322b36edd5c697fcf53d347af4696b0e5e06"
+      abi: AssetRegistry
+      startBlock: 42450000
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.9
+      language: wasm/assemblyscript
+      file: ./src/mappings/asset-registry.ts
+      entities:
+        - Market
+      abis:
+        - name: AssetRegistry
+          file: ./abis/AssetRegistry.json
+      eventHandlers:
+        - event: AssetEnabled(indexed uint8,indexed address)
+          handler: handleAssetEnabled
+        - event: AssetConfigUpdated(indexed uint8)
+          handler: handleAssetConfigUpdated
+        - event: AssetDisabled(indexed uint8)
+          handler: handleAssetDisabled

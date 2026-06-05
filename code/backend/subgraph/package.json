@@ -1,0 +1,27 @@
+{
+  "name": "@lending/subgraph",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Day-10 subgraph indexing zenfinance privacy lending events (S06).",
+  "scripts": {
+    "codegen:base-sepolia": "graph codegen subgraph.base-sepolia.yaml",
+    "codegen:anvil": "graph codegen subgraph.anvil.yaml",
+    "build:base-sepolia": "graph build subgraph.base-sepolia.yaml",
+    "build:anvil": "graph build subgraph.anvil.yaml",
+    "render-anvil": "tsx scripts/render-anvil.ts",
+    "create-local": "graph create --node http://localhost:8020 lending/anvil",
+    "deploy-local": "graph deploy --node http://localhost:8020 --ipfs http://localhost:5001 --version-label v0 lending/anvil subgraph.anvil.yaml",
+    "t10-1": "tsx test/t10-1.ts",
+    "goldsky:build": "graph codegen subgraph.base-sepolia.yaml && graph build subgraph.base-sepolia.yaml",
+    "goldsky:deploy": "goldsky subgraph deploy zenfinance-privacy/v0.1.0-day10 --path build/"
+  },
+  "dependencies": {
+    "undici": "^6.21.0"
+  },
+  "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.79.2",
+    "@graphprotocol/graph-ts": "^0.35.1",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3"
+  }
+}

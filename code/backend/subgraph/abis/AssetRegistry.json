@@ -1,0 +1,817 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [
+      {
+        "name": "admin",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "BPS_DENOMINATOR",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "DEFAULT_ADMIN_ROLE",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "GUARDIAN_ROLE",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MANAGER_ROLE",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MAX_ASSETS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "assets",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct IAssetRegistry.AssetConfig",
+        "components": [
+          {
+            "name": "token",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "oracleFeed",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "decimals",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "ltvBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "liquidationThresholdBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "liquidationBonusBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "protocolFeeOfBonusBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "reserveFactorBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "closeFactorHfThresholdBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "minBorrowSize",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "dustDebtThreshold",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "suppliable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "borrowable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "collateralizable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "enabled",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "disableAsset",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "enableAsset",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "config",
+        "type": "tuple",
+        "internalType": "struct IAssetRegistry.AssetConfig",
+        "components": [
+          {
+            "name": "token",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "oracleFeed",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "decimals",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "ltvBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "liquidationThresholdBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "liquidationBonusBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "protocolFeeOfBonusBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "reserveFactorBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "closeFactorHfThresholdBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "minBorrowSize",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "dustDebtThreshold",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "suppliable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "borrowable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "collateralizable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "enabled",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getRoleAdmin",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "grantRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "hasRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isEnabled",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "numAssets",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "pause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "paused",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "reenableAsset",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "renounceRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "callerConfirmation",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "revokeRole",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "supportsInterface",
+    "inputs": [
+      {
+        "name": "interfaceId",
+        "type": "bytes4",
+        "internalType": "bytes4"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool",
+        "internalType": "bool"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "unpause",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "updateAssetConfig",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      },
+      {
+        "name": "config",
+        "type": "tuple",
+        "internalType": "struct IAssetRegistry.AssetConfig",
+        "components": [
+          {
+            "name": "token",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "oracleFeed",
+            "type": "address",
+            "internalType": "address"
+          },
+          {
+            "name": "decimals",
+            "type": "uint8",
+            "internalType": "uint8"
+          },
+          {
+            "name": "ltvBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "liquidationThresholdBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "liquidationBonusBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "protocolFeeOfBonusBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "reserveFactorBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "closeFactorHfThresholdBps",
+            "type": "uint16",
+            "internalType": "uint16"
+          },
+          {
+            "name": "minBorrowSize",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "dustDebtThreshold",
+            "type": "uint128",
+            "internalType": "uint128"
+          },
+          {
+            "name": "suppliable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "borrowable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "collateralizable",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "enabled",
+            "type": "bool",
+            "internalType": "bool"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "AssetConfigUpdated",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "indexed": true,
+        "internalType": "uint8"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "AssetDisabled",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "indexed": true,
+        "internalType": "uint8"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "AssetEnabled",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "indexed": true,
+        "internalType": "uint8"
+      },
+      {
+        "name": "token",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Paused",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleAdminChanged",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "previousAdminRole",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newAdminRole",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleGranted",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "RoleRevoked",
+    "inputs": [
+      {
+        "name": "role",
+        "type": "bytes32",
+        "indexed": true,
+        "internalType": "bytes32"
+      },
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      },
+      {
+        "name": "sender",
+        "type": "address",
+        "indexed": true,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Unpaused",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "indexed": false,
+        "internalType": "address"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "AccessControlBadConfirmation",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "AccessControlUnauthorizedAccount",
+    "inputs": [
+      {
+        "name": "account",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "neededRole",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "AssetAlreadyExists",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "AssetNotConfigured",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "EnforcedPause",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ExpectedPause",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidAssetId",
+    "inputs": [
+      {
+        "name": "assetId",
+        "type": "uint8",
+        "internalType": "uint8"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidBps",
+    "inputs": [
+      {
+        "name": "field",
+        "type": "string",
+        "internalType": "string"
+      },
+      {
+        "name": "value",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "LiquidationThresholdBelowLtv",
+    "inputs": [
+      {
+        "name": "ltvBps",
+        "type": "uint16",
+        "internalType": "uint16"
+      },
+      {
+        "name": "liquidationThresholdBps",
+        "type": "uint16",
+        "internalType": "uint16"
+      }
+    ]
+  },
+  {
+    "type": "error",
+    "name": "MaxAssetsReached",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddress",
+    "inputs": []
+  }
+]
