@@ -180,12 +180,49 @@ The Day-6 test doubles the on-chain `IVerifyProofAggregation` proxy with `MockVe
   LiquidationBoard + agent account deployed first (see Day-9 spec §2.3).
 - [ ] AWS KMS deferred to mainnet prep. Testnet uses .env-loaded keys,
   matching the Day-8 pattern (gitignored).
-- [x] Day-9 tests run: T-9.1 (Oracle reads from Stork) PASS via OracleStorkTest (5/5),
-  T-9.2 (live BTCUSD push readback) PASS — see tx + readback above.
-  T-9.3 ___, T-9.4 ___ TBD.
-- [ ] **Checkpoint G2 — Full chain stack**: ___ (run after Day 9)
-  - [ ] G2.1, G2.2, G2.3, G2.4, G2.5
-- [ ] Day 9 user wrap-up acknowledged
+- [x] **Day-9 tests** (per subsystem_test.md §Day-9):
+  - **T-9.1 Oracle: Stork price flows through** — PASS. OracleStorkTest 5/5 unit
+    plus live evidence above: `setStorkFeed → push BTCUSD → cast getPrice(1) = $60,745.28`.
+  - **T-9.2 Accrue keeper: cadence honoured** — PASS (2026-06-05). Ran
+    `npm run accrue -- --loop` with ACCRUE_INTERVAL_SECONDS=60 for 5 min;
+    counted 5 successful asset-0 calls + 4 asset-1 calls inside the 300s
+    window (within spec's 5±1). 3 nonce-race failures observed after
+    repeated restarts in the test environment (viem's auto-nonce was stale
+    after orphaned-keeper txs landed) — noted as a keeper-resilience
+    follow-up, not a cadence regression.
+  - **T-9.3 Keeper: KMS signing only** — DEFERRED to mainnet prep. Testnet
+    uses `.env`-loaded RELAYER_PRIVATE_KEY (gitignored), matching the
+    Day-8 prover pattern. KMS ARN wiring lands when we cut a mainnet
+    release branch.
+  - **T-9.4 Keeper pause: protocol stays safe** — DEFERRED to Day 12-13.
+    Test requires LendingPool + LiquidationBoard so we can observe
+    "no liquidations" under keeper pause; neither is deployed yet.
+- [~] **Checkpoint G2 — Full chain stack** (partial; gates remaining items on
+  later days):
+  - [ ] **G2.1 Agent borrow on Horizen testnet with real attestation** —
+    DEFERRED. Test targets Horizen testnet, but Day-8 fell back to Base
+    Sepolia for attestation ([[zkverify_proxy_fallback]]). Also needs
+    AgentAccount + ERC-4337 bundler wiring that hasn't been deployed yet
+    (Day 11 territory). Will be exercised when both Horizen proxy
+    addresses and AgentAccount land.
+  - [ ] **G2.2 Policy violation blocks attestation submission** — DEFERRED
+    alongside G2.1 (same AgentAccount dependency).
+  - [ ] **G2.3 Keeper-driven accrue propagates through indices** — DEFERRED.
+    Requires LendingPool to observe borrowIndex/supplyIndex; we only
+    have RateModel.accrue today, and a 1-hour drift run is wasteful
+    against an empty pool. Defer until Day 11 (LendingPool live).
+  - [x] **G2.4 Stork price stall handled** — PASS (2026-06-05). Live
+    round-trip on Base Sepolia: fresh push → `getPrice(1) = $60,887.49`;
+    waited 80s past the default 60s window; next `getPrice(1)` reverted
+    with selector `0x0868dfcf = PriceStale(uint8,uint64,uint64,uint32)`
+    and decoded args `(assetId=1, updatedAt=0x6a22ea11, nowTs=0x6a22ea92,
+    window=60)` — diff 129s > 60s window confirms fail-closed behaviour
+    (I-SOLV-5). After a fresh push, `getPrice(1)` recovered to $60,741.09.
+  - [ ] **G2.5 Session-key revocation propagates** — DEFERRED. Same
+    AgentAccount/ERC-4337 dependency as G2.1.
+- [x] Day 9 user wrap-up acknowledged: full Day-9 close-out 2026-06-05
+  with live T-9.1, T-9.2, G2.4 evidence on Base Sepolia. T-9.3, T-9.4
+  and G2.1/2/3/5 deferred with explicit prerequisites listed above.
 
 ### Day 10 — Subgraph + Postgres
 - [ ] subgraph/schema.graphql authored
