@@ -129,12 +129,60 @@ The Day-6 test doubles the on-chain `IVerifyProofAggregation` proxy with `MockVe
 **Toolchain correction (2026-06-02):** bb pin moved from v5.0.0-nightly.20260324 back to v3.0.0-nightly.20260102 (nargo paired at 1.0.0-beta.18). zkVerify's `UltrahonkVersion` enum has no V5_x variant — v5 proofs were accepted at registration (vk size matched V3_0 = 1888 bytes) but `optimisticVerify` failed because the proof body layout differs. All 11 vkHashes regenerated, `VkRegistry.sol` updated, contracts must be redeployed before Day-9. See [[bb-version-pin]].
 
 ### Day 9 — Oracle + Keepers
-- [ ] Oracle.sol full Stork integration
-- [ ] Price keeper deployed
-- [ ] Accrue keeper deployed
-- [ ] Backstop keeper deployed
-- [ ] AWS KMS configured; no plaintext keys anywhere
-- [ ] Day-9 tests run: T-9.1 ___, T-9.2 ___, T-9.3 ___, T-9.4 ___
+- [x] Oracle.sol Stork integration: pull adapter that reads
+  `IStork.getTemporalNumericValueUnsafeV1(feedId)` when `setStorkFeed(assetId, feedId)`
+  has been called; otherwise falls back to Day-1 `pushPrice`. Scales 1e18 quantization
+  back to 1e8. New `OracleStorkTest` covers happy-path, scaling, stale, zero-value,
+  unset-revert-to-push. 192/192 forge tests green.
+- [x] Oracle deployed to Base Sepolia at `0x056402158030767724cbc87469cdd9cf1d8afeb9`,
+  pointing at Stork verifier `0x647DFd812BC1e116c6992CB2bC353b2112176fD6`;
+  `setStorkFeed(CBBTC_ID=1, keccak256("BTCUSD")=0x7404e3d104ea7841c3d9e6fd20adfe99b4ad586bc08d8f3bd3afef894cf184de)`
+  applied (tx `0x46c9b8be…`). USDC ($1 fixed) intentionally skipped — debt asset, not read in v1.
+- [x] price-keeper code complete (`code/backend/price-keeper/`): viem + undici + zod scaffold,
+  Stork REST client (handles base64/hex asset ids, preserves nanosecond-precision
+  timestamps via pre-parse large-integer quoting), on-chain pusher (computes fee via
+  getUpdateFeeV1, simulates, sends). 18/18 vitest green. `scripts/push-once.ts` for
+  one-shot; `scripts/start.ts` for the 30s cadence loop.
+- [x] **IStork struct layout corrected** (canonical Stork SDK shape):
+  `TemporalNumericValueInput = {temporalNumericValue{timestampNs,quantizedValue},
+  id, publisherMerkleRoot, valueComputeAlgHash, r, s, v}` — earlier draft had a
+  flat tuple with a packed `bytes signature`, which encoded the wrong calldata
+  and reverted with InvalidSignature on-chain.
+- [x] **JSON nanosecond-precision fix**: Stork returns recv_time as a bare JSON
+  integer (~1.78e18, beyond Number.MAX_SAFE_INTEGER). `JSON.parse` silently
+  truncated ~20 ns, breaking signature verification. Added `quoteLargeIntegers`
+  pre-parser that wraps any ≥16-digit bare integer in double quotes so it
+  survives as a string; covered by 5 new vitest cases.
+- [x] accrue-keeper code complete (`code/backend/price-keeper/scripts/accrue.ts`).
+  Single-shot or `--loop` mode at ACCRUE_INTERVAL_SECONDS (default 300). Reuses
+  price-keeper signer/RPC.
+- [x] AssetRegistry + RateModel deployed to Base Sepolia (testnet rate scaffold):
+  - MockUSDC `0x9cfc503a6d82191ac9e87e4917393a5b9e68cdef` (6 decimals)
+  - MockcbBTC `0x7e785d81c0e1121813b5c76e407105854d70dcf6` (8 decimals)
+  - AssetRegistry `0x666e322b36edd5c697fcf53d347af4696b0e5e06` — USDC (id=0) + cbBTC (id=1) enabled
+  - RateModel `0xd301fddfa39254c00c2e3aa9c2963254b6e33f5d` — kinked curve {uOpt=80%, slope1=4% APR, slope2=75% APR}, both assets initialized with indices=RAY
+- [x] **Live accrue-keeper run PASS** (2026-06-04): `npm run accrue` against deployed
+  RateModel succeeded for both assets — USDC tx `0x16741d23e5e062e1563be6b33b41681c7dc06b8cb06c8b93731970446c1871fb` (43,514 gas) and
+  cbBTC tx `0x42ee513ee3f1db7e7c17e3ab7605af60ccebf824cfd0ab57d1b12a266f6231c9` (43,526 gas).
+- [x] **Live Stork push PASS** (2026-06-05): `npm run push-once` fetched a
+  signed BTCUSD update from `rest.jp.stork-oracle.network` and submitted it
+  to Stork verifier `0x647DFd812BC1e116c6992CB2bC353b2112176fD6` on Base
+  Sepolia. Tx `0x3bebc12ea9a6223eccb1a5222e9c1c8bfc68705c0e16e83be9c8d49a6484c218`
+  (73,232 gas; cold write). Subsequent fresh push tx
+  `0x7b644bc142ca833a9ff705c1c4055838fee3280ec12d8084ab42d36589d04514`
+  (55,791 gas; warm slot). Readback confirmed BTC stored at $60,812.35.
+- [x] **Live Oracle.getPrice(cbBTC) PASS** (2026-06-05): after
+  `setStorkFeed(1, keccak256("BTCUSD"))` (tx `0xef07fb2bdd5bc89e695f76abece78c0233f301826183950eb28d0d46b2ecea3a`,
+  28,168 gas), `cast call Oracle.getPrice(1)` returned `6_074_528_479_938`
+  = $60,745.28 (1e8-scaled). Full pipeline live: Stork REST → on-chain
+  Stork verifier → Oracle adapter → 1e8 USD price.
+- [ ] Backstop keeper deferred to Day 12-13: needs LendingPool +
+  LiquidationBoard + agent account deployed first (see Day-9 spec §2.3).
+- [ ] AWS KMS deferred to mainnet prep. Testnet uses .env-loaded keys,
+  matching the Day-8 pattern (gitignored).
+- [x] Day-9 tests run: T-9.1 (Oracle reads from Stork) PASS via OracleStorkTest (5/5),
+  T-9.2 (live BTCUSD push readback) PASS — see tx + readback above.
+  T-9.3 ___, T-9.4 ___ TBD.
 - [ ] **Checkpoint G2 — Full chain stack**: ___ (run after Day 9)
   - [ ] G2.1, G2.2, G2.3, G2.4, G2.5
 - [ ] Day 9 user wrap-up acknowledged

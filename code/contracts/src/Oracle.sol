@@ -4,6 +4,7 @@ pragma solidity 0.8.27;
 import {AccessControl} from "@openzeppelin/contracts/access/AccessControl.sol";
 
 import {IOracle} from "./interfaces/IOracle.sol";
+import {IStork} from "./interfaces/external/IStork.sol";
 
 /// @title Oracle
 /// @notice Stork adapter for per-asset USD prices.
@@ -23,19 +24,51 @@ contract Oracle is IOracle, AccessControl {
     uint32 public constant DEFAULT_STALENESS_WINDOW = 60;
     uint32 public constant MAX_STALENESS_WINDOW = 3_600;
 
+    /// @notice Stork verifier contract. Optional — when address(0) the Oracle
+    ///         behaves as a Day-1 push-only adapter (for tests / migration).
+    IStork public immutable stork;
+
     mapping(uint8 => PriceData) private _priceData;
     mapping(uint8 => uint32) private _stalenessWindow;
     mapping(uint8 => address) private _feed;
+    /// @notice Per-asset Stork feed id (e.g. keccak256("BTCUSD")). When set,
+    ///         `getPrice` reads from Stork instead of `_priceData`.
+    mapping(uint8 => bytes32) private _storkFeedId;
+
+    /// @dev Stork quantizes prices by 1e18; IOracle convention is 1e8.
+    int192 internal constant STORK_PRICE_SCALE = 1e10;
+
+    event StorkFeedSet(uint8 indexed assetId, bytes32 feedId);
 
     error PriceStale(uint8 assetId, uint64 updatedAt, uint64 nowTs, uint32 window);
     error PriceUnset(uint8 assetId);
     error InvalidWindow(uint32 windowSeconds);
     error ZeroAddress();
     error ZeroPrice();
+    error StorkNotConfigured();
+    error StorkValueNonPositive(uint8 assetId, int192 quantizedValue);
+    error StorkValueOverflow(uint8 assetId, int192 quantizedValue);
 
-    constructor(address admin) {
+    constructor(address admin, address stork_) {
         if (admin == address(0)) revert ZeroAddress();
         _grantRole(DEFAULT_ADMIN_ROLE, admin);
+        stork = IStork(stork_);
+    }
+
+    /// @notice Bind an `assetId` to a Stork feed id (e.g. keccak256("BTCUSD")).
+    ///         After this call, `getPrice(assetId)` reads from Stork. Setting
+    ///         `feedId` to bytes32(0) reverts to the Day-1 push path.
+    /// @dev    Stork uses bytes32 feed ids derived from the asset symbol
+    ///         (see IStork). The Stork contract must already have an
+    ///         active feed for this id.
+    function setStorkFeed(uint8 assetId, bytes32 feedId) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        if (address(stork) == address(0)) revert StorkNotConfigured();
+        _storkFeedId[assetId] = feedId;
+        emit StorkFeedSet(assetId, feedId);
+    }
+
+    function storkFeedId(uint8 assetId) external view returns (bytes32) {
+        return _storkFeedId[assetId];
     }
 
     function configureFeed(uint8 assetId, address feedAddress, uint32 windowSeconds)
@@ -74,13 +107,32 @@ contract Oracle is IOracle, AccessControl {
     }
 
     function getPrice(uint8 assetId) external view returns (uint128) {
+        uint32 window = _stalenessWindow[assetId];
+        if (window == 0) window = DEFAULT_STALENESS_WINDOW;
+        uint64 nowTs = uint64(block.timestamp);
+
+        bytes32 feedId = _storkFeedId[assetId];
+        if (feedId != bytes32(0)) {
+            IStork.TemporalNumericValue memory v =
+                stork.getTemporalNumericValueUnsafeV1(feedId);
+
+            uint64 updatedAt = uint64(v.timestampNs / 1_000_000_000);
+            if (nowTs > updatedAt + window) {
+                revert PriceStale(assetId, updatedAt, nowTs, window);
+            }
+            if (v.quantizedValue <= 0) {
+                revert StorkValueNonPositive(assetId, v.quantizedValue);
+            }
+            int192 scaled = v.quantizedValue / STORK_PRICE_SCALE;
+            if (scaled > int192(uint192(type(uint128).max))) {
+                revert StorkValueOverflow(assetId, v.quantizedValue);
+            }
+            return uint128(uint192(scaled));
+        }
+
         PriceData memory p = _priceData[assetId];
         if (p.updatedAt == 0) revert PriceUnset(assetId);
 
-        uint32 window = _stalenessWindow[assetId];
-        if (window == 0) window = DEFAULT_STALENESS_WINDOW;
-
-        uint64 nowTs = uint64(block.timestamp);
         if (nowTs > p.updatedAt + window) {
             revert PriceStale(assetId, p.updatedAt, nowTs, window);
         }
@@ -88,6 +140,19 @@ contract Oracle is IOracle, AccessControl {
     }
 
     function priceData(uint8 assetId) external view returns (PriceData memory) {
+        bytes32 feedId = _storkFeedId[assetId];
+        if (feedId != bytes32(0)) {
+            IStork.TemporalNumericValue memory v =
+                stork.getTemporalNumericValueUnsafeV1(feedId);
+            if (v.timestampNs == 0) return PriceData({priceUsd1e8: 0, updatedAt: 0});
+            int192 scaled = v.quantizedValue / STORK_PRICE_SCALE;
+            uint128 price =
+                scaled <= 0 ? 0 : uint128(uint192(scaled > int192(uint192(type(uint128).max)) ? int192(uint192(type(uint128).max)) : scaled));
+            return PriceData({
+                priceUsd1e8: price,
+                updatedAt: uint64(v.timestampNs / 1_000_000_000)
+            });
+        }
         return _priceData[assetId];
     }
 

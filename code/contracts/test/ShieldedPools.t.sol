@@ -75,7 +75,7 @@ abstract contract PoolDeployment is Test {
         vm.stopPrank();
 
         // Oracle
-        oracle = new Oracle(ADMIN);
+        oracle = new Oracle(ADMIN, address(0));
         bytes32 oracleMgr = oracle.MANAGER_ROLE();
         vm.startPrank(ADMIN);
         oracle.grantRole(oracleMgr, MANAGER);

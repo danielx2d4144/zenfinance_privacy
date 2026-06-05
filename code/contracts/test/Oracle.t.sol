@@ -18,7 +18,7 @@ contract OracleTest is Test {
     uint8 internal constant USDC_ID = 0;
 
     function setUp() public {
-        oracle = new Oracle(ADMIN);
+        oracle = new Oracle(ADMIN, address(0));
         vm.startPrank(ADMIN);
         oracle.grantRole(oracle.MANAGER_ROLE(), MANAGER);
         oracle.configureFeed(USDC_ID, FEED, 60);
@@ -139,6 +139,12 @@ contract OracleTest is Test {
 
     function testRevert_constructor_zeroAdmin() public {
         vm.expectRevert(Oracle.ZeroAddress.selector);
-        new Oracle(address(0));
+        new Oracle(address(0), address(0));
+    }
+
+    function testRevert_setStorkFeed_whenStorkUnset() public {
+        vm.prank(ADMIN);
+        vm.expectRevert(Oracle.StorkNotConfigured.selector);
+        oracle.setStorkFeed(USDC_ID, bytes32(uint256(1)));
     }
 }
