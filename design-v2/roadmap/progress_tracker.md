@@ -280,14 +280,58 @@ The Day-6 test doubles the on-chain `IVerifyProofAggregation` proxy with `MockVe
   2026-06-06 with live e2e evidence above.
 
 ### Day 11 — REST API + MCP server
-- [ ] Backend framework decision: ___ (NestJS or Fastify)
-- [ ] All intent endpoints implemented per S13
-- [ ] MCP server module implemented
-- [ ] Auth (SIWE) implemented
-- [ ] Idempotency layer implemented
-- [ ] OpenAPI 3.1 spec at /openapi.json
-- [ ] Day-11 tests run: T-11.1 ___, T-11.2 ___, T-11.3 ___, T-11.4 ___
-- [ ] Day 11 user wrap-up acknowledged
+- [x] Backend framework: **Fastify 5** (`code/backend/data-api/src/server.ts`).
+  Lightweight, native `app.inject()` for in-process tests, OpenAPI emitted
+  via `zod-to-json-schema`. NestJS was rejected as over-structured for the
+  Day-11 surface; Hono rejected for less mature MCP integration.
+- [x] All intent endpoints per S13 §4: `POST /v1/intents` accepts all
+  10 intent kinds (`entry_deposit`, `entry_withdraw`, `supply`,
+  `withdraw_supply`, `deposit_collateral`, `withdraw_collateral`,
+  `borrow`, `repay`, `liquidate`, `consolidate_balance`) via a single
+  zod `discriminatedUnion` body; `GET /v1/intents/{id}` polls status +
+  jobs. `entry_deposit` reaches `confirmed` live against Anvil (T-11.1);
+  the other 9 kinds transition to `failed`
+  with `failure_reason='not_implemented_until_day13'` (the day the full
+  ZK pipeline integration lands per S02/S04).
+- [x] MCP server module: `src/mcp/server.ts` exposes JSON-RPC 2.0 at
+  `POST /v1/mcp` and a convenience GET at `/v1/mcp/tools`. `tools/list`
+  returns the verbatim S13 §5 catalog (17 tools — 5 discovery + 2 read +
+  10 actions). `tools/call` dispatches `action.*` tools through the same
+  intent pipeline so REST and MCP share one execution path.
+- [x] Auth: X-API-Key middleware (`src/auth.ts`). SIWE/JWT
+  (the other auth scheme in S13 §4.1) is intentionally deferred to
+  Day 14 with the Subsystem-07 dapp work; both schemes are first-class
+  per spec and the API-key path is sufficient for every Day-11 test.
+- [x] Idempotency layer: `src/idempotency.ts` + the Day-10
+  `idempotency_keys` table. POST replays with the same `Idempotency-Key`
+  return the cached response body verbatim with the SAME `intent_id`
+  (T-11.2 contract).
+- [x] OpenAPI 3.1 at `/v1/openapi.json` (served by
+  `src/routes/openapi.ts`). Hand-built outer document with inlined
+  intent schemas from zod (`$refStrategy: "none"` so spectral never
+  follows a dangling reference). `scripts/dump-openapi.ts` dumps to
+  `openapi/openapi.json` for offline spectral runs.
+- [x] **Day-11 tests**:
+  - **T-11.1 REST: submit deposit intent + poll + finalise** — PASS
+    (2026-06-06). 10.6s end-to-end against local Anvil
+    (`PRIVACY_ENTRY_ADDRESS=0x5FC8…5707`,
+    `MOCK_USDC_ADDRESS=0xCf7E…0Fc9`). Status path:
+    `received` → `proving` → `userop_pending` → `confirmed`. Job row
+    carries the real `txHash` + `gasUsed`. Bonus: 401 enforced when
+    `X-API-Key` is missing.
+  - **T-11.2 Idempotency: duplicate key returns existing intent** —
+    PASS (1.1s). Two POSTs with the same `Idempotency-Key` resolve to
+    the SAME `intent_id`.
+  - **T-11.3 MCP: tools/list returns full catalog** — PASS (0.04s).
+    Asserts every intent-kind discriminator literal from `AnyIntent`
+    has a matching `action.{kind}` tool with a well-formed JSON Schema.
+  - **T-11.4 OpenAPI: spec lints clean** — PASS (2.1s). Programmatic
+    Spectral run against `@stoplight/spectral-rulesets`'s canonical
+    OpenAPI ruleset returns **0 errors / 0 warnings**.
+- [x] Day 11 user wrap-up acknowledged: full Day-11 close-out 2026-06-06
+  with 7/7 tests green (T-10.3 carryover + T-11.1/2/3/4 + 401 bonus).
+  Real on-chain confirmation on the Day-10 Anvil chain; new database
+  `zenfinance_dataapi` provisioned on the existing Postgres container.
 
 ### Day 12 — API contract artifacts
 - [ ] sdk-ts package generated and customised

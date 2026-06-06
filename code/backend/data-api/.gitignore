@@ -1,0 +1,5 @@
+# dump-openapi.ts emits this; spectral lints it; not committed.
+openapi/openapi.json
+
+# build output
+dist/

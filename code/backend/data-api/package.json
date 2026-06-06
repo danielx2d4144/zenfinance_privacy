@@ -1,26 +1,43 @@
 {
   "name": "@lending/data-api",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "Day-10 Postgres migrations + Day-11 REST/MCP scaffolding for the data layer (S06).",
+  "description": "Day-11 REST API + MCP server for the zenfinance privacy lending protocol (S06).",
   "type": "module",
   "engines": {
     "node": ">=22.0.0 <23"
   },
   "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "migrate:up": "tsx src/migrate.ts up",
     "migrate:down": "tsx src/migrate.ts down",
-    "test": "vitest run"
+    "start": "tsx src/server.ts",
+    "dev": "tsx --watch src/server.ts",
+    "test": "vitest run",
+    "lint:openapi": "tsx scripts/dump-openapi.ts && spectral lint openapi/openapi.json --ruleset openapi/.spectral.yaml"
   },
   "dependencies": {
-    "pg": "^8.13.0"
+    "@fastify/swagger": "^9.4.2",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "dotenv": "^16.4.7",
+    "fastify": "^5.2.0",
+    "pg": "^8.13.1",
+    "pino": "^9.5.0",
+    "viem": "^2.21.55",
+    "zod": "^3.24.1",
+    "zod-to-json-schema": "^3.24.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "^0.2.13",
+    "@stoplight/spectral-cli": "^6.14.2",
+    "@stoplight/spectral-core": "^1.19.4",
+    "@stoplight/spectral-rulesets": "^1.21.3",
     "@types/node": "^22.10.0",
     "@types/pg": "^8.11.10",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
+    "undici": "^7.2.0",
     "vitest": "^2.1.5"
   }
 }

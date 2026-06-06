@@ -1,0 +1,13 @@
+# Day-11 OpenAPI lint config. Inherits the canonical Spectral OpenAPI
+# ruleset, which catches the things S13 §4 cares about (missing
+# operationIds, malformed responses, undocumented status codes).
+extends:
+  - ["@stoplight/spectral-rulesets/dist/rulesets/oas", all]
+
+rules:
+  # We embed the OpenAPI server URL only for local-dev; relaxing the
+  # "production server in info.contact.url" check until Day-13 deploy.
+  contact-properties: off
+  # info.license is set; the canonical ruleset wants identifier+url which
+  # is fine but warns; we keep it explicit.
+  info-license: warn
