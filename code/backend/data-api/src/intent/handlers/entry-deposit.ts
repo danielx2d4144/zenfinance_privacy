@@ -2,6 +2,7 @@ import type { Pool } from "pg";
 import type { Address, Hex } from "viem";
 
 import { getChainClients } from "../../chain/anvil.js";
+import { withChainLock } from "../../chain/mutex.js";
 import { insertJobWithTx, updateIntentStatus, type IntentRow } from "../state.js";
 import type { z } from "zod";
 import type { EntryDepositIntent } from "../schemas.js";
@@ -71,51 +72,55 @@ export async function handleEntryDeposit(
     // to make sense to clients polling).
     await updateIntentStatus(pool, intent.id, "proving");
 
-    // Stage 2: mint + approve.
-    const mintHash = await walletClient.writeContract({
-      address: mockUsdc as Address,
-      abi: ERC20_ABI,
-      functionName: "mint",
-      args: [account.address, amount],
-    });
-    await publicClient.waitForTransactionReceipt({ hash: mintHash });
-
-    const allowance = (await publicClient.readContract({
-      address: mockUsdc as Address,
-      abi: ERC20_ABI,
-      functionName: "allowance",
-      args: [account.address, privacyEntry],
-    })) as bigint;
-    if (allowance < amount) {
-      const approveHash = await walletClient.writeContract({
+    // Serialize all chain writes through a single-flight mutex. viem's
+    // auto-nonce races under concurrent handlers; see chain/mutex.ts.
+    await withChainLock(async () => {
+      // Stage 2: mint + approve.
+      const mintHash = await walletClient.writeContract({
         address: mockUsdc as Address,
         abi: ERC20_ABI,
-        functionName: "approve",
-        args: [privacyEntry, (1n << 256n) - 1n],
+        functionName: "mint",
+        args: [account.address, amount],
       });
-      await publicClient.waitForTransactionReceipt({ hash: approveHash });
-    }
+      await publicClient.waitForTransactionReceipt({ hash: mintHash });
 
-    // Stage 3: submitted (we're broadcasting); wait for confirmation.
-    await updateIntentStatus(pool, intent.id, "userop_pending");
-    const depositHash = await walletClient.writeContract({
-      address: privacyEntry,
-      abi: PRIVACY_ENTRY_ABI,
-      functionName: "deposit",
-      args: [mockUsdc, amount, body.commitment as Hex],
+      const allowance = (await publicClient.readContract({
+        address: mockUsdc as Address,
+        abi: ERC20_ABI,
+        functionName: "allowance",
+        args: [account.address, privacyEntry],
+      })) as bigint;
+      if (allowance < amount) {
+        const approveHash = await walletClient.writeContract({
+          address: mockUsdc as Address,
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [privacyEntry, (1n << 256n) - 1n],
+        });
+        await publicClient.waitForTransactionReceipt({ hash: approveHash });
+      }
+
+      // Stage 3: submitted (we're broadcasting); wait for confirmation.
+      await updateIntentStatus(pool, intent.id, "userop_pending");
+      const depositHash = await walletClient.writeContract({
+        address: privacyEntry,
+        abi: PRIVACY_ENTRY_ABI,
+        functionName: "deposit",
+        args: [mockUsdc, amount, body.commitment as Hex],
+      });
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: depositHash });
+      if (receipt.status !== "success") {
+        throw new Error(`deposit reverted (tx ${depositHash})`);
+      }
+
+      await insertJobWithTx(pool, intent.id, Buffer.from(depositHash.slice(2), "hex"), {
+        txHash: depositHash,
+        blockNumber: receipt.blockNumber.toString(),
+        gasUsed: receipt.gasUsed.toString(),
+      });
+
+      await updateIntentStatus(pool, intent.id, "confirmed");
     });
-    const receipt = await publicClient.waitForTransactionReceipt({ hash: depositHash });
-    if (receipt.status !== "success") {
-      throw new Error(`deposit reverted (tx ${depositHash})`);
-    }
-
-    await insertJobWithTx(pool, intent.id, Buffer.from(depositHash.slice(2), "hex"), {
-      txHash: depositHash,
-      blockNumber: receipt.blockNumber.toString(),
-      gasUsed: receipt.gasUsed.toString(),
-    });
-
-    await updateIntentStatus(pool, intent.id, "confirmed");
   } catch (err) {
     const reason = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
     await updateIntentStatus(pool, intent.id, "failed", reason.slice(0, 500));

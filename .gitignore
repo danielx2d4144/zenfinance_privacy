@@ -41,6 +41,13 @@ horizen-docs/
 zkVerify-docs/
 referenced_repos/
 
+# Python
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
 # Editor / OS
 .DS_Store
 Thumbs.db

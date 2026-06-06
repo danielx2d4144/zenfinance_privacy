@@ -1,9 +1,10 @@
+import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 
 import { requireApiKey } from "../auth.js";
 import { getPool } from "../db.js";
-import { lookupIdempotency, recordIdempotency } from "../idempotency.js";
+import { claimIdempotency, persistIdempotencyBody } from "../idempotency.js";
 import { handleEntryDeposit } from "../intent/handlers/entry-deposit.js";
 import { handleStubbedIntent } from "../intent/handlers/stub.js";
 import {
@@ -46,40 +47,66 @@ export async function registerIntentRoutes(app: FastifyInstance): Promise<void> 
     const pool = getPool();
 
     const rawKey = req.headers["idempotency-key"];
-    const idempotencyKey = typeof rawKey === "string" ? rawKey : Array.isArray(rawKey) ? rawKey[0] : undefined;
+    const idempotencyKey =
+      typeof rawKey === "string" ? rawKey : Array.isArray(rawKey) ? rawKey[0] : undefined;
+
+    const assetId =
+      body.kind === "liquidate"
+        ? ASSET_ID[body.collateralAsset]
+        : ASSET_ID[body.asset as keyof typeof ASSET_ID];
+    const amount = "amount" in body ? body.amount : null;
+
+    let intentId: string;
+    let responseBody: { intent_id: string; status: string; failure_reason: string | null };
 
     if (idempotencyKey) {
-      const hit = await lookupIdempotency(pool, idempotencyKey);
-      if (hit) {
-        reply.code(hit.responseStatus).send(hit.responseBody);
+      // Atomic claim BEFORE we touch intents — race-safe.
+      const proposed = randomUUID();
+      const claim = await claimIdempotency(pool, {
+        key: idempotencyKey,
+        proposedIntentId: proposed,
+        pendingBody: { intent_id: proposed, status: "received", failure_reason: null },
+        pendingStatus: 202,
+      });
+      if (!claim.wonClaim) {
+        const cached = claim.cached;
+        if (cached) {
+          reply.code(cached.responseStatus).send(cached.responseBody);
+          return;
+        }
+        // Edge case: we lost but cached row vanished. Return the winning id
+        // with a placeholder status so the caller can poll.
+        reply.code(202).send({
+          intent_id: claim.intentId,
+          status: "received",
+          failure_reason: null,
+        });
         return;
       }
-    }
-
-    const intent = await insertIntent(pool, {
-      // Day-11 doesn't ship SIWE; the owner address comes from the request
-      // body for action surface that needs it, but the deposit path doesn't.
-      accountAddress: ZERO_ADDRESS_BUF,
-      kind: body.kind,
-      assetId: body.kind === "liquidate"
-        ? ASSET_ID[body.collateralAsset]
-        : ASSET_ID[body.asset as keyof typeof ASSET_ID],
-      amount: "amount" in body ? body.amount : null,
-    });
-
-    // Kick off the handler asynchronously; the response is 202 + intent_id
-    // so the caller polls /v1/intents/{id} for status transitions.
-    void runHandler(body, intent.id).catch((err) => app.log.error({ err }, "intent handler crash"));
-
-    const responseBody = intentResponse(intent);
-    if (idempotencyKey) {
-      await recordIdempotency(pool, {
-        key: idempotencyKey,
-        intentId: intent.id,
-        responseBody,
-        responseStatus: 202,
+      const intent = await insertIntent(pool, {
+        id: claim.intentId,
+        accountAddress: ZERO_ADDRESS_BUF,
+        kind: body.kind,
+        assetId,
+        amount,
       });
+      intentId = intent.id;
+      responseBody = intentResponse(intent);
+      // Re-persist the body now that the intent row exists (mostly cosmetic
+      // — the pending body already has the right shape).
+      await persistIdempotencyBody(pool, idempotencyKey, responseBody, 202);
+    } else {
+      const intent = await insertIntent(pool, {
+        accountAddress: ZERO_ADDRESS_BUF,
+        kind: body.kind,
+        assetId,
+        amount,
+      });
+      intentId = intent.id;
+      responseBody = intentResponse(intent);
     }
+
+    void runHandler(body, intentId).catch((err) => app.log.error({ err }, "intent handler crash"));
     reply.code(202).send(responseBody);
   });
 

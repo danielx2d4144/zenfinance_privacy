@@ -33,19 +33,50 @@ export async function lookupIdempotency(
   };
 }
 
-export async function recordIdempotency(
+/**
+ * Atomically claim an Idempotency-Key. Returns `intentId === proposedIntentId`
+ * if we won and the caller should create the intent + dispatch the handler,
+ * or the OTHER winner's intent id (with their cached response, if any) if we
+ * lost the race. The single SQL statement is race-free thanks to the primary
+ * key uniqueness on idempotency_keys.id.
+ */
+export async function claimIdempotency(
   pool: Pool,
   args: {
     key: string;
-    intentId: string;
-    responseBody: unknown;
-    responseStatus: number;
+    proposedIntentId: string;
+    pendingBody: unknown;
+    pendingStatus: number;
   },
-): Promise<void> {
-  await pool.query(
+): Promise<{ wonClaim: boolean; intentId: string; cached: IdempotencyHit | null }> {
+  const ins = await pool.query<{ intent_id: string }>(
     `INSERT INTO idempotency_keys (id, intent_id, response_body, response_status)
      VALUES ($1, $2, $3, $4)
-     ON CONFLICT (id) DO NOTHING`,
-    [args.key, args.intentId, args.responseBody, args.responseStatus],
+     ON CONFLICT (id) DO NOTHING
+     RETURNING intent_id`,
+    [args.key, args.proposedIntentId, args.pendingBody, args.pendingStatus],
+  );
+  if (ins.rows[0]) {
+    return { wonClaim: true, intentId: args.proposedIntentId, cached: null };
+  }
+  const cached = await lookupIdempotency(pool, args.key);
+  if (!cached) {
+    // The conflicting row vanished between insert and lookup — shouldn't
+    // happen since we never delete keys, but treat as a bizarre race.
+    return { wonClaim: false, intentId: args.proposedIntentId, cached: null };
+  }
+  return { wonClaim: false, intentId: cached.intentId, cached };
+}
+
+/** Update the cached body for an existing idempotency claim (winner only). */
+export async function persistIdempotencyBody(
+  pool: Pool,
+  key: string,
+  body: unknown,
+  status: number,
+): Promise<void> {
+  await pool.query(
+    `UPDATE idempotency_keys SET response_body = $2, response_status = $3 WHERE id = $1`,
+    [key, body, status],
   );
 }

@@ -41,12 +41,24 @@ export interface JobRow {
 export async function insertIntent(
   pool: Pool,
   args: {
+    /** Optional pre-generated UUID so the idempotency claim and the intent
+     *  row can share an identity created before the handler kicks off. */
+    id?: string;
     accountAddress: Buffer;
     kind: string;
     assetId: number;
     amount: string | null;
   },
 ): Promise<IntentRow> {
+  if (args.id) {
+    const r = await pool.query<IntentRow>(
+      `INSERT INTO intents (id, account_address, kind, asset_id, amount, status)
+       VALUES ($1, $2, $3, $4, $5, 'received')
+       RETURNING *`,
+      [args.id, args.accountAddress, args.kind, args.assetId, args.amount],
+    );
+    return r.rows[0]!;
+  }
   const r = await pool.query<IntentRow>(
     `INSERT INTO intents (account_address, kind, asset_id, amount, status)
      VALUES ($1, $2, $3, $4, 'received')
