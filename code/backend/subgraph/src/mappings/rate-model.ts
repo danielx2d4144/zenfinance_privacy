@@ -29,7 +29,7 @@ export function handleIndexAccrued(event: IndexAccrued): void {
   const m = getOrCreateMarket(event.params.assetId);
   m.borrowIndex = event.params.borrowIndex;
   m.supplyIndex = event.params.supplyIndex;
-  m.lastAccrual = BigInt.fromI64(event.params.timestamp);
+  m.lastAccrual = event.params.timestamp;
   m.utilizationBps = recomputeUtilization(m);
   // Rate fields stay at last-known values; pool-driven setTotals events on
   // Day 11 will refresh totalSupply/totalBorrow and let us recompute APRs

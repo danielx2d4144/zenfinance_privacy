@@ -19,7 +19,7 @@ export function handlePositionUpdated(event: PositionUpdated): void {
     c = new Commitment(newId);
     c.pool = "POSITION";
     c.market = null;
-    c.leafIndex = event.params.leafIndex;
+    c.leafIndex = event.params.leafIndex.toI32();
     c.insertedAt = event.block.timestamp;
     c.insertedAtBlock = event.block.number;
     c.insertedAtTx = event.transaction.hash;

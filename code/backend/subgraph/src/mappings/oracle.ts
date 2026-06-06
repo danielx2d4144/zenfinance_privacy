@@ -9,7 +9,7 @@ import { getOrCreateMarket } from "../utils/market";
 export function handlePriceUpdated(event: PriceUpdated): void {
   const m = getOrCreateMarket(event.params.assetId);
   m.latestPriceUsd1e8 = event.params.priceUsd1e8;
-  m.latestPriceAt = BigInt.fromI64(event.params.updatedAt);
+  m.latestPriceAt = event.params.updatedAt;
   m.save();
 }
 

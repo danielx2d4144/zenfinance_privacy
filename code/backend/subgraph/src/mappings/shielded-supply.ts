@@ -15,7 +15,7 @@ export function handleSupplyDeposited(event: SupplyDeposited): void {
     c = new Commitment(id);
     c.pool = "SUPPLY";
     c.market = marketIdFromAssetId(event.params.assetId);
-    c.leafIndex = event.params.leafIndex;
+    c.leafIndex = event.params.leafIndex.toI32();
     c.insertedAt = event.block.timestamp;
     c.insertedAtBlock = event.block.number;
     c.insertedAtTx = event.transaction.hash;

@@ -66,11 +66,12 @@ contract EmitTestEvents is Script {
         d.usdc = new MockERC20("Mock USDC", "USDC", 6);
         d.cbBtc = new MockERC20("Mock cbBTC", "cbBTC", 8);
         d.pe = new PrivacyEntry(admin, address(d.zk));
+        d.oracle = new Oracle(admin, address(0));
 
         d.reg = new AssetRegistry(admin);
         d.reg.grantRole(d.reg.MANAGER_ROLE(), admin);
-        d.reg.enableAsset(USDC_ID, _cfg(address(d.usdc), 6));
-        d.reg.enableAsset(CBBTC_ID, _cfg(address(d.cbBtc), 8));
+        d.reg.enableAsset(USDC_ID, _cfg(address(d.usdc), 6, address(d.oracle)));
+        d.reg.enableAsset(CBBTC_ID, _cfg(address(d.cbBtc), 8, address(d.oracle)));
 
         d.rm = new RateModel(admin, address(d.reg));
         d.rm.grantRole(d.rm.MANAGER_ROLE(), admin);
@@ -82,7 +83,6 @@ contract EmitTestEvents is Script {
         d.rm.initializeAsset(USDC_ID, rp);
         d.rm.initializeAsset(CBBTC_ID, rp);
 
-        d.oracle = new Oracle(admin, address(0));
         d.ifund = new InsuranceFund(admin, address(d.reg));
 
         d.ssp = new ShieldedSupplyPool(admin, address(d.reg), address(d.rm), address(d.pe), address(d.zk));
@@ -140,10 +140,10 @@ contract EmitTestEvents is Script {
         console.log("ShieldedPositionPool:", address(d.spp));
     }
 
-    function _cfg(address token, uint8 decimals) internal pure returns (IAssetRegistry.AssetConfig memory) {
+    function _cfg(address token, uint8 decimals, address oracleFeed) internal pure returns (IAssetRegistry.AssetConfig memory) {
         return IAssetRegistry.AssetConfig({
             token: token,
-            oracleFeed: address(0),
+            oracleFeed: oracleFeed,
             decimals: decimals,
             ltvBps: 7_500,
             liquidationThresholdBps: 8_000,

@@ -253,11 +253,19 @@ The Day-6 test doubles the on-chain `IVerifyProofAggregation` proxy with `MockVe
   manifest template), and `test/t10-1.ts` (polls graph-node sync,
   asserts entity counts).
 - [x] **Day-10 tests**:
-  - **T-10.1 Subgraph: events indexed correctly** — ready-to-run pending
-    Docker Desktop start. End-to-end harness is complete; the only
-    missing step is the user running `docker compose up` before
-    `npm run t10-1`. Expected counts encoded in the assertion script:
-    50 Commitment + 50 Aggregation + 2 Market.
+  - **T-10.1 Subgraph: events indexed correctly** — **PASS** (2026-06-06).
+    Live run against docker-compose stack (graph-node v0.36.0 + Postgres
+    15 + Kubo + Anvil chain id 31337). `forge script EmitTestEvents`
+    deployed all 11 contracts and fired 100 events; graph-node synced to
+    block 1817; GraphQL counts matched exactly: 50 Commitment + 50
+    Aggregation + 2 Market. Three small bring-up fixes landed during
+    the run: `EmitTestEvents` now passes a non-zero `oracleFeed` to
+    `AssetRegistry.enableAsset` (oracle deployed before registry); the
+    foundry profile gained `fs_permissions` for the subgraph write
+    target; and three mappings dropped redundant BigInt conversions
+    (`leafIndex.toI32()` for uint32→Int fields, drop `BigInt.fromI64`
+    for already-BigInt timestamps, use the codegen'd `try_assets` view
+    not the hand-typed `try_assetConfig`).
   - **T-10.2 Subgraph: read-only enforced** — PASS by construction.
     AssemblyScript mappings don't have a write surface against contracts:
     `@graphprotocol/graph-ts` exposes only entity store APIs (`save`,
@@ -268,8 +276,8 @@ The Day-6 test doubles the on-chain `IVerifyProofAggregation` proxy with `MockVe
     for an honest test that exercises triggers + plpgsql + info_schema
     without needing Docker. After up: 3 tables / 2 enums / 1 function /
     2 triggers. After down: all four counts back to zero.
-- [ ] Day 10 user wrap-up acknowledged (pending T-10.1 live run after
-  Docker Desktop starts).
+- [x] Day 10 user wrap-up acknowledged: full T-10.1/T-10.2/T-10.3 closed
+  2026-06-06 with live e2e evidence above.
 
 ### Day 11 — REST API + MCP server
 - [ ] Backend framework decision: ___ (NestJS or Fastify)

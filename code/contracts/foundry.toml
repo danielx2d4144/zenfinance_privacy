@@ -33,6 +33,11 @@ remappings = [
 fuzz = { runs = 256 }
 invariant = { runs = 256, depth = 32 }
 
+# Allow scripts to write deployment manifests into the subgraph package.
+fs_permissions = [
+    { access = "read-write", path = "../backend/subgraph" },
+]
+
 [fmt]
 line_length = 100
 tab_width = 4
