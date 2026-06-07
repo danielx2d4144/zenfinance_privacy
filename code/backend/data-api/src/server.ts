@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance } from "fastify";
+import cors from "@fastify/cors";
 import { getConfig } from "./config.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerIntentRoutes } from "./routes/intents.js";
@@ -14,6 +15,16 @@ export async function buildApp(): Promise<FastifyInstance> {
   // pino-pretty isn't a dependency; use the plain JSON logger. Day-N+
   // can swap in pino-pretty under dev if someone wants colour locally.
   const app = Fastify({ logger: { level: cfg.LOG_LEVEL } });
+
+  // Day-13: the browser dapp at :3000 needs to call the API at :8787.
+  // Permissive policy is fine for local dev; tighten to a domain list
+  // before any non-local deployment.
+  await app.register(cors, {
+    origin: true,
+    credentials: true,
+    methods: ["GET", "POST", "DELETE", "OPTIONS"],
+    allowedHeaders: ["content-type", "x-api-key", "idempotency-key"],
+  });
 
   await registerHealthRoutes(app);
   await registerIntentRoutes(app);

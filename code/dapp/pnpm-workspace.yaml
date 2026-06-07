@@ -1,0 +1,11 @@
+# Native build scripts approved for vetted upstream packages:
+# - sharp         — Next.js image optimization
+# - unrs-resolver — ESLint's bundled module resolver
+# - keccak        — eth crypto primitive used by wagmi/viem connectors
+# - bufferutil + utf-8-validate — ws connector accelerators
+allowBuilds:
+  bufferutil: true
+  keccak: true
+  sharp: true
+  unrs-resolver: true
+  utf-8-validate: true

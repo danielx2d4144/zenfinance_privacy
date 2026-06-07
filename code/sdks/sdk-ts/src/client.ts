@@ -1,9 +1,10 @@
 /**
  * Thin REST client. Other modules layer typed helpers on top of this.
- * Uses undici's fetch-compatible request so we get HTTP/2 + sane timeouts
- * without the global fetch's quirks under Node.
+ * Uses the global `fetch` so the SDK works in both Node (>=18 has fetch
+ * built-in; Node 22 is what data-api ships on) and the browser, which
+ * means the same SDK package is shared by Day-12 examples and the
+ * Day-13 dapp.
  */
-import { request } from "undici";
 
 export interface ClientOptions {
   /** Base URL up to and including the version segment, e.g. http://localhost:8787 */
@@ -42,16 +43,26 @@ export class Client {
       ...(this.opts.apiKey ? { "x-api-key": this.opts.apiKey } : {}),
       ...(init?.headers ?? {}),
     };
-    const res = await request(url, {
-      method,
-      headers,
-      body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
-      headersTimeout: this.opts.timeoutMs ?? 30_000,
-      bodyTimeout: this.opts.timeoutMs ?? 30_000,
-    });
-    const text = await res.body.text();
-    const status = res.statusCode;
-    if (status < 200 || status >= 300) {
+
+    const controller = new AbortController();
+    const timeout = setTimeout(
+      () => controller.abort(),
+      this.opts.timeoutMs ?? 30_000,
+    );
+    let res: Response;
+    try {
+      res = await fetch(url, {
+        method,
+        headers,
+        body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timeout);
+    }
+
+    const text = await res.text();
+    if (!res.ok) {
       let code = "HTTP_ERROR";
       let message = text.slice(0, 200);
       let details: unknown;
@@ -63,7 +74,7 @@ export class Client {
       } catch {
         /* keep body verbatim */
       }
-      throw new ApiError(status, code, message, details);
+      throw new ApiError(res.status, code, message, details);
     }
     if (!text) return undefined as T;
     return JSON.parse(text) as T;
