@@ -3,9 +3,11 @@
 # - unrs-resolver — ESLint's bundled module resolver
 # - keccak        — eth crypto primitive used by wagmi/viem connectors
 # - bufferutil + utf-8-validate — ws connector accelerators
+# - msgpackr-extract — bb.js's msgpack codec accelerator
 allowBuilds:
   bufferutil: true
   keccak: true
+  msgpackr-extract: true
   sharp: true
   unrs-resolver: true
   utf-8-validate: true

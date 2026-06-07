@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@aztec/bb.js": "3.0.0-rc.6",
     "@lending/sdk-ts": "link:..\\sdks\\sdk-ts",
     "@noble/hashes": "^2.2.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
