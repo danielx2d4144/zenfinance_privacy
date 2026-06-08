@@ -11,7 +11,20 @@ import { AssetSelector, ASSET_DECIMALS, type AssetSymbol } from "./AssetSelector
 import { ConnectGate } from "./ConnectGate";
 import { ProofProgressModal, type ProofStage } from "./ProofProgressModal";
 
+import {
+  balanceCommitment,
+  balanceNullifier,
+  positionCommitment,
+  positionNullifier,
+  slotFor,
+  supplyCommitment,
+  supplyNullifier,
+  zeroBytes32,
+} from "@/lib/witness";
+
 import { LendingSdk, type AnyIntentInput, type IntentDetail } from "@lending/sdk-ts";
+
+const DUMMY_ROOT = zeroBytes32();
 
 export type LendingFormKind =
   | "supply"
@@ -123,13 +136,20 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
 
     try {
       const amountUnits = toUnits(amount, ASSET_DECIMALS[asset]);
-      await prove(kind, {
+      const proof = await prove(kind, {
         witness: { asset, amount: amountUnits },
         publicInputs: [amountUnits],
       });
 
       setStage("submitting");
-      const body = buildIntent(kind, { asset, amountUnits, minHfBps });
+      const body = buildIntent(kind, {
+        asset,
+        amountUnits,
+        minHfBps,
+        spendingKey: spendingKey!,
+        proof: proof.proof,
+        publicInputs: proof.publicInputs,
+      });
       const accepted = await sdk.intents.create(body, {
         idempotencyKey: `dapp-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       });
@@ -226,22 +246,73 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
 
 function buildIntent(
   kind: LendingFormKind,
-  args: { asset: AssetSymbol; amountUnits: string; minHfBps: string },
+  args: {
+    asset: AssetSymbol;
+    amountUnits: string;
+    minHfBps: string;
+    spendingKey: Uint8Array;
+    proof: `0x${string}`;
+    publicInputs: string[];
+  },
 ): AnyIntentInput {
   const hf = Number.parseInt(args.minHfBps || "0", 10);
+  const proofBundle = { proof: args.proof, publicInputs: args.publicInputs };
+  const sk = args.spendingKey;
+  const slot = slotFor(kind);
+  const slotNew = slotFor(`${kind}-new`);
+
   switch (kind) {
     case "supply":
-      return { kind: "supply", asset: args.asset, amount: args.amountUnits };
+      return {
+        kind: "supply",
+        asset: args.asset,
+        amount: args.amountUnits,
+        supplyCommitment: supplyCommitment(sk, slotNew),
+        balanceMove: {
+          balanceNullifier: balanceNullifier(sk, slot),
+          residualBalanceCommitment: balanceCommitment(sk, slotNew),
+        },
+        proofBundle,
+      };
     case "withdraw_supply":
-      return { kind: "withdraw_supply", asset: args.asset, amount: args.amountUnits };
+      return {
+        kind: "withdraw_supply",
+        asset: args.asset,
+        amount: args.amountUnits,
+        supplyNullifier: supplyNullifier(sk, slot),
+        newBalanceCommitment: balanceCommitment(sk, slotNew),
+        rootAtProveTime: DUMMY_ROOT,
+        proofBundle,
+      };
     case "deposit_collateral":
-      return { kind: "deposit_collateral", asset: args.asset, amount: args.amountUnits };
+      return {
+        kind: "deposit_collateral",
+        asset: args.asset,
+        amount: args.amountUnits,
+        balanceMove: {
+          balanceNullifier: balanceNullifier(sk, slot),
+          residualBalanceCommitment: balanceCommitment(sk, slotNew),
+        },
+        positionMove: {
+          oldPositionNullifier: positionNullifier(sk, slot),
+          newPositionCommitment: positionCommitment(sk, slotNew),
+          rootAtProveTime: DUMMY_ROOT,
+        },
+        proofBundle,
+      };
     case "withdraw_collateral":
       return {
         kind: "withdraw_collateral",
         asset: args.asset,
         amount: args.amountUnits,
         minHfBps: Number.isFinite(hf) ? hf : 0,
+        newBalanceCommitment: balanceCommitment(sk, slotNew),
+        positionMove: {
+          oldPositionNullifier: positionNullifier(sk, slot),
+          newPositionCommitment: positionCommitment(sk, slotNew),
+          rootAtProveTime: DUMMY_ROOT,
+        },
+        proofBundle,
       };
     case "borrow":
       return {
@@ -249,8 +320,29 @@ function buildIntent(
         asset: args.asset,
         amount: args.amountUnits,
         minHfBps: Number.isFinite(hf) ? hf : 0,
+        newBalanceCommitment: balanceCommitment(sk, slotNew),
+        positionMove: {
+          oldPositionNullifier: positionNullifier(sk, slot),
+          newPositionCommitment: positionCommitment(sk, slotNew),
+          rootAtProveTime: DUMMY_ROOT,
+        },
+        proofBundle,
       };
     case "repay":
-      return { kind: "repay", asset: args.asset, amount: args.amountUnits };
+      return {
+        kind: "repay",
+        asset: args.asset,
+        amount: args.amountUnits,
+        balanceMove: {
+          balanceNullifier: balanceNullifier(sk, slot),
+          residualBalanceCommitment: balanceCommitment(sk, slotNew),
+        },
+        positionMove: {
+          oldPositionNullifier: positionNullifier(sk, slot),
+          newPositionCommitment: positionCommitment(sk, slotNew),
+          rootAtProveTime: DUMMY_ROOT,
+        },
+        proofBundle,
+      };
   }
 }

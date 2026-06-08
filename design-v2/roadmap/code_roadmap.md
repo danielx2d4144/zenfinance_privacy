@@ -591,6 +591,94 @@ Run section **Day-14** in `subsystem_test.md`.
 
 ---
 
+## Day 14b — Lending intent handlers (real ZK path through Kurier)
+
+> **Insertion note**: this day was added after Day 14 to resolve a real
+> roadmap gap. Day 14's "Done when" called for each intent flow to work
+> end-to-end on Horizen testnet, but the backend handler glue for the
+> 9 non-deposit intent kinds wasn't allocated to any day. The contracts
+> (Day 2), circuits (Days 4-5), and Kurier client (Day 8-9) all exist.
+> This day wires them together via the data-API.
+
+### Subsystem
+S13 (Intent Coordinator) — backend handlers — with S04 (Attestation
+Pipeline), S01 (Shielded Pools), and S07 (Human Frontend) on the boundary.
+
+### Reference docs
+- [`../subsystems/13_intent_coordinator.md`](../subsystems/13_intent_coordinator.md) §3, §6
+- [`../subsystems/04_attestation_pipeline.md`](../subsystems/04_attestation_pipeline.md) §2-§4
+- [`../subsystems/01_shielded_pools.md`](../subsystems/01_shielded_pools.md) §3 (per-asset externals)
+
+### External services / APIs
+- Kurier (Horizen-zkVerify proof aggregator) — already wired in
+  `code/backend/prover-service` from Day 8-9.
+- zkVerify mainnet attestation proxy on Base Sepolia (`0x312468Eb…`,
+  domain id 2 per the existing memory).
+
+### External reference docs
+- bb v3.x UltrahonkVersion compatibility note in
+  `code/backend/prover-service/src/kurier/schemas.ts`.
+
+### Goals
+1. Extend the intent zod schemas: every non-deposit kind gains
+   `proof: Hex` + `publicInputs: string[]` (mirrors what the dapp
+   already computes client-side via the Day-14 worker).
+2. Implement nine real handlers in
+   `code/backend/data-api/src/intent/handlers/`:
+   `entry_withdraw`, `supply`, `withdraw_supply`, `deposit_collateral`,
+   `withdraw_collateral`, `borrow`, `repay`, `liquidate`,
+   `consolidate_balance`. Each handler:
+   - Validates the proof bundle shape + the public-inputs structure
+     expected by its circuit.
+   - Submits the proof to Kurier via the prover-service Kurier client.
+   - Polls Kurier until the aggregation receipt lands
+     (`aggregationId`, `leafIndex`, `merkleProof`).
+   - Constructs the on-chain call for the corresponding pool method
+     (e.g. `ShieldedSupplyPool.supply(attestationRef, leafIndex,
+     merkleProof, …)`) and submits via the relayer using
+     `withChainLock` from Day 12.
+   - Persists tx hash to the `jobs` table and transitions intent
+     status: `received` → `proving` → `aggregating` → `aggregated`
+     → `userop_pending` → `confirmed`.
+3. Replace `code/dapp/src/lib/prover/worker.ts`'s synthetic compute
+   with real bb.js UltraHonk proving against the compiled circuit
+   artifacts in `code/circuits/crates/*/target/*.json`.
+4. Update `NOT_IMPLEMENTED_UNTIL` in the schema to point at this day.
+
+### How to achieve
+1. Each handler file under `intent/handlers/` exports
+   `async function handleX(pool, intent, body)` matching the existing
+   `entry-deposit.ts` shape so `intents.ts` route can dispatch by
+   intent kind.
+2. Reuse the `withChainLock` mutex from `chain/mutex.ts` to serialize
+   chain writes — multiple users submitting concurrent intents stay
+   correct under the relayer's single nonce.
+3. Aggregation polling lives in `intent/kurier-poll.ts` (new file)
+   with exponential back-off and a hard deadline (default 8 min, hits
+   `failed: aggregation_timeout` if exceeded).
+4. dapp worker loads bb.js + the per-circuit ACIR + verification key
+   on first use of each kind; the witness shape is the circuit's
+   `prover.toml`-equivalent in JS-object form.
+
+### Done when
+- [ ] The dapp's supply / borrow / repay / withdraw flows reach
+      `confirmed` end-to-end against the local Anvil stack.
+- [ ] Each pool contract (ShieldedSupplyPool, ShieldedPositionPool,
+      LiquidationBoard) receives a real aggregated attestation and
+      mutates state accordingly.
+- [ ] No handler stub remains in `intent/handlers/`; the
+      `handleStubbedIntent` file is deleted; intents.ts dispatches
+      every kind to a real handler.
+- [ ] `NOT_IMPLEMENTED_UNTIL` is removed from the schema (no longer
+      meaningful once the 9 handlers ship).
+- [ ] T-14.2 (Borrow happy path) — which was deferred from Day 14 —
+      passes against the local Anvil stack.
+
+### Tests
+Run section **Day-14b** in `subsystem_test.md`.
+
+---
+
 ## Day 15 — Human frontend (liquidator board + auditor mode + i18n + a11y pass 1)
 
 ### Subsystem

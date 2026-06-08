@@ -5,12 +5,29 @@ import { z } from "zod";
 import { requireApiKey } from "../auth.js";
 import { getPool } from "../db.js";
 import { claimIdempotency, persistIdempotencyBody } from "../idempotency.js";
+import { handleBorrow } from "../intent/handlers/borrow.js";
+import { handleConsolidateBalance } from "../intent/handlers/consolidate-balance.js";
+import { handleDepositCollateral } from "../intent/handlers/deposit-collateral.js";
 import { handleEntryDeposit } from "../intent/handlers/entry-deposit.js";
-import { handleStubbedIntent } from "../intent/handlers/stub.js";
+import { handleEntryWithdraw } from "../intent/handlers/entry-withdraw.js";
+import { handleLiquidate } from "../intent/handlers/liquidate.js";
+import { handleRepay } from "../intent/handlers/repay.js";
+import { handleSupply } from "../intent/handlers/supply.js";
+import { handleWithdrawCollateral } from "../intent/handlers/withdraw-collateral.js";
+import { handleWithdrawSupply } from "../intent/handlers/withdraw-supply.js";
 import {
   AnyIntent,
   ASSET_ID,
+  BorrowIntent,
+  ConsolidateBalanceIntent,
+  DepositCollateralIntent,
   EntryDepositIntent,
+  EntryWithdrawIntent,
+  LiquidateIntent,
+  RepayIntent,
+  SupplyIntent,
+  WithdrawCollateralIntent,
+  WithdrawSupplyIntent,
   type AnyIntentInput,
 } from "../intent/schemas.js";
 import { getIntent, getJobsForIntent, insertIntent } from "../intent/state.js";
@@ -142,9 +159,29 @@ async function runHandler(body: AnyIntentInput, intentId: string): Promise<void>
   const pool = getPool();
   const intent = await getIntent(pool, intentId);
   if (!intent) return;
-  if (body.kind === "entry_deposit") {
-    await handleEntryDeposit(pool, intent, EntryDepositIntent.parse(body));
-    return;
+  switch (body.kind) {
+    case "entry_deposit":
+      return handleEntryDeposit(pool, intent, EntryDepositIntent.parse(body));
+    case "entry_withdraw":
+      return handleEntryWithdraw(pool, intent, EntryWithdrawIntent.parse(body));
+    case "supply":
+      return handleSupply(pool, intent, SupplyIntent.parse(body));
+    case "withdraw_supply":
+      return handleWithdrawSupply(pool, intent, WithdrawSupplyIntent.parse(body));
+    case "deposit_collateral":
+      return handleDepositCollateral(pool, intent, DepositCollateralIntent.parse(body));
+    case "withdraw_collateral":
+      return handleWithdrawCollateral(pool, intent, WithdrawCollateralIntent.parse(body));
+    case "borrow":
+      return handleBorrow(pool, intent, BorrowIntent.parse(body));
+    case "repay":
+      return handleRepay(pool, intent, RepayIntent.parse(body));
+    case "liquidate":
+      return handleLiquidate(pool, intent, LiquidateIntent.parse(body));
+    case "consolidate_balance":
+      // ConsolidateBalanceIntent parsed only for shape validation; the
+      // handler doesn't need the body since it's a Day-17 deferral.
+      ConsolidateBalanceIntent.parse(body);
+      return handleConsolidateBalance(pool, intent);
   }
-  await handleStubbedIntent(pool, intent);
 }

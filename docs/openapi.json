@@ -104,13 +104,49 @@
               "recipient": {
                 "type": "string",
                 "pattern": "^0x[a-fA-F0-9]{40}$"
+              },
+              "nullifier": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "newCommitment": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "rootAtProveTime": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "asset",
               "amount",
-              "recipient"
+              "recipient",
+              "nullifier",
+              "newCommitment",
+              "rootAtProveTime",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -135,12 +171,57 @@
               "amount": {
                 "type": "string",
                 "pattern": "^\\d+$"
+              },
+              "supplyCommitment": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "balanceMove": {
+                "type": "object",
+                "properties": {
+                  "balanceNullifier": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "residualBalanceCommitment": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "balanceNullifier",
+                  "residualBalanceCommitment"
+                ],
+                "additionalProperties": false
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "asset",
-              "amount"
+              "amount",
+              "supplyCommitment",
+              "balanceMove",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -165,12 +246,48 @@
               "amount": {
                 "type": "string",
                 "pattern": "^\\d+$"
+              },
+              "supplyNullifier": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "newBalanceCommitment": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "rootAtProveTime": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "asset",
-              "amount"
+              "amount",
+              "supplyNullifier",
+              "newBalanceCommitment",
+              "rootAtProveTime",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -195,12 +312,76 @@
               "amount": {
                 "type": "string",
                 "pattern": "^\\d+$"
+              },
+              "balanceMove": {
+                "type": "object",
+                "properties": {
+                  "balanceNullifier": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "residualBalanceCommitment": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "balanceNullifier",
+                  "residualBalanceCommitment"
+                ],
+                "additionalProperties": false
+              },
+              "positionMove": {
+                "type": "object",
+                "properties": {
+                  "oldPositionNullifier": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "newPositionCommitment": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "rootAtProveTime": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "oldPositionNullifier",
+                  "newPositionCommitment",
+                  "rootAtProveTime"
+                ],
+                "additionalProperties": false
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "asset",
-              "amount"
+              "amount",
+              "balanceMove",
+              "positionMove",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -230,12 +411,62 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 100000
+              },
+              "newBalanceCommitment": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "positionMove": {
+                "type": "object",
+                "properties": {
+                  "oldPositionNullifier": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "newPositionCommitment": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "rootAtProveTime": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "oldPositionNullifier",
+                  "newPositionCommitment",
+                  "rootAtProveTime"
+                ],
+                "additionalProperties": false
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "asset",
-              "amount"
+              "amount",
+              "newBalanceCommitment",
+              "positionMove",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -265,12 +496,62 @@
                 "type": "integer",
                 "minimum": 0,
                 "maximum": 100000
+              },
+              "newBalanceCommitment": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "positionMove": {
+                "type": "object",
+                "properties": {
+                  "oldPositionNullifier": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "newPositionCommitment": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "rootAtProveTime": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "oldPositionNullifier",
+                  "newPositionCommitment",
+                  "rootAtProveTime"
+                ],
+                "additionalProperties": false
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "asset",
-              "amount"
+              "amount",
+              "newBalanceCommitment",
+              "positionMove",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -295,12 +576,76 @@
               "amount": {
                 "type": "string",
                 "pattern": "^\\d+$"
+              },
+              "balanceMove": {
+                "type": "object",
+                "properties": {
+                  "balanceNullifier": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "residualBalanceCommitment": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "balanceNullifier",
+                  "residualBalanceCommitment"
+                ],
+                "additionalProperties": false
+              },
+              "positionMove": {
+                "type": "object",
+                "properties": {
+                  "oldPositionNullifier": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "newPositionCommitment": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  },
+                  "rootAtProveTime": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]{64}$"
+                  }
+                },
+                "required": [
+                  "oldPositionNullifier",
+                  "newPositionCommitment",
+                  "rootAtProveTime"
+                ],
+                "additionalProperties": false
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "asset",
-              "amount"
+              "amount",
+              "balanceMove",
+              "positionMove",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -314,6 +659,14 @@
                 ]
               },
               "targetCommitment": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "residualCommitment": {
+                "type": "string",
+                "pattern": "^0x[a-fA-F0-9]{64}$"
+              },
+              "liquidatorBalanceCommitment": {
                 "type": "string",
                 "pattern": "^0x[a-fA-F0-9]{64}$"
               },
@@ -338,14 +691,43 @@
               "debtToCover": {
                 "type": "string",
                 "pattern": "^\\d+$"
+              },
+              "currentHealthFactorBps": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 10000
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
               "targetCommitment",
+              "residualCommitment",
+              "liquidatorBalanceCommitment",
               "collateralAsset",
               "debtAsset",
-              "debtToCover"
+              "debtToCover",
+              "currentHealthFactorBps",
+              "proofBundle"
             ],
             "additionalProperties": false
           },
@@ -366,11 +748,32 @@
                   "WETH",
                   "ZEN"
                 ]
+              },
+              "proofBundle": {
+                "type": "object",
+                "properties": {
+                  "proof": {
+                    "type": "string",
+                    "pattern": "^0x[a-fA-F0-9]+$"
+                  },
+                  "publicInputs": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "proof",
+                  "publicInputs"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "kind",
-              "asset"
+              "asset",
+              "proofBundle"
             ],
             "additionalProperties": false
           }

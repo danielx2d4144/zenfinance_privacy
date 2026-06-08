@@ -122,24 +122,60 @@ export interface components {
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
             recipient: string;
+            nullifier: string;
+            newCommitment: string;
+            rootAtProveTime: string;
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "supply";
             /** @enum {string} */
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
+            supplyCommitment: string;
+            balanceMove: {
+                balanceNullifier: string;
+                residualBalanceCommitment: string;
+            };
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "withdraw_supply";
             /** @enum {string} */
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
+            supplyNullifier: string;
+            newBalanceCommitment: string;
+            rootAtProveTime: string;
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "deposit_collateral";
             /** @enum {string} */
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
+            balanceMove: {
+                balanceNullifier: string;
+                residualBalanceCommitment: string;
+            };
+            positionMove: {
+                oldPositionNullifier: string;
+                newPositionCommitment: string;
+                rootAtProveTime: string;
+            };
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "withdraw_collateral";
@@ -147,6 +183,16 @@ export interface components {
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
             minHfBps?: number;
+            newBalanceCommitment: string;
+            positionMove: {
+                oldPositionNullifier: string;
+                newPositionCommitment: string;
+                rootAtProveTime: string;
+            };
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "borrow";
@@ -154,26 +200,60 @@ export interface components {
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
             minHfBps?: number;
+            newBalanceCommitment: string;
+            positionMove: {
+                oldPositionNullifier: string;
+                newPositionCommitment: string;
+                rootAtProveTime: string;
+            };
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "repay";
             /** @enum {string} */
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
+            balanceMove: {
+                balanceNullifier: string;
+                residualBalanceCommitment: string;
+            };
+            positionMove: {
+                oldPositionNullifier: string;
+                newPositionCommitment: string;
+                rootAtProveTime: string;
+            };
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "liquidate";
             targetCommitment: string;
+            residualCommitment: string;
+            liquidatorBalanceCommitment: string;
             /** @enum {string} */
             collateralAsset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             /** @enum {string} */
             debtAsset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             debtToCover: string;
+            currentHealthFactorBps: number;
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         } | {
             /** @enum {string} */
             kind: "consolidate_balance";
             /** @enum {string} */
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
+            proofBundle: {
+                proof: string;
+                publicInputs: string[];
+            };
         };
         IntentAccepted: {
             /** Format: uuid */

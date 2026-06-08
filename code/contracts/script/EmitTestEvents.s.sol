@@ -11,6 +11,7 @@ import {Oracle} from "../src/Oracle.sol";
 import {InsuranceFund} from "../src/InsuranceFund.sol";
 import {ShieldedSupplyPool} from "../src/ShieldedSupplyPool.sol";
 import {ShieldedPositionPool} from "../src/ShieldedPositionPool.sol";
+import {LiquidationBoard} from "../src/LiquidationBoard.sol";
 import {VkRegistry} from "../src/libraries/VkRegistry.sol";
 import {IAssetRegistry} from "../src/interfaces/IAssetRegistry.sol";
 import {IRateModel} from "../src/interfaces/IRateModel.sol";
@@ -40,6 +41,7 @@ contract EmitTestEvents is Script {
         InsuranceFund ifund;
         ShieldedSupplyPool ssp;
         ShieldedPositionPool spp;
+        LiquidationBoard lb;
     }
 
     function run() external {
@@ -87,6 +89,38 @@ contract EmitTestEvents is Script {
 
         d.ssp = new ShieldedSupplyPool(admin, address(d.reg), address(d.rm), address(d.pe), address(d.zk));
         d.spp = new ShieldedPositionPool(admin, address(d.reg), address(d.rm), address(d.pe), address(d.zk));
+        d.lb = new LiquidationBoard(
+            admin,
+            address(d.reg),
+            address(d.oracle),
+            address(d.pe),
+            address(d.spp),
+            address(d.ifund),
+            address(d.zk)
+        );
+
+        // Cross-contract role grants required for Day-14b handlers:
+        //   - CALLER_ROLE on ZkVerifier: every contract that calls verifyAndConsume
+        //   - POOL_ROLE on PrivacyEntry: pools call spendBalance/creditBalance
+        //   - LIQUIDATOR_ROLE on ShieldedPositionPool: LiquidationBoard calls applyLiquidation
+        //   - REGISTRAR_ROLE on LiquidationBoard: relayer registers position triggers
+        // Tests in EntryFlow.t.sol wire these per-contract; here we wire them
+        // all at boot so the handlers don't have to.
+        d.zk.grantRole(d.zk.CALLER_ROLE(), address(d.pe));
+        d.zk.grantRole(d.zk.CALLER_ROLE(), address(d.ssp));
+        d.zk.grantRole(d.zk.CALLER_ROLE(), address(d.spp));
+        d.zk.grantRole(d.zk.CALLER_ROLE(), address(d.lb));
+
+        d.pe.grantRole(d.pe.POOL_ROLE(), address(d.ssp));
+        d.pe.grantRole(d.pe.POOL_ROLE(), address(d.spp));
+        d.pe.grantRole(d.pe.POOL_ROLE(), address(d.lb));
+
+        d.rm.grantRole(d.rm.POOL_ROLE(), address(d.ssp));
+        d.rm.grantRole(d.rm.POOL_ROLE(), address(d.spp));
+
+        d.spp.grantRole(d.spp.LIQUIDATOR_ROLE(), address(d.lb));
+
+        d.lb.grantRole(d.lb.REGISTRAR_ROLE(), admin);
     }
 
     function _seedDeposits(Deployment memory d) internal {
@@ -122,7 +156,9 @@ contract EmitTestEvents is Script {
         vm.serializeAddress(root, "PRIVACY_ENTRY", address(d.pe));
         vm.serializeAddress(root, "SHIELDED_SUPPLY_POOL", address(d.ssp));
         vm.serializeAddress(root, "SHIELDED_POSITION_POOL", address(d.spp));
+        vm.serializeAddress(root, "LIQUIDATION_BOARD", address(d.lb));
         vm.serializeAddress(root, "ZK_VERIFIER", address(d.zk));
+        vm.serializeAddress(root, "MOCK_PROXY", address(d.proxy));
         vm.serializeAddress(root, "RATE_MODEL", address(d.rm));
         vm.serializeAddress(root, "ORACLE", address(d.oracle));
         vm.serializeAddress(root, "ASSET_REGISTRY", address(d.reg));
@@ -132,12 +168,14 @@ contract EmitTestEvents is Script {
         console.log("Deployed and emitted 100 events.");
         console.log("PrivacyEntry        :", address(d.pe));
         console.log("ZkVerifier          :", address(d.zk));
+        console.log("MockProxy           :", address(d.proxy));
         console.log("RateModel           :", address(d.rm));
         console.log("Oracle              :", address(d.oracle));
         console.log("AssetRegistry       :", address(d.reg));
         console.log("InsuranceFund       :", address(d.ifund));
         console.log("ShieldedSupplyPool  :", address(d.ssp));
         console.log("ShieldedPositionPool:", address(d.spp));
+        console.log("LiquidationBoard    :", address(d.lb));
     }
 
     function _cfg(address token, uint8 decimals, address oracleFeed) internal pure returns (IAssetRegistry.AssetConfig memory) {

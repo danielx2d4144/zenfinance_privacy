@@ -3,9 +3,14 @@
  *
  * Currently a synthetic CPU load that mimics the wall-clock + memory
  * profile of a real bb.js UltraHonk proof. Real circuit-driven proving
- * lands when supply/borrow/repay/withdraw_collateral backend handlers
- * ship; the public message contract here is the same shape we'll send
- * to bb.js then, so the swap is local to this file.
+ * lands in Day 14c (the Pedersen swap), not Day 14b — because today's
+ * placeholder keccak Merkle root (PrivacyEntry.sol:233 Day-2 TODO)
+ * makes the circuit's `computed_root == root_balance` assert
+ * unsatisfiable: the contract hashes via keccak, the circuit via
+ * Pedersen. Once the contract-side hash function lines up with the
+ * circuit's, swap `syntheticCompute` here for the real
+ * `UltraHonkBackend.prove(circuitJson, witness)` call against the
+ * artifact at `public/circuits/<name>.json`.
  *
  * Per S07 §6 + S17 §3 the heavy work MUST stay off the main thread.
  * T-14.1 covers this: scroll/click the page while a prove() is in

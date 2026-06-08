@@ -26,6 +26,18 @@ const Schema = z.object({
   RELAYER_PRIVATE_KEY: z.string().regex(/^0x[a-fA-F0-9]{64}$/),
   PRIVACY_ENTRY_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
   MOCK_USDC_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+
+  // Day-14b lending handler addresses. All four are deployed by
+  // EmitTestEvents.s.sol; the relayer needs them to call into pools +
+  // the mock proxy.
+  SHIELDED_SUPPLY_POOL_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  SHIELDED_POSITION_POOL_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  LIQUIDATION_BOARD_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  ZK_VERIFIER_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  MOCK_PROXY_ADDRESS: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
+  // zkVerify on-chain domainId — 2 on Base Sepolia per the existing
+  // memory; same value is used by the mock proxy for symmetry.
+  ZK_DOMAIN_ID: z.coerce.number().default(2),
 });
 
 export type Config = z.infer<typeof Schema>;

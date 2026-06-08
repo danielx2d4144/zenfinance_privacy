@@ -435,6 +435,49 @@ before moving to the next day.
 
 ---
 
+## Day-14b — Lending intent handlers (real ZK path)
+
+> Inserted after Day 14 to close the schema-vs-roadmap gap; see the
+> Day-14b section in `code_roadmap.md` for context.
+
+### T-14b.1 Supply happy path
+
+- **Steps**: from the dapp's Supply tab, supply 100 USDC against an
+  existing PrivacyEntry balance.
+- **Observe**: intent transitions
+  `received → proving → aggregating → aggregated → userop_pending →
+  confirmed`; `ShieldedSupplyPool` emits a `Supplied` event; subgraph
+  reflects the new commitment.
+- **Pass**: terminal status `confirmed` with a tx hash.
+
+### T-14b.2 Borrow happy path (was T-14.2)
+
+- **Setup**: 1000 USDC in PrivacyEntry, 0.5 cbBTC deposited as collateral.
+- **Steps**: borrow 100 USDC from the Borrow tab with minHfBps=15000.
+- **Observe**: `ShieldedPositionPool` emits `Borrowed`; the user's
+  borrowed funds appear in a new debt note; HF computed locally
+  stays ≥ 1.5.
+- **Pass**: terminal `confirmed`; debt commitment present.
+
+### T-14b.3 Repay clears debt
+
+- **Setup**: outcome of T-14b.2 (debt note for 100 USDC).
+- **Steps**: repay 100 USDC from the Repay tab.
+- **Observe**: nullifier consumes the debt note; pool balance back to
+  pre-borrow state.
+- **Pass**: terminal `confirmed`.
+
+### T-14b.4 Concurrent handler safety
+
+- **Setup**: 3 distinct intents (supply / borrow / repay) submitted in
+  parallel from 3 browser tabs.
+- **Observe**: each one reaches `confirmed`; no nonce gaps in the
+  relayer's tx history; the chain mutex from Day 12 keeps writes
+  serialized.
+- **Pass**: 3 successes, distinct tx hashes, no failed-via-race.
+
+---
+
 ## Day-15 — Liquidator + auditor + i18n + a11y
 
 ### T-15.1 Liquidator board: shows underwater positions

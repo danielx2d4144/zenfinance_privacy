@@ -35,5 +35,11 @@ export function getChainClients() {
     walletClient: createWalletClient({ chain, transport, account }),
     privacyEntry: cfg.PRIVACY_ENTRY_ADDRESS as Address,
     mockUsdc: cfg.MOCK_USDC_ADDRESS as Address,
+    shieldedSupplyPool: cfg.SHIELDED_SUPPLY_POOL_ADDRESS as Address,
+    shieldedPositionPool: cfg.SHIELDED_POSITION_POOL_ADDRESS as Address,
+    liquidationBoard: cfg.LIQUIDATION_BOARD_ADDRESS as Address,
+    zkVerifier: cfg.ZK_VERIFIER_ADDRESS as Address,
+    mockProxy: cfg.MOCK_PROXY_ADDRESS as Address,
+    domainId: BigInt(cfg.ZK_DOMAIN_ID),
   };
 }
