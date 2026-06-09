@@ -10,6 +10,7 @@ import {IPrivacyEntry} from "./interfaces/IPrivacyEntry.sol";
 import {IRateModel} from "./interfaces/IRateModel.sol";
 import {IShieldedSupplyPool} from "./interfaces/IShieldedSupplyPool.sol";
 import {IZkVerifier} from "./interfaces/IZkVerifier.sol";
+import {PoseidonIMT} from "./libraries/PoseidonIMT.sol";
 
 /// @title ShieldedSupplyPool
 /// @notice Holds the Merkle tree of supply-note commitments per asset
@@ -18,14 +19,15 @@ import {IZkVerifier} from "./interfaces/IZkVerifier.sol";
 ///         pushes.
 /// @dev Spec: design-v2/subsystems/01_shielded_pools.md §3 (ShieldedSupplyPool)
 ///            design-v2/subsystems/14_interest_and_apys.md §6 (per-note interest)
-///      Day-3 placeholder hash chain mirrors PrivacyEntry's (swapped on Day 6).
-///      Contract never sees per-user amounts — only assetId, public amount,
-///      commitments, and nullifiers (per S01 §5).
+///      Day 14c Stage C: keccak hash-chain swapped for the depth-20
+///      Poseidon2 IMT in `libraries/PoseidonIMT.sol`; root layout
+///      matches `lib_common::merkle_root`. Contract never sees per-user
+///      amounts -- only assetId, public amount, commitments, and
+///      nullifiers (per S01 §5).
 contract ShieldedSupplyPool is IShieldedSupplyPool, AccessControl, ReentrancyGuard, Pausable {
-    bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
+    using PoseidonIMT for PoseidonIMT.State;
 
-    uint32 public constant ROOT_HISTORY_SIZE = 32;
-    uint32 public constant TREE_DEPTH = 32;
+    bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
 
     IAssetRegistry public immutable assetRegistry;
     IRateModel public immutable rateModel;
@@ -36,10 +38,7 @@ contract ShieldedSupplyPool is IShieldedSupplyPool, AccessControl, ReentrancyGua
     mapping(bytes32 => bool) private _spent;
     mapping(bytes32 => bool) private _committed;
 
-    bytes32 private _currentRoot;
-    uint32 private _nextLeafIndex;
-    bytes32[ROOT_HISTORY_SIZE] private _rootHistory;
-    mapping(bytes32 => bool) private _knownRoot;
+    PoseidonIMT.State private _imt;
 
     error ZeroAddress();
     error ZeroAmount();
@@ -67,6 +66,7 @@ contract ShieldedSupplyPool is IShieldedSupplyPool, AccessControl, ReentrancyGua
         rateModel = IRateModel(rateModel_);
         privacyEntry = IPrivacyEntry(privacyEntry_);
         verifier = IZkVerifier(verifier_);
+        _imt.init();
     }
 
     /// @notice Consume a balance note in PrivacyEntry, mint a supply note here.
@@ -104,13 +104,13 @@ contract ShieldedSupplyPool is IShieldedSupplyPool, AccessControl, ReentrancyGua
             balanceNullifier, residualBalanceCommitment, supplyCommitment
         );
 
-        _insertCommitment(supplyCommitment);
+        uint32 leafIdx = _insertCommitment(supplyCommitment);
 
         uint256 newTotal = _totalSupplyPerAsset[assetId] + amount;
         _totalSupplyPerAsset[assetId] = newTotal;
         _pushTotals(assetId, newTotal);
 
-        emit SupplyDeposited(assetId, _nextLeafIndex - 1, supplyCommitment, amount);
+        emit SupplyDeposited(assetId, leafIdx, supplyCommitment, amount);
     }
 
     /// @notice Consume a supply note here, credit a balance note in PrivacyEntry.
@@ -129,7 +129,7 @@ contract ShieldedSupplyPool is IShieldedSupplyPool, AccessControl, ReentrancyGua
         IAssetRegistry.AssetConfig memory cfg = assetRegistry.assets(assetId);
         if (!cfg.enabled) revert AssetNotEnabled(assetId);
         if (_spent[supplyNullifier]) revert NullifierAlreadySpent(supplyNullifier);
-        if (!_knownRoot[rootAtProveTime]) revert UnknownRoot();
+        if (!_imt.known(rootAtProveTime)) revert UnknownRoot();
 
         rateModel.accrue(assetId);
 
@@ -166,15 +166,15 @@ contract ShieldedSupplyPool is IShieldedSupplyPool, AccessControl, ReentrancyGua
     }
 
     function currentRoot() external view returns (bytes32) {
-        return _currentRoot;
+        return _imt.currentRoot;
     }
 
     function knownRoot(bytes32 root) external view returns (bool) {
-        return _knownRoot[root];
+        return _imt.known(root);
     }
 
     function nextLeafIndex() external view returns (uint32) {
-        return _nextLeafIndex;
+        return _imt.nextLeafIndex;
     }
 
     function _pushTotals(uint8 assetId, uint256 newTotal) private {
@@ -185,18 +185,13 @@ contract ShieldedSupplyPool is IShieldedSupplyPool, AccessControl, ReentrancyGua
         rateModel.setTotals(assetId, _safe128(newTotal), s.totalBorrow);
     }
 
-    function _insertCommitment(bytes32 commitment) private {
+    function _insertCommitment(bytes32 commitment) private returns (uint32) {
         if (_committed[commitment]) revert CommitmentAlreadyInserted(commitment);
         _committed[commitment] = true;
 
-        bytes32 newRoot = keccak256(abi.encodePacked(_currentRoot, commitment, _nextLeafIndex));
-        _currentRoot = newRoot;
-        _rootHistory[_nextLeafIndex % ROOT_HISTORY_SIZE] = newRoot;
-        _knownRoot[newRoot] = true;
-        unchecked {
-            _nextLeafIndex += 1;
-        }
-        emit MerkleRootUpdated(newRoot, _nextLeafIndex);
+        (uint32 idx, bytes32 newRoot) = _imt.insert(commitment);
+        emit MerkleRootUpdated(newRoot, idx + 1);
+        return idx;
     }
 
     function _safe128(uint256 v) private pure returns (uint128) {

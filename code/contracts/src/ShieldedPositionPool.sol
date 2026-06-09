@@ -10,26 +10,28 @@ import {IPrivacyEntry} from "./interfaces/IPrivacyEntry.sol";
 import {IRateModel} from "./interfaces/IRateModel.sol";
 import {IShieldedPositionPool} from "./interfaces/IShieldedPositionPool.sol";
 import {IZkVerifier} from "./interfaces/IZkVerifier.sol";
+import {PoseidonIMT} from "./libraries/PoseidonIMT.sol";
 
 /// @title ShieldedPositionPool
 /// @notice Holds the Merkle tree of multi-slot position commitments.
 ///         Each position commitment encodes per-asset collaterals + debts
 ///         + borrowIndices snapshot (S02 §3). Health-factor check happens
-///         **inside the ZK circuit** — this contract verifies the proof
+///         **inside the ZK circuit** -- this contract verifies the proof
 ///         and updates per-asset aggregates only.
 /// @dev Spec: design-v2/subsystems/01_shielded_pools.md §3 (ShieldedPositionPool)
 ///            design-v2/subsystems/02_zk_circuits.md §3, §4, §5
-///      Day-3 placeholder hash chain (Day-6 swap to Poseidon).
+///      Day 14c Stage C: keccak hash-chain swapped for the depth-20
+///      Poseidon2 IMT in `libraries/PoseidonIMT.sol`.
 contract ShieldedPositionPool is
     IShieldedPositionPool,
     AccessControl,
     ReentrancyGuard,
     Pausable
 {
+    using PoseidonIMT for PoseidonIMT.State;
+
     bytes32 public constant GUARDIAN_ROLE = keccak256("GUARDIAN_ROLE");
     bytes32 public constant LIQUIDATOR_ROLE = keccak256("LIQUIDATOR_ROLE");
-
-    uint32 public constant ROOT_HISTORY_SIZE = 32;
 
     IAssetRegistry public immutable assetRegistry;
     IRateModel public immutable rateModel;
@@ -41,10 +43,7 @@ contract ShieldedPositionPool is
     mapping(bytes32 => bool) private _spent;
     mapping(bytes32 => bool) private _committed;
 
-    bytes32 private _currentRoot;
-    uint32 private _nextLeafIndex;
-    bytes32[ROOT_HISTORY_SIZE] private _rootHistory;
-    mapping(bytes32 => bool) private _knownRoot;
+    PoseidonIMT.State private _imt;
 
     error ZeroAddress();
     error ZeroAmount();
@@ -73,6 +72,7 @@ contract ShieldedPositionPool is
         rateModel = IRateModel(rateModel_);
         privacyEntry = IPrivacyEntry(privacyEntry_);
         verifier = IZkVerifier(verifier_);
+        _imt.init();
     }
 
     /// @notice Add collateral to a position (or create one). Consumes a
@@ -100,7 +100,7 @@ contract ShieldedPositionPool is
 
         if (oldPositionNullifier != bytes32(0)) {
             if (_spent[oldPositionNullifier]) revert NullifierAlreadySpent(oldPositionNullifier);
-            if (!_knownRoot[rootAtProveTime]) revert UnknownRoot();
+            if (!_imt.known(rootAtProveTime)) revert UnknownRoot();
         }
 
         _accrueAll();
@@ -112,13 +112,13 @@ contract ShieldedPositionPool is
         privacyEntry.spendBalance(
             balanceNullifier, residualBalanceCommitment, newPositionCommitment
         );
-        _insertCommitment(newPositionCommitment);
+        uint32 leafIdx = _insertCommitment(newPositionCommitment);
 
         uint256 newTotal = _totalCollateralPerAsset[assetId] + amount;
         _totalCollateralPerAsset[assetId] = newTotal;
 
         emit CollateralDeposited(assetId, amount);
-        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, _nextLeafIndex - 1);
+        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, leafIdx);
     }
 
     /// @notice Reduce collateral, credit a balance note in PrivacyEntry.
@@ -137,20 +137,20 @@ contract ShieldedPositionPool is
         IAssetRegistry.AssetConfig memory cfg = assetRegistry.assets(assetId);
         if (!cfg.enabled) revert AssetNotEnabled(assetId);
         if (_spent[oldPositionNullifier]) revert NullifierAlreadySpent(oldPositionNullifier);
-        if (!_knownRoot[rootAtProveTime]) revert UnknownRoot();
+        if (!_imt.known(rootAtProveTime)) revert UnknownRoot();
 
         _accrueAll();
         _verify(IZkVerifier.CircuitId.WITHDRAW_COLLATERAL, proof);
 
         _spent[oldPositionNullifier] = true;
-        _insertCommitment(newPositionCommitment);
+        uint32 leafIdx = _insertCommitment(newPositionCommitment);
         privacyEntry.creditBalance(newBalanceCommitment);
 
         uint256 prev = _totalCollateralPerAsset[assetId];
         _totalCollateralPerAsset[assetId] = prev >= amount ? prev - amount : 0;
 
         emit CollateralWithdrawn(assetId, amount);
-        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, _nextLeafIndex - 1);
+        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, leafIdx);
     }
 
     /// @notice Increase debt in `assetId`, credit a balance note for the
@@ -172,7 +172,7 @@ contract ShieldedPositionPool is
         if (!cfg.enabled) revert AssetNotEnabled(assetId);
         if (!cfg.borrowable) revert AssetNotBorrowable(assetId);
         if (_spent[oldPositionNullifier]) revert NullifierAlreadySpent(oldPositionNullifier);
-        if (!_knownRoot[rootAtProveTime]) revert UnknownRoot();
+        if (!_imt.known(rootAtProveTime)) revert UnknownRoot();
 
         _accrueAll();
         // BORROW circuit asserts HF >= 1.0 against LTV; if the user tries
@@ -181,7 +181,7 @@ contract ShieldedPositionPool is
         _verify(IZkVerifier.CircuitId.BORROW, proof);
 
         _spent[oldPositionNullifier] = true;
-        _insertCommitment(newPositionCommitment);
+        uint32 leafIdx = _insertCommitment(newPositionCommitment);
         privacyEntry.creditBalance(newBalanceCommitment);
 
         uint256 newBorrow = _totalBorrowPerAsset[assetId] + amount;
@@ -189,7 +189,7 @@ contract ShieldedPositionPool is
         _pushBorrowTotal(assetId, newBorrow);
 
         emit Borrowed(assetId, amount);
-        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, _nextLeafIndex - 1);
+        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, leafIdx);
     }
 
     /// @notice Reduce debt in `assetId`, consuming a balance note in PrivacyEntry.
@@ -209,7 +209,7 @@ contract ShieldedPositionPool is
         if (!cfg.enabled) revert AssetNotEnabled(assetId);
         // balanceNullifier checked by PrivacyEntry.spendBalance.
         if (_spent[oldPositionNullifier]) revert NullifierAlreadySpent(oldPositionNullifier);
-        if (!_knownRoot[rootAtProveTime]) revert UnknownRoot();
+        if (!_imt.known(rootAtProveTime)) revert UnknownRoot();
 
         _accrueAll();
         _verify(IZkVerifier.CircuitId.REPAY, proof);
@@ -218,7 +218,7 @@ contract ShieldedPositionPool is
         privacyEntry.spendBalance(
             balanceNullifier, residualBalanceCommitment, newPositionCommitment
         );
-        _insertCommitment(newPositionCommitment);
+        uint32 leafIdx = _insertCommitment(newPositionCommitment);
 
         uint256 prev = _totalBorrowPerAsset[assetId];
         uint256 newBorrow = prev >= amount ? prev - amount : 0;
@@ -226,7 +226,7 @@ contract ShieldedPositionPool is
         _pushBorrowTotal(assetId, newBorrow);
 
         emit Repaid(assetId, amount);
-        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, _nextLeafIndex - 1);
+        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, leafIdx);
     }
 
     /// @notice LIQUIDATOR_ROLE-only: applied by LiquidationBoard after a
@@ -245,7 +245,7 @@ contract ShieldedPositionPool is
         if (_spent[oldPositionNullifier]) revert NullifierAlreadySpent(oldPositionNullifier);
 
         _spent[oldPositionNullifier] = true;
-        _insertCommitment(newPositionCommitment);
+        uint32 leafIdx = _insertCommitment(newPositionCommitment);
 
         if (collateralSeized > 0) {
             uint256 prev = _totalCollateralPerAsset[collateralAsset];
@@ -261,7 +261,7 @@ contract ShieldedPositionPool is
 
         emit CollateralWithdrawn(collateralAsset, collateralSeized);
         emit Repaid(debtAsset, debtCovered);
-        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, _nextLeafIndex - 1);
+        emit PositionUpdated(oldPositionNullifier, newPositionCommitment, leafIdx);
     }
 
     function pause() external onlyRole(GUARDIAN_ROLE) {
@@ -285,15 +285,15 @@ contract ShieldedPositionPool is
     }
 
     function currentRoot() external view returns (bytes32) {
-        return _currentRoot;
+        return _imt.currentRoot;
     }
 
     function knownRoot(bytes32 root) external view returns (bool) {
-        return _knownRoot[root];
+        return _imt.known(root);
     }
 
     function nextLeafIndex() external view returns (uint32) {
-        return _nextLeafIndex;
+        return _imt.nextLeafIndex;
     }
 
     function _verify(IZkVerifier.CircuitId cid, IZkVerifier.AggregationProof calldata p) private {
@@ -317,18 +317,13 @@ contract ShieldedPositionPool is
         rateModel.setTotals(assetId, s.totalSupply, _safe128(newBorrow));
     }
 
-    function _insertCommitment(bytes32 commitment) private {
+    function _insertCommitment(bytes32 commitment) private returns (uint32) {
         if (_committed[commitment]) revert CommitmentAlreadyInserted(commitment);
         _committed[commitment] = true;
 
-        bytes32 newRoot = keccak256(abi.encodePacked(_currentRoot, commitment, _nextLeafIndex));
-        _currentRoot = newRoot;
-        _rootHistory[_nextLeafIndex % ROOT_HISTORY_SIZE] = newRoot;
-        _knownRoot[newRoot] = true;
-        unchecked {
-            _nextLeafIndex += 1;
-        }
-        emit MerkleRootUpdated(newRoot, _nextLeafIndex);
+        (uint32 idx, bytes32 newRoot) = _imt.insert(commitment);
+        emit MerkleRootUpdated(newRoot, idx + 1);
+        return idx;
     }
 
     function _safe128(uint256 v) private pure returns (uint128) {

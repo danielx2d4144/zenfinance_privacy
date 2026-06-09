@@ -39,6 +39,15 @@ contract EntryFlowTest is Test {
     address internal constant USER = address(0x10AD);
     address internal constant RECIPIENT = address(0x9999);
 
+    /// BN254 Fr prime: Stage-A Poseidon2 rejects inputs >= PRIME, so
+    /// test commitments built from keccak("...") must be reduced into Field.
+    uint256 internal constant PRIME =
+        0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001;
+
+    function _c(string memory s) internal pure returns (bytes32) {
+        return bytes32(uint256(keccak256(bytes(s))) % PRIME);
+    }
+
     function setUp() public {
         proxy = new MockVerifyProofAggregation();
 
@@ -71,7 +80,7 @@ contract EntryFlowTest is Test {
         assertEq(usdc.balanceOf(USER), 10_000e6, "user starts at 10k USDC");
 
         // Step 1: deposit 1000 USDC -> commitment c1.
-        bytes32 c1 = keccak256("balance-note-1");
+        bytes32 c1 = _c("balance-note-1");
         vm.prank(USER);
         entry.deposit(address(usdc), 1_000e6, c1);
 
@@ -83,9 +92,9 @@ contract EntryFlowTest is Test {
         // Step 2: POOL spends c1 (e.g. supply move into ShieldedSupplyPool).
         //         residual stays inside PrivacyEntry; destination commitment
         //         is in the receiving pool's tree (event-only here).
-        bytes32 n1 = keccak256("nullifier-1");
-        bytes32 c1_residual = keccak256("residual-after-supply");
-        bytes32 c1_dest = keccak256("dest-in-supply-pool");
+        bytes32 n1 = _c("nullifier-1");
+        bytes32 c1_residual = _c("residual-after-supply");
+        bytes32 c1_dest = _c("dest-in-supply-pool");
         vm.prank(POOL);
         entry.spendBalance(n1, c1_residual, c1_dest);
 
@@ -95,7 +104,7 @@ contract EntryFlowTest is Test {
 
         // Step 3: POOL credits a fresh balance note (e.g. borrow proceeds
         //         or supply withdrawal returning value into PrivacyEntry).
-        bytes32 c2 = keccak256("balance-note-after-borrow");
+        bytes32 c2 = _c("balance-note-after-borrow");
         vm.prank(POOL);
         entry.creditBalance(c2);
 
@@ -105,8 +114,8 @@ contract EntryFlowTest is Test {
         // Step 4: user withdraws 1000 USDC against c2.
         //         Capture the root at "prove time" for the proof binding.
         bytes32 rootAtProveTime = entry.currentRoot();
-        bytes32 nWithdraw = keccak256("nullifier-withdraw");
-        bytes32 cResidual = keccak256("residual-after-withdraw");
+        bytes32 nWithdraw = _c("nullifier-withdraw");
+        bytes32 cResidual = _c("residual-after-withdraw");
 
         IZkVerifier.AggregationProof memory proof = _proof(7, 13, 21);
         proxy.setAllowed(7, 13, 21, true);
@@ -147,13 +156,13 @@ contract EntryFlowTest is Test {
 
     function test_T6_2_replayNullifierReverts() public {
         // Stage a withdrawable balance.
-        bytes32 c1 = keccak256("balance-replay");
+        bytes32 c1 = _c("balance-replay");
         vm.prank(USER);
         entry.deposit(address(usdc), 500e6, c1);
 
         bytes32 root = entry.currentRoot();
-        bytes32 nW = keccak256("nullifier-replay");
-        bytes32 cR = keccak256("residual-replay");
+        bytes32 nW = _c("nullifier-replay");
+        bytes32 cR = _c("residual-replay");
 
         IZkVerifier.AggregationProof memory p1 = _proof(1, 2, 3);
         proxy.setAllowed(1, 2, 3, true);
@@ -174,7 +183,7 @@ contract EntryFlowTest is Test {
             abi.encodeWithSelector(PrivacyEntry.NullifierAlreadySpent.selector, nW)
         );
         entry.withdraw(
-            nW, keccak256("res-2"), address(usdc), RECIPIENT, 500e6, root,
+            nW, _c("res-2"), address(usdc), RECIPIENT, 500e6, root,
             VkRegistry.ENTRY_WITHDRAW, p2
         );
     }
@@ -184,7 +193,7 @@ contract EntryFlowTest is Test {
     ///         malicious pool with CALLER_ROLE could submit the same proof
     ///         twice via two different action paths.
     function test_T6_2b_zkVerifierReplaySlotEnforced() public {
-        bytes32 c1 = keccak256("balance-r2");
+        bytes32 c1 = _c("balance-r2");
         vm.prank(USER);
         entry.deposit(address(usdc), 200e6, c1);
 
@@ -195,7 +204,7 @@ contract EntryFlowTest is Test {
 
         vm.prank(USER);
         entry.withdraw(
-            keccak256("n-1st"), keccak256("res-1st"), address(usdc), RECIPIENT, 100e6, root,
+            _c("n-1st"), _c("res-1st"), address(usdc), RECIPIENT, 100e6, root,
             VkRegistry.ENTRY_WITHDRAW, p
         );
 
@@ -205,7 +214,7 @@ contract EntryFlowTest is Test {
             abi.encodeWithSelector(ZkVerifier.AlreadyConsumed.selector, uint256(9), uint256(9), uint256(9))
         );
         entry.withdraw(
-            keccak256("n-2nd"), keccak256("res-2nd"), address(usdc), RECIPIENT, 100e6, root,
+            _c("n-2nd"), _c("res-2nd"), address(usdc), RECIPIENT, 100e6, root,
             VkRegistry.ENTRY_WITHDRAW, p
         );
     }
@@ -215,7 +224,7 @@ contract EntryFlowTest is Test {
     // ---------------------------------------------------------------------
 
     function test_T6_3_mismatchedVkHashReverts() public {
-        bytes32 c1 = keccak256("balance-vkmm");
+        bytes32 c1 = _c("balance-vkmm");
         vm.prank(USER);
         entry.deposit(address(usdc), 100e6, c1);
         bytes32 root = entry.currentRoot();
@@ -235,7 +244,7 @@ contract EntryFlowTest is Test {
             )
         );
         entry.withdraw(
-            keccak256("n-vkmm"), keccak256("res-vkmm"), address(usdc), RECIPIENT, 100e6, root,
+            _c("n-vkmm"), _c("res-vkmm"), address(usdc), RECIPIENT, 100e6, root,
             VkRegistry.BORROW,                      // wrong vkHash
             p
         );

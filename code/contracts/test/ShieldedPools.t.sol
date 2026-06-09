@@ -49,6 +49,27 @@ abstract contract PoolDeployment is Test {
     address internal constant USER = address(0xF00D);
     address internal constant RECIPIENT = address(0x9999);
 
+    /// BN254 Fr prime: Stage-A Poseidon2 rejects inputs >= PRIME, so
+    /// test commitments built from keccak("...") must be reduced into Field.
+    uint256 internal constant PRIME =
+        0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001;
+    /// Depth-20 empty Poseidon2 IMT root (pinned in
+    /// `code/contracts/test/libraries/PoseidonIMT.t.sol` against Noir).
+    bytes32 internal constant EMPTY_IMT_ROOT =
+        0x1c8c3ca0b3a3d75850fcd4dc7bf1e3445cd0cfff3ca510630fd90b47e8a24755;
+
+    /// Field-reduced commitment helper. Real production commitments come
+    /// from in-circuit hashing and are already < PRIME; tests mirror that.
+    function _c(string memory s) internal pure returns (bytes32) {
+        return bytes32(uint256(keccak256(bytes(s))) % PRIME);
+    }
+    /// Bytes-input variant for `abi.encodePacked(...)` sites; renamed
+    /// (vs an overload) to keep Solidity's string-literal overload
+    /// resolution unambiguous.
+    function _ce(bytes memory b) internal pure returns (bytes32) {
+        return bytes32(uint256(keccak256(b)) % PRIME);
+    }
+
     uint8 internal constant USDC_ID = 0;
     uint8 internal constant CBBTC_ID = 1;
     uint256 internal constant RAY = 1e27;
@@ -106,7 +127,7 @@ abstract contract PoolDeployment is Test {
         proxy = new MockVerifyProofAggregation();
         _vks = new bytes32[](11);
         for (uint256 i = 0; i < 11; ++i) {
-            _vks[i] = keccak256(abi.encodePacked("vk-", i));
+            _vks[i] = _ce(abi.encodePacked("vk-", i));
         }
         zk = new ZkVerifier(ADMIN, address(proxy), _vks);
 
@@ -208,7 +229,7 @@ abstract contract PoolDeployment is Test {
         return IZkVerifier.AggregationProof({
             domainId: domainId,
             aggregationId: aggId,
-            leaf: keccak256(abi.encodePacked("leaf", domainId, aggId, leafIndex)),
+            leaf: _ce(abi.encodePacked("leaf", domainId, aggId, leafIndex)),
             merklePath: new bytes32[](0),
             leafCount: 1,
             leafIndex: leafIndex
@@ -225,16 +246,16 @@ contract ShieldedPoolsTest is PoolDeployment {
     // ────────────── T-3.1: supply increases custody + supplyIndex updates ──────────────
     function test_T31_supply_increasesCustodyAndAggregates() public {
         // Seed user with a balance commitment in PrivacyEntry (one-shot deposit).
-        bytes32 cBal = keccak256("user-balance-1");
+        bytes32 cBal = _c("user-balance-1");
         vm.prank(USER);
         entry.deposit(address(usdc), 10_000e6, cBal);
 
         // Mock the supply proof tuple as accepted by the proxy.
         proxy.setAllowed(1, 10, 0, true);
 
-        bytes32 balNul = keccak256("bal-nul-1");
-        bytes32 residual = keccak256("residual-1");
-        bytes32 supplyC = keccak256("supply-commit-1");
+        bytes32 balNul = _c("bal-nul-1");
+        bytes32 residual = _c("residual-1");
+        bytes32 supplyC = _c("supply-commit-1");
 
         uint256 prevCustody = entry.reserves(address(usdc));
         uint256 prevTotal = supplyPool.totalSupplyPerAsset(USDC_ID);
@@ -256,15 +277,15 @@ contract ShieldedPoolsTest is PoolDeployment {
 
     function test_supply_emitsEvents() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("e1"));
+        entry.deposit(address(usdc), 10_000e6, _c("e1"));
         proxy.setAllowed(1, 11, 0, true);
 
         vm.expectEmit(true, false, false, true);
-        emit IShieldedSupplyPool.SupplyDeposited(USDC_ID, 0, keccak256("sc"), 1_000e6);
+        emit IShieldedSupplyPool.SupplyDeposited(USDC_ID, 0, _c("sc"), 1_000e6);
 
         vm.prank(USER);
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("n"), keccak256("r"), keccak256("sc"), 1_000e6, _proof(1, 11, 0)
+            USDC_ID, _c("n"), _c("r"), _c("sc"), 1_000e6, _proof(1, 11, 0)
         );
     }
 
@@ -272,7 +293,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(ShieldedSupplyPool.ZeroAmount.selector);
         supplyPool.supplyAsset(
-            USDC_ID, bytes32(0), bytes32(0), keccak256("sc"), 0, _proof(1, 12, 0)
+            USDC_ID, bytes32(0), bytes32(0), _c("sc"), 0, _proof(1, 12, 0)
         );
     }
 
@@ -280,7 +301,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(abi.encodeWithSelector(ShieldedSupplyPool.AssetNotEnabled.selector, uint8(99)));
         supplyPool.supplyAsset(
-            99, keccak256("n"), keccak256("r"), keccak256("sc"), 1, _proof(1, 13, 0)
+            99, _c("n"), _c("r"), _c("sc"), 1, _proof(1, 13, 0)
         );
     }
 
@@ -289,18 +310,18 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert();
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("n"), keccak256("r"), keccak256("sc"), 1, _proof(1, 14, 0)
+            USDC_ID, _c("n"), _c("r"), _c("sc"), 1, _proof(1, 14, 0)
         );
     }
 
     function test_withdrawSupply_marksNullifierAndCreditsBalance() public {
         // First supply so we have something to withdraw.
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("e2"));
+        entry.deposit(address(usdc), 10_000e6, _c("e2"));
         proxy.setAllowed(1, 20, 0, true);
         vm.prank(USER);
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("n2"), keccak256("r2"), keccak256("sc2"), 1_000e6, _proof(1, 20, 0)
+            USDC_ID, _c("n2"), _c("r2"), _c("sc2"), 1_000e6, _proof(1, 20, 0)
         );
         bytes32 supplyRoot = supplyPool.currentRoot();
 
@@ -308,14 +329,14 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         supplyPool.withdrawSupply(
             USDC_ID,
-            keccak256("supply-nul"),
-            keccak256("new-balance"),
+            _c("supply-nul"),
+            _c("new-balance"),
             500e6,
             supplyRoot,
             _proof(1, 21, 0)
         );
 
-        assertTrue(supplyPool.isSpent(keccak256("supply-nul")));
+        assertTrue(supplyPool.isSpent(_c("supply-nul")));
         assertEq(supplyPool.totalSupplyPerAsset(USDC_ID), 500e6);
     }
 
@@ -325,10 +346,10 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert(ShieldedSupplyPool.UnknownRoot.selector);
         supplyPool.withdrawSupply(
             USDC_ID,
-            keccak256("snul"),
-            keccak256("nb"),
+            _c("snul"),
+            _c("nb"),
             1,
-            keccak256("not-a-root"),
+            _c("not-a-root"),
             _proof(1, 22, 0)
         );
     }
@@ -337,15 +358,15 @@ contract ShieldedPoolsTest is PoolDeployment {
     function test_T32_borrow_rejectedWhenProofInvalid() public {
         // Build the position with collateral first so the borrow has something to consume.
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("eC"));
+        entry.deposit(address(usdc), 10_000e6, _c("eC"));
         proxy.setAllowed(1, 30, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("bnul"),
-            keccak256("residual"),
+            _c("bnul"),
+            _c("residual"),
             bytes32(0),
-            keccak256("pos-1"),
+            _c("pos-1"),
             1_000e6,
             bytes32(0),
             _proof(1, 30, 0)
@@ -359,9 +380,9 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert();
         positionPool.borrow(
             USDC_ID,
-            keccak256("pos-1-nul"),
-            keccak256("new-pos"),
-            keccak256("new-bal"),
+            _c("pos-1-nul"),
+            _c("new-pos"),
+            _c("new-bal"),
             8_000e6, // over-LTV
             posRoot,
             _proof(1, 31, 0)
@@ -370,15 +391,15 @@ contract ShieldedPoolsTest is PoolDeployment {
 
     function test_borrow_happyPath_creditsBalanceAndBumpsTotals() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("eD"));
+        entry.deposit(address(usdc), 10_000e6, _c("eD"));
         proxy.setAllowed(1, 40, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("bnul-D"),
-            keccak256("res-D"),
+            _c("bnul-D"),
+            _c("res-D"),
             bytes32(0),
-            keccak256("pos-D"),
+            _c("pos-D"),
             5_000e6,
             bytes32(0),
             _proof(1, 40, 0)
@@ -389,9 +410,9 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         positionPool.borrow(
             USDC_ID,
-            keccak256("pos-D-nul"),
-            keccak256("pos-D2"),
-            keccak256("bal-D2"),
+            _c("pos-D-nul"),
+            _c("pos-D2"),
+            _c("bal-D2"),
             1_000e6,
             posRoot,
             _proof(1, 41, 0)
@@ -405,15 +426,15 @@ contract ShieldedPoolsTest is PoolDeployment {
     function test_repay_reducesTotalBorrow() public {
         // setup: collateral + borrow
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("eE"));
+        entry.deposit(address(usdc), 10_000e6, _c("eE"));
         proxy.setAllowed(1, 50, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("bnul-E"),
-            keccak256("res-E"),
+            _c("bnul-E"),
+            _c("res-E"),
             bytes32(0),
-            keccak256("pos-E"),
+            _c("pos-E"),
             5_000e6,
             bytes32(0),
             _proof(1, 50, 0)
@@ -423,9 +444,9 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         positionPool.borrow(
             USDC_ID,
-            keccak256("pos-E-nul"),
-            keccak256("pos-E2"),
-            keccak256("bal-E2"),
+            _c("pos-E-nul"),
+            _c("pos-E2"),
+            _c("bal-E2"),
             1_000e6,
             root1,
             _proof(1, 51, 0)
@@ -437,10 +458,10 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         positionPool.repay(
             USDC_ID,
-            keccak256("repay-bal-nul"),
-            keccak256("repay-res"),
-            keccak256("pos-E2-nul"),
-            keccak256("pos-E3"),
+            _c("repay-bal-nul"),
+            _c("repay-res"),
+            _c("pos-E2-nul"),
+            _c("pos-E3"),
             300e6,
             root2,
             _proof(1, 52, 0)
@@ -475,10 +496,10 @@ contract ShieldedPoolsTest is PoolDeployment {
         usdc.mint(USER, 10_000e6); // already minted in setUp, top up anyway
         // We use cbBTC as collateral here to match the 8% bonus param.
         vm.prank(USER);
-        entry.deposit(address(cbBtc), 1e8, keccak256("entry-cbtc")); // 1 cbBTC = $60k
+        entry.deposit(address(cbBtc), 1e8, _c("entry-cbtc")); // 1 cbBTC = $60k
 
         // Register a fake position so liquidate can target it.
-        bytes32 target = keccak256("victim-position");
+        bytes32 target = _c("victim-position");
         ILiquidationBoard.LiquidationTrigger[] memory triggers =
             new ILiquidationBoard.LiquidationTrigger[](1);
         triggers[0] = ILiquidationBoard.LiquidationTrigger({
@@ -503,8 +524,8 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(LIQUIDATOR);
         board.liquidate(
             target,
-            keccak256("residual-victim"),
-            keccak256("liquidator-bal"),
+            _c("residual-victim"),
+            _c("liquidator-bal"),
             CBBTC_ID,
             USDC_ID,
             100e6, // 100 USDC debt
@@ -553,13 +574,13 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(LIQUIDATOR);
         vm.expectRevert(
             abi.encodeWithSelector(
-                LiquidationBoard.UnknownPosition.selector, keccak256("ghost")
+                LiquidationBoard.UnknownPosition.selector, _c("ghost")
             )
         );
         board.liquidate(
-            keccak256("ghost"),
-            keccak256("r"),
-            keccak256("lb"),
+            _c("ghost"),
+            _c("r"),
+            _c("lb"),
             CBBTC_ID,
             USDC_ID,
             1,
@@ -570,7 +591,7 @@ contract ShieldedPoolsTest is PoolDeployment {
     }
 
     function testRevert_liquidate_zeroDebtToCover() public {
-        bytes32 target = keccak256("target-2");
+        bytes32 target = _c("target-2");
         ILiquidationBoard.LiquidationTrigger[] memory triggers =
             new ILiquidationBoard.LiquidationTrigger[](0);
         vm.prank(POOL_KEEPER);
@@ -580,8 +601,8 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert(LiquidationBoard.ZeroAmount.selector);
         board.liquidate(
             target,
-            keccak256("r"),
-            keccak256("lb"),
+            _c("r"),
+            _c("lb"),
             CBBTC_ID,
             USDC_ID,
             0,
@@ -592,7 +613,7 @@ contract ShieldedPoolsTest is PoolDeployment {
     }
 
     function testRevert_liquidate_invalidHF() public {
-        bytes32 target = keccak256("target-3");
+        bytes32 target = _c("target-3");
         ILiquidationBoard.LiquidationTrigger[] memory triggers =
             new ILiquidationBoard.LiquidationTrigger[](0);
         vm.prank(POOL_KEEPER);
@@ -604,8 +625,8 @@ contract ShieldedPoolsTest is PoolDeployment {
         );
         board.liquidate(
             target,
-            keccak256("r"),
-            keccak256("lb"),
+            _c("r"),
+            _c("lb"),
             CBBTC_ID,
             USDC_ID,
             1,
@@ -616,7 +637,7 @@ contract ShieldedPoolsTest is PoolDeployment {
     }
 
     function testRevert_liquidate_inactivePosition() public {
-        bytes32 target = keccak256("target-4");
+        bytes32 target = _c("target-4");
         ILiquidationBoard.LiquidationTrigger[] memory triggers =
             new ILiquidationBoard.LiquidationTrigger[](0);
         vm.startPrank(POOL_KEEPER);
@@ -630,8 +651,8 @@ contract ShieldedPoolsTest is PoolDeployment {
         );
         board.liquidate(
             target,
-            keccak256("r"),
-            keccak256("lb"),
+            _c("r"),
+            _c("lb"),
             CBBTC_ID,
             USDC_ID,
             1,
@@ -645,7 +666,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         ILiquidationBoard.LiquidationTrigger[] memory none =
             new ILiquidationBoard.LiquidationTrigger[](0);
         vm.expectRevert();
-        board.registerPosition(keccak256("x"), none);
+        board.registerPosition(_c("x"), none);
     }
 
     function test_pause_blocksSupply() public {
@@ -658,14 +679,14 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert();
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("n"), keccak256("r"), keccak256("sc"), 1, _proof(1, 200, 0)
+            USDC_ID, _c("n"), _c("r"), _c("sc"), 1, _proof(1, 200, 0)
         );
     }
 
     function testRevert_applyLiquidation_byOutsider() public {
         vm.expectRevert();
         positionPool.applyLiquidation(
-            CBBTC_ID, USDC_ID, keccak256("n"), keccak256("c"), 1, 1
+            CBBTC_ID, USDC_ID, _c("n"), _c("c"), 1, 1
         );
     }
 
@@ -675,7 +696,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(ShieldedSupplyPool.ZeroAmount.selector);
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("n"), keccak256("r"), bytes32(0), 100, _proof(1, 300, 0)
+            USDC_ID, _c("n"), _c("r"), bytes32(0), 100, _proof(1, 300, 0)
         );
     }
 
@@ -691,19 +712,19 @@ contract ShieldedPoolsTest is PoolDeployment {
             abi.encodeWithSelector(ShieldedSupplyPool.AssetNotSuppliable.selector, USDC_ID)
         );
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("n"), keccak256("r"), keccak256("sc"), 100, _proof(1, 301, 0)
+            USDC_ID, _c("n"), _c("r"), _c("sc"), 100, _proof(1, 301, 0)
         );
     }
 
     function testRevert_supply_nullifierAlreadySpent() public {
         // Seed
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("seed-S"));
+        entry.deposit(address(usdc), 10_000e6, _c("seed-S"));
         proxy.setAllowed(1, 302, 0, true);
-        bytes32 dup = keccak256("dup-nul");
+        bytes32 dup = _c("dup-nul");
         vm.prank(USER);
         supplyPool.supplyAsset(
-            USDC_ID, dup, keccak256("rA"), keccak256("sA"), 100e6, _proof(1, 302, 0)
+            USDC_ID, dup, _c("rA"), _c("sA"), 100e6, _proof(1, 302, 0)
         );
 
         // Replay — PrivacyEntry's spendBalance rejects since it owns the
@@ -714,7 +735,7 @@ contract ShieldedPoolsTest is PoolDeployment {
             abi.encodeWithSelector(PrivacyEntry.NullifierAlreadySpent.selector, dup)
         );
         supplyPool.supplyAsset(
-            USDC_ID, dup, keccak256("rB"), keccak256("sB"), 100e6, _proof(1, 303, 0)
+            USDC_ID, dup, _c("rB"), _c("sB"), 100e6, _proof(1, 303, 0)
         );
     }
 
@@ -722,7 +743,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(ShieldedSupplyPool.ZeroAmount.selector);
         supplyPool.withdrawSupply(
-            USDC_ID, keccak256("n"), keccak256("c"), 0, bytes32(0), _proof(1, 304, 0)
+            USDC_ID, _c("n"), _c("c"), 0, bytes32(0), _proof(1, 304, 0)
         );
     }
 
@@ -730,18 +751,18 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(ShieldedSupplyPool.ZeroAmount.selector);
         supplyPool.withdrawSupply(
-            USDC_ID, keccak256("n"), bytes32(0), 1, bytes32(0), _proof(1, 305, 0)
+            USDC_ID, _c("n"), bytes32(0), 1, bytes32(0), _proof(1, 305, 0)
         );
     }
 
     function testRevert_withdrawSupply_assetDisabled() public {
         // Build a known root first so we don't hit UnknownRoot before AssetNotEnabled.
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("seed-WD"));
+        entry.deposit(address(usdc), 10_000e6, _c("seed-WD"));
         proxy.setAllowed(1, 306, 0, true);
         vm.prank(USER);
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("nWD"), keccak256("rWD"), keccak256("sWD"), 1_000e6, _proof(1, 306, 0)
+            USDC_ID, _c("nWD"), _c("rWD"), _c("sWD"), 1_000e6, _proof(1, 306, 0)
         );
 
         // Disable
@@ -753,7 +774,7 @@ contract ShieldedPoolsTest is PoolDeployment {
             abi.encodeWithSelector(ShieldedSupplyPool.AssetNotEnabled.selector, USDC_ID)
         );
         supplyPool.withdrawSupply(
-            USDC_ID, keccak256("nWD2"), keccak256("nbWD"), 1, bytes32(0), _proof(1, 307, 0)
+            USDC_ID, _c("nWD2"), _c("nbWD"), 1, bytes32(0), _proof(1, 307, 0)
         );
 
         // Re-enable for following tests
@@ -764,15 +785,15 @@ contract ShieldedPoolsTest is PoolDeployment {
     function test_withdrawCollateral_happyPath() public {
         // Open a position with collateral
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("e-wc"));
+        entry.deposit(address(usdc), 10_000e6, _c("e-wc"));
         proxy.setAllowed(1, 400, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("bnul-wc"),
-            keccak256("res-wc"),
+            _c("bnul-wc"),
+            _c("res-wc"),
             bytes32(0),
-            keccak256("pos-wc"),
+            _c("pos-wc"),
             5_000e6,
             bytes32(0),
             _proof(1, 400, 0)
@@ -783,9 +804,9 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         positionPool.withdrawCollateral(
             USDC_ID,
-            keccak256("pos-wc-nul"),
-            keccak256("pos-wc-2"),
-            keccak256("bal-wc-2"),
+            _c("pos-wc-nul"),
+            _c("pos-wc-2"),
+            _c("bal-wc-2"),
             1_000e6,
             root,
             _proof(1, 401, 0)
@@ -807,10 +828,10 @@ contract ShieldedPoolsTest is PoolDeployment {
         );
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("n"),
-            keccak256("r"),
+            _c("n"),
+            _c("r"),
             bytes32(0),
-            keccak256("c"),
+            _c("c"),
             1,
             bytes32(0),
             _proof(1, 500, 0)
@@ -822,10 +843,10 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert(ShieldedPositionPool.ZeroAmount.selector);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("n"),
-            keccak256("r"),
+            _c("n"),
+            _c("r"),
             bytes32(0),
-            keccak256("c"),
+            _c("c"),
             0,
             bytes32(0),
             _proof(1, 501, 0)
@@ -837,9 +858,9 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert(ShieldedPositionPool.ZeroAmount.selector);
         positionPool.borrow(
             USDC_ID,
-            keccak256("n"),
-            keccak256("c"),
-            keccak256("b"),
+            _c("n"),
+            _c("c"),
+            _c("b"),
             0,
             bytes32(0),
             _proof(1, 502, 0)
@@ -851,11 +872,11 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert(ShieldedPositionPool.UnknownRoot.selector);
         positionPool.borrow(
             USDC_ID,
-            keccak256("n"),
-            keccak256("c"),
-            keccak256("b"),
+            _c("n"),
+            _c("c"),
+            _c("b"),
             1,
-            keccak256("not-a-root"),
+            _c("not-a-root"),
             _proof(1, 503, 0)
         );
     }
@@ -868,15 +889,15 @@ contract ShieldedPoolsTest is PoolDeployment {
 
         // Need a known root first
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("e-bnb"));
+        entry.deposit(address(usdc), 1_000e6, _c("e-bnb"));
         proxy.setAllowed(1, 504, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("n-bnb"),
-            keccak256("r-bnb"),
+            _c("n-bnb"),
+            _c("r-bnb"),
             bytes32(0),
-            keccak256("c-bnb"),
+            _c("c-bnb"),
             500e6,
             bytes32(0),
             _proof(1, 504, 0)
@@ -889,9 +910,9 @@ contract ShieldedPoolsTest is PoolDeployment {
         );
         positionPool.borrow(
             USDC_ID,
-            keccak256("nb-bnb"),
-            keccak256("cb-bnb"),
-            keccak256("bb-bnb"),
+            _c("nb-bnb"),
+            _c("cb-bnb"),
+            _c("bb-bnb"),
             1,
             root,
             _proof(1, 505, 0)
@@ -903,10 +924,10 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert(ShieldedPositionPool.ZeroAmount.selector);
         positionPool.repay(
             USDC_ID,
-            keccak256("bn"),
-            keccak256("r"),
-            keccak256("on"),
-            keccak256("nc"),
+            _c("bn"),
+            _c("r"),
+            _c("on"),
+            _c("nc"),
             0,
             bytes32(0),
             _proof(1, 600, 0)
@@ -918,12 +939,12 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.expectRevert(ShieldedPositionPool.UnknownRoot.selector);
         positionPool.repay(
             USDC_ID,
-            keccak256("bn"),
-            keccak256("r"),
-            keccak256("on"),
-            keccak256("nc"),
+            _c("bn"),
+            _c("r"),
+            _c("on"),
+            _c("nc"),
             1,
-            keccak256("nope"),
+            _c("nope"),
             _proof(1, 601, 0)
         );
     }
@@ -931,15 +952,15 @@ contract ShieldedPoolsTest is PoolDeployment {
     function test_applyLiquidation_byBoard() public {
         // Open a position
         vm.prank(USER);
-        entry.deposit(address(cbBtc), 1e8, keccak256("e-alq"));
+        entry.deposit(address(cbBtc), 1e8, _c("e-alq"));
         proxy.setAllowed(1, 700, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
             CBBTC_ID,
-            keccak256("n-alq"),
-            keccak256("r-alq"),
+            _c("n-alq"),
+            _c("r-alq"),
             bytes32(0),
-            keccak256("p-alq"),
+            _c("p-alq"),
             1e8,
             bytes32(0),
             _proof(1, 700, 0)
@@ -954,8 +975,8 @@ contract ShieldedPoolsTest is PoolDeployment {
         positionPool.applyLiquidation(
             CBBTC_ID,
             USDC_ID,
-            keccak256("p-alq-nul"),
-            keccak256("p-alq-2"),
+            _c("p-alq-nul"),
+            _c("p-alq-2"),
             1e7, // 0.1 cbBTC seized
             100e6 // 100 USDC repaid (no prior debt so this just decrements floor)
         );
@@ -972,7 +993,7 @@ contract ShieldedPoolsTest is PoolDeployment {
     }
 
     function test_registerPosition_updatesExisting() public {
-        bytes32 target = keccak256("upd-target");
+        bytes32 target = _c("upd-target");
         ILiquidationBoard.LiquidationTrigger[] memory t1 =
             new ILiquidationBoard.LiquidationTrigger[](1);
         t1[0] = ILiquidationBoard.LiquidationTrigger({assetId: CBBTC_ID, priceThresholdUsd1e8: 50_000e8});
@@ -994,29 +1015,29 @@ contract ShieldedPoolsTest is PoolDeployment {
     function testRevert_removePosition_unknown() public {
         vm.prank(POOL_KEEPER);
         vm.expectRevert(
-            abi.encodeWithSelector(LiquidationBoard.UnknownPosition.selector, keccak256("ghost"))
+            abi.encodeWithSelector(LiquidationBoard.UnknownPosition.selector, _c("ghost"))
         );
-        board.removePosition(keccak256("ghost"));
+        board.removePosition(_c("ghost"));
     }
 
     function testRevert_positionByCommitment_unknown() public {
         vm.expectRevert(
-            abi.encodeWithSelector(LiquidationBoard.UnknownPosition.selector, keccak256("ghost"))
+            abi.encodeWithSelector(LiquidationBoard.UnknownPosition.selector, _c("ghost"))
         );
-        board.positionByCommitment(keccak256("ghost"));
+        board.positionByCommitment(_c("ghost"));
     }
 
     function test_positionCountAndAt() public {
         ILiquidationBoard.LiquidationTrigger[] memory triggers =
             new ILiquidationBoard.LiquidationTrigger[](0);
         vm.startPrank(POOL_KEEPER);
-        board.registerPosition(keccak256("pa1"), triggers);
-        board.registerPosition(keccak256("pa2"), triggers);
+        board.registerPosition(_c("pa1"), triggers);
+        board.registerPosition(_c("pa2"), triggers);
         vm.stopPrank();
 
         assertEq(board.positionCount(), 2);
-        assertEq(board.positionAt(0).commitment, keccak256("pa1"));
-        assertEq(board.positionAt(1).commitment, keccak256("pa2"));
+        assertEq(board.positionAt(0).commitment, _c("pa1"));
+        assertEq(board.positionAt(1).commitment, _c("pa2"));
     }
 
     function test_pause_liquidationBoard() public {
@@ -1031,7 +1052,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(LIQUIDATOR);
         vm.expectRevert();
         board.liquidate(
-            keccak256("any"), bytes32(0), keccak256("lb"), CBBTC_ID, USDC_ID,
+            _c("any"), bytes32(0), _c("lb"), CBBTC_ID, USDC_ID,
             1, 9_600, none, _proof(1, 800, 0)
         );
 
@@ -1049,7 +1070,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert();
         positionPool.borrow(
-            USDC_ID, keccak256("n"), keccak256("c"), keccak256("b"), 1,
+            USDC_ID, _c("n"), _c("c"), _c("b"), 1,
             bytes32(0), _proof(1, 801, 0)
         );
 
@@ -1059,14 +1080,14 @@ contract ShieldedPoolsTest is PoolDeployment {
 
     function test_supplyPool_views() public view {
         assertEq(supplyPool.nextLeafIndex(), 0);
-        assertEq(supplyPool.currentRoot(), bytes32(0));
+        assertEq(supplyPool.currentRoot(), EMPTY_IMT_ROOT);
         assertFalse(supplyPool.knownRoot(bytes32(0)));
         assertFalse(supplyPool.isSpent(bytes32("x")));
     }
 
     function test_positionPool_views() public view {
         assertEq(positionPool.nextLeafIndex(), 0);
-        assertEq(positionPool.currentRoot(), bytes32(0));
+        assertEq(positionPool.currentRoot(), EMPTY_IMT_ROOT);
         assertFalse(positionPool.knownRoot(bytes32(0)));
         assertFalse(positionPool.isSpent(bytes32("x")));
     }
@@ -1084,18 +1105,18 @@ contract ShieldedPoolsTest is PoolDeployment {
     function testRevert_withdrawSupply_replaySupplyNullifier() public {
         // Seed and withdraw once
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("seed-rep"));
+        entry.deposit(address(usdc), 10_000e6, _c("seed-rep"));
         proxy.setAllowed(1, 900, 0, true);
         vm.prank(USER);
         supplyPool.supplyAsset(
-            USDC_ID, keccak256("n-rep"), keccak256("r-rep"), keccak256("s-rep"), 1_000e6, _proof(1, 900, 0)
+            USDC_ID, _c("n-rep"), _c("r-rep"), _c("s-rep"), 1_000e6, _proof(1, 900, 0)
         );
         bytes32 root = supplyPool.currentRoot();
-        bytes32 supplyNul = keccak256("supply-nul-rep");
+        bytes32 supplyNul = _c("supply-nul-rep");
         proxy.setAllowed(1, 901, 0, true);
         vm.prank(USER);
         supplyPool.withdrawSupply(
-            USDC_ID, supplyNul, keccak256("nb-rep"), 100e6, root, _proof(1, 901, 0)
+            USDC_ID, supplyNul, _c("nb-rep"), 100e6, root, _proof(1, 901, 0)
         );
 
         // Replay same supply nullifier
@@ -1108,7 +1129,7 @@ contract ShieldedPoolsTest is PoolDeployment {
             )
         );
         supplyPool.withdrawSupply(
-            USDC_ID, supplyNul, keccak256("nb-rep2"), 100e6, newRoot, _proof(1, 902, 0)
+            USDC_ID, supplyNul, _c("nb-rep2"), 100e6, newRoot, _proof(1, 902, 0)
         );
     }
 
@@ -1116,7 +1137,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(ShieldedPositionPool.ZeroAmount.selector);
         positionPool.withdrawCollateral(
-            USDC_ID, keccak256("n"), keccak256("c"), keccak256("b"), 0, bytes32(0), _proof(1, 910, 0)
+            USDC_ID, _c("n"), _c("c"), _c("b"), 0, bytes32(0), _proof(1, 910, 0)
         );
     }
 
@@ -1124,7 +1145,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(ShieldedPositionPool.ZeroAmount.selector);
         positionPool.withdrawCollateral(
-            USDC_ID, keccak256("n"), bytes32(0), keccak256("b"), 1, bytes32(0), _proof(1, 911, 0)
+            USDC_ID, _c("n"), bytes32(0), _c("b"), 1, bytes32(0), _proof(1, 911, 0)
         );
     }
 
@@ -1132,22 +1153,22 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(USER);
         vm.expectRevert(ShieldedPositionPool.ZeroAmount.selector);
         positionPool.withdrawCollateral(
-            USDC_ID, keccak256("n"), keccak256("c"), bytes32(0), 1, bytes32(0), _proof(1, 912, 0)
+            USDC_ID, _c("n"), _c("c"), bytes32(0), 1, bytes32(0), _proof(1, 912, 0)
         );
     }
 
     function testRevert_withdrawCollateral_assetDisabled() public {
         // Need a known root first
         vm.prank(USER);
-        entry.deposit(address(usdc), 10_000e6, keccak256("e-wcd"));
+        entry.deposit(address(usdc), 10_000e6, _c("e-wcd"));
         proxy.setAllowed(1, 913, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("n-wcd"),
-            keccak256("r-wcd"),
+            _c("n-wcd"),
+            _c("r-wcd"),
             bytes32(0),
-            keccak256("c-wcd"),
+            _c("c-wcd"),
             500e6,
             bytes32(0),
             _proof(1, 913, 0)
@@ -1162,7 +1183,7 @@ contract ShieldedPoolsTest is PoolDeployment {
             abi.encodeWithSelector(ShieldedPositionPool.AssetNotEnabled.selector, USDC_ID)
         );
         positionPool.withdrawCollateral(
-            USDC_ID, keccak256("nw-wcd"), keccak256("ncw-wcd"), keccak256("nbw-wcd"),
+            USDC_ID, _c("nw-wcd"), _c("ncw-wcd"), _c("nbw-wcd"),
             1, root, _proof(1, 914, 0)
         );
 
@@ -1179,7 +1200,7 @@ contract ShieldedPoolsTest is PoolDeployment {
             abi.encodeWithSelector(ShieldedPositionPool.AssetNotEnabled.selector, USDC_ID)
         );
         positionPool.borrow(
-            USDC_ID, keccak256("n"), keccak256("c"), keccak256("b"), 1, bytes32(0), _proof(1, 915, 0)
+            USDC_ID, _c("n"), _c("c"), _c("b"), 1, bytes32(0), _proof(1, 915, 0)
         );
 
         vm.prank(MANAGER);
@@ -1195,7 +1216,7 @@ contract ShieldedPoolsTest is PoolDeployment {
             abi.encodeWithSelector(ShieldedPositionPool.AssetNotEnabled.selector, USDC_ID)
         );
         positionPool.repay(
-            USDC_ID, keccak256("bn"), keccak256("r"), keccak256("on"), keccak256("nc"),
+            USDC_ID, _c("bn"), _c("r"), _c("on"), _c("nc"),
             1, bytes32(0), _proof(1, 916, 0)
         );
 
@@ -1209,25 +1230,25 @@ contract ShieldedPoolsTest is PoolDeployment {
             abi.encodeWithSelector(ShieldedPositionPool.AssetNotEnabled.selector, uint8(99))
         );
         positionPool.depositCollateral(
-            99, keccak256("n"), keccak256("r"), bytes32(0), keccak256("c"), 1, bytes32(0),
+            99, _c("n"), _c("r"), bytes32(0), _c("c"), 1, bytes32(0),
             _proof(1, 917, 0)
         );
     }
 
     function test_depositCollateral_withExistingPosition_unknownRoot() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("e-dc2"));
+        entry.deposit(address(usdc), 1_000e6, _c("e-dc2"));
 
         vm.prank(USER);
         vm.expectRevert(ShieldedPositionPool.UnknownRoot.selector);
         positionPool.depositCollateral(
             USDC_ID,
-            keccak256("n-dc2"),
-            keccak256("r-dc2"),
-            keccak256("existing-pos"), // non-zero → triggers root check
-            keccak256("c-dc2"),
+            _c("n-dc2"),
+            _c("r-dc2"),
+            _c("existing-pos"), // non-zero → triggers root check
+            _c("c-dc2"),
             500e6,
-            keccak256("not-a-root"),
+            _c("not-a-root"),
             _proof(1, 918, 0)
         );
     }
@@ -1235,12 +1256,12 @@ contract ShieldedPoolsTest is PoolDeployment {
     function test_applyLiquidation_zeroDebt() public {
         // Open a position
         vm.prank(USER);
-        entry.deposit(address(cbBtc), 1e8, keccak256("e-alz"));
+        entry.deposit(address(cbBtc), 1e8, _c("e-alz"));
         proxy.setAllowed(1, 919, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
-            CBBTC_ID, keccak256("n-alz"), keccak256("r-alz"), bytes32(0),
-            keccak256("p-alz"), 1e8, bytes32(0), _proof(1, 919, 0)
+            CBBTC_ID, _c("n-alz"), _c("r-alz"), bytes32(0),
+            _c("p-alz"), 1e8, bytes32(0), _proof(1, 919, 0)
         );
 
         bytes32 liqRole = positionPool.LIQUIDATOR_ROLE();
@@ -1250,19 +1271,19 @@ contract ShieldedPoolsTest is PoolDeployment {
         // collateralSeized=0 and debtCovered=0 exercises both skip branches
         vm.prank(LIQUIDATOR);
         positionPool.applyLiquidation(
-            CBBTC_ID, USDC_ID, keccak256("p-alz-nul"), keccak256("p-alz-2"), 0, 0
+            CBBTC_ID, USDC_ID, _c("p-alz-nul"), _c("p-alz-2"), 0, 0
         );
     }
 
     function test_applyLiquidation_collateralOnly() public {
         // Open
         vm.prank(USER);
-        entry.deposit(address(cbBtc), 1e8, keccak256("e-aco"));
+        entry.deposit(address(cbBtc), 1e8, _c("e-aco"));
         proxy.setAllowed(1, 920, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
-            CBBTC_ID, keccak256("n-aco"), keccak256("r-aco"), bytes32(0),
-            keccak256("p-aco"), 1e8, bytes32(0), _proof(1, 920, 0)
+            CBBTC_ID, _c("n-aco"), _c("r-aco"), bytes32(0),
+            _c("p-aco"), 1e8, bytes32(0), _proof(1, 920, 0)
         );
 
         bytes32 liqRole = positionPool.LIQUIDATOR_ROLE();
@@ -1271,28 +1292,28 @@ contract ShieldedPoolsTest is PoolDeployment {
 
         vm.prank(LIQUIDATOR);
         positionPool.applyLiquidation(
-            CBBTC_ID, USDC_ID, keccak256("p-aco-nul"), keccak256("p-aco-2"), 1e7, 0
+            CBBTC_ID, USDC_ID, _c("p-aco-nul"), _c("p-aco-2"), 1e7, 0
         );
         assertEq(positionPool.totalCollateralPerAsset(CBBTC_ID), 1e8 - 1e7);
     }
 
     function testRevert_applyLiquidation_replay() public {
         vm.prank(USER);
-        entry.deposit(address(cbBtc), 1e8, keccak256("e-arp"));
+        entry.deposit(address(cbBtc), 1e8, _c("e-arp"));
         proxy.setAllowed(1, 921, 0, true);
         vm.prank(USER);
         positionPool.depositCollateral(
-            CBBTC_ID, keccak256("n-arp"), keccak256("r-arp"), bytes32(0),
-            keccak256("p-arp"), 1e8, bytes32(0), _proof(1, 921, 0)
+            CBBTC_ID, _c("n-arp"), _c("r-arp"), bytes32(0),
+            _c("p-arp"), 1e8, bytes32(0), _proof(1, 921, 0)
         );
         bytes32 liqRole = positionPool.LIQUIDATOR_ROLE();
         vm.prank(ADMIN);
         positionPool.grantRole(liqRole, LIQUIDATOR);
 
-        bytes32 dupNul = keccak256("dup-pos-nul");
+        bytes32 dupNul = _c("dup-pos-nul");
         vm.startPrank(LIQUIDATOR);
         positionPool.applyLiquidation(
-            CBBTC_ID, USDC_ID, dupNul, keccak256("p-arp-2"), 1e6, 1
+            CBBTC_ID, USDC_ID, dupNul, _c("p-arp-2"), 1e6, 1
         );
         vm.expectRevert(
             abi.encodeWithSelector(
@@ -1300,7 +1321,7 @@ contract ShieldedPoolsTest is PoolDeployment {
             )
         );
         positionPool.applyLiquidation(
-            CBBTC_ID, USDC_ID, dupNul, keccak256("p-arp-3"), 1e6, 1
+            CBBTC_ID, USDC_ID, dupNul, _c("p-arp-3"), 1e6, 1
         );
         vm.stopPrank();
     }
@@ -1312,7 +1333,7 @@ contract ShieldedPoolsTest is PoolDeployment {
         vm.prank(LIQUIDATOR);
         vm.expectRevert(ShieldedPositionPool.ZeroAmount.selector);
         positionPool.applyLiquidation(
-            CBBTC_ID, USDC_ID, keccak256("n"), bytes32(0), 1, 1
+            CBBTC_ID, USDC_ID, _c("n"), bytes32(0), 1, 1
         );
     }
 

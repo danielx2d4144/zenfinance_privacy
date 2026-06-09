@@ -29,6 +29,9 @@ contract SolvencyHandler is Test {
     uint256 internal _commitmentSeq;
     uint256 internal _depositSeq;
 
+    uint256 internal constant PRIME =
+        0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001;
+
     constructor(
         PrivacyEntry entry_,
         ShieldedSupplyPool supplyPool_,
@@ -61,13 +64,15 @@ contract SolvencyHandler is Test {
     }
 
     function _commit(string memory tag) internal returns (bytes32) {
-        return keccak256(abi.encodePacked(tag, ++_commitmentSeq));
+        return bytes32(uint256(keccak256(abi.encodePacked(tag, ++_commitmentSeq))) % PRIME);
     }
 
     function supply(uint256 amount) external {
         amount = bound(amount, 1, 1_000e6);
-        bytes32 entryC =
-            keccak256(abi.encodePacked("fuzz-deposit-commit-", ++_depositSeq));
+        bytes32 entryC = bytes32(
+            uint256(keccak256(abi.encodePacked("fuzz-deposit-commit-", ++_depositSeq)))
+                % PRIME
+        );
         vm.prank(user);
         entry.deposit(address(usdc), amount, entryC);
 

@@ -25,7 +25,20 @@ contract PrivacyEntryTest is Test {
     address internal constant OUTSIDER = address(0xDEAD);
 
     bytes32 internal constant VK_WITHDRAW =
-        keccak256("vk-circuit-1"); // CircuitId.ENTRY_WITHDRAW = 1
+        0x0cab278e65e51eb92a75c0285c5b953a2fff36de3547036e3051915af46ce250;
+    // ^ _c("vk-circuit-1") -- inlined as hex so the constant
+    //   survives the _c() Field-reducer rewrite below.
+
+    /// BN254 Fr prime: Stage-A Poseidon2 rejects inputs >= PRIME, so test
+    /// commitments built from keccak("...") must be reduced into Field.
+    uint256 internal constant PRIME =
+        0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001;
+
+    /// Field-reduced commitment helper. Real production commitments come
+    /// from in-circuit hashing and are already < PRIME; tests mirror that.
+    function _c(string memory s) internal pure returns (bytes32) {
+        return bytes32(uint256(keccak256(bytes(s))) % PRIME);
+    }
 
     function setUp() public {
         proxy = new MockVerifyProofAggregation();
@@ -51,7 +64,7 @@ contract PrivacyEntryTest is Test {
     // T-2.2: reserves arithmetic
     function test_deposit_updatesReservesAndPullsTokens() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("commit-1"));
+        entry.deposit(address(usdc), 1_000e6, _c("commit-1"));
 
         assertEq(entry.reserves(address(usdc)), 1_000e6);
         assertEq(usdc.balanceOf(address(entry)), 1_000e6);
@@ -63,13 +76,13 @@ contract PrivacyEntryTest is Test {
     function testRevert_deposit_zeroToken() public {
         vm.prank(USER);
         vm.expectRevert(PrivacyEntry.ZeroAddress.selector);
-        entry.deposit(address(0), 1, keccak256("c"));
+        entry.deposit(address(0), 1, _c("c"));
     }
 
     function testRevert_deposit_zeroAmount() public {
         vm.prank(USER);
         vm.expectRevert(PrivacyEntry.ZeroAmount.selector);
-        entry.deposit(address(usdc), 0, keccak256("c"));
+        entry.deposit(address(usdc), 0, _c("c"));
     }
 
     function testRevert_deposit_zeroCommitment() public {
@@ -79,7 +92,7 @@ contract PrivacyEntryTest is Test {
     }
 
     function testRevert_deposit_duplicateCommitment() public {
-        bytes32 c = keccak256("dup");
+        bytes32 c = _c("dup");
         vm.startPrank(USER);
         entry.deposit(address(usdc), 1e6, c);
         vm.expectRevert(abi.encodeWithSelector(PrivacyEntry.CommitmentAlreadyInserted.selector, c));
@@ -89,9 +102,9 @@ contract PrivacyEntryTest is Test {
 
     // T-2.1: POOL_ROLE gating
     function test_spendBalance_byPool_marksNullifierAndInserts() public {
-        bytes32 nul = keccak256("n1");
-        bytes32 res = keccak256("r1");
-        bytes32 dst = keccak256("d1");
+        bytes32 nul = _c("n1");
+        bytes32 res = _c("r1");
+        bytes32 dst = _c("d1");
 
         vm.prank(POOL);
         entry.spendBalance(nul, res, dst);
@@ -101,7 +114,7 @@ contract PrivacyEntryTest is Test {
     }
 
     function test_spendBalance_skipsZeroResidual() public {
-        bytes32 nul = keccak256("n2");
+        bytes32 nul = _c("n2");
         vm.prank(POOL);
         entry.spendBalance(nul, bytes32(0), bytes32(0));
         assertTrue(entry.isSpent(nul));
@@ -111,11 +124,11 @@ contract PrivacyEntryTest is Test {
     function testRevert_spendBalance_byOutsider() public {
         vm.prank(OUTSIDER);
         vm.expectRevert();
-        entry.spendBalance(keccak256("n"), bytes32(0), bytes32(0));
+        entry.spendBalance(_c("n"), bytes32(0), bytes32(0));
     }
 
     function testRevert_spendBalance_replayNullifier() public {
-        bytes32 nul = keccak256("n");
+        bytes32 nul = _c("n");
         vm.prank(POOL);
         entry.spendBalance(nul, bytes32(0), bytes32(0));
 
@@ -125,7 +138,7 @@ contract PrivacyEntryTest is Test {
     }
 
     function test_creditBalance_byPool_inserts() public {
-        bytes32 c = keccak256("credit-1");
+        bytes32 c = _c("credit-1");
         vm.prank(POOL);
         entry.creditBalance(c);
         assertEq(entry.nextLeafIndex(), 1);
@@ -134,7 +147,7 @@ contract PrivacyEntryTest is Test {
     function testRevert_creditBalance_byOutsider() public {
         vm.prank(OUTSIDER);
         vm.expectRevert();
-        entry.creditBalance(keccak256("c"));
+        entry.creditBalance(_c("c"));
     }
 
     function testRevert_creditBalance_zero() public {
@@ -153,7 +166,7 @@ contract PrivacyEntryTest is Test {
         return IZkVerifier.AggregationProof({
             domainId: 1,
             aggregationId: 100,
-            leaf: keccak256("leaf"),
+            leaf: _c("leaf"),
             merklePath: new bytes32[](0),
             leafCount: 1,
             leafIndex: leafIndex
@@ -163,7 +176,7 @@ contract PrivacyEntryTest is Test {
     function test_withdraw_happyPath() public {
         // Seed the vault and capture a known root.
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("c-seed"));
+        entry.deposit(address(usdc), 1_000e6, _c("c-seed"));
         bytes32 root = entry.currentRoot();
 
         proxy.setAllowed(1, 100, 0, true);
@@ -171,8 +184,8 @@ contract PrivacyEntryTest is Test {
 
         vm.prank(USER);
         entry.withdraw(
-            keccak256("withdraw-nul"),
-            keccak256("withdraw-residual"),
+            _c("withdraw-nul"),
+            _c("withdraw-residual"),
             address(usdc),
             RECIPIENT,
             250e6,
@@ -183,21 +196,21 @@ contract PrivacyEntryTest is Test {
 
         assertEq(usdc.balanceOf(RECIPIENT), 250e6);
         assertEq(entry.reserves(address(usdc)), 750e6);
-        assertTrue(entry.isSpent(keccak256("withdraw-nul")));
+        assertTrue(entry.isSpent(_c("withdraw-nul")));
     }
 
     function test_withdraw_thenDeposit_reservesArithmetic() public {
         // T-2.2 walkthrough: deposit 1000, withdraw 250, deposit 500 -> 1250.
         vm.startPrank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("c-A"));
+        entry.deposit(address(usdc), 1_000e6, _c("c-A"));
         vm.stopPrank();
         bytes32 rootA = entry.currentRoot();
 
         proxy.setAllowed(1, 100, 0, true);
         vm.prank(USER);
         entry.withdraw(
-            keccak256("nA"),
-            keccak256("rA"),
+            _c("nA"),
+            _c("rA"),
             address(usdc),
             RECIPIENT,
             250e6,
@@ -207,7 +220,7 @@ contract PrivacyEntryTest is Test {
         );
 
         vm.prank(USER);
-        entry.deposit(address(usdc), 500e6, keccak256("c-B"));
+        entry.deposit(address(usdc), 500e6, _c("c-B"));
 
         assertEq(entry.reserves(address(usdc)), 1_250e6);
         assertEq(usdc.balanceOf(address(entry)), 1_250e6);
@@ -218,12 +231,12 @@ contract PrivacyEntryTest is Test {
         vm.prank(USER);
         vm.expectRevert(PrivacyEntry.UnknownRoot.selector);
         entry.withdraw(
-            keccak256("n"),
-            keccak256("r"),
+            _c("n"),
+            _c("r"),
             address(usdc),
             RECIPIENT,
             1,
-            keccak256("not-a-root"),
+            _c("not-a-root"),
             VK_WITHDRAW,
             _proof(0)
         );
@@ -231,14 +244,14 @@ contract PrivacyEntryTest is Test {
 
     function testRevert_withdraw_replayNullifier() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("c-seed"));
+        entry.deposit(address(usdc), 1_000e6, _c("c-seed"));
         bytes32 root = entry.currentRoot();
 
         proxy.setAllowed(1, 100, 0, true);
         vm.prank(USER);
         entry.withdraw(
-            keccak256("dup-nul"),
-            keccak256("r1"),
+            _c("dup-nul"),
+            _c("r1"),
             address(usdc),
             RECIPIENT,
             100e6,
@@ -252,12 +265,12 @@ contract PrivacyEntryTest is Test {
         vm.prank(USER);
         vm.expectRevert(
             abi.encodeWithSelector(
-                PrivacyEntry.NullifierAlreadySpent.selector, keccak256("dup-nul")
+                PrivacyEntry.NullifierAlreadySpent.selector, _c("dup-nul")
             )
         );
         entry.withdraw(
-            keccak256("dup-nul"),
-            keccak256("r2"),
+            _c("dup-nul"),
+            _c("r2"),
             address(usdc),
             RECIPIENT,
             100e6,
@@ -269,15 +282,15 @@ contract PrivacyEntryTest is Test {
 
     function testRevert_withdraw_proofRejected() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("c-seed"));
+        entry.deposit(address(usdc), 1_000e6, _c("c-seed"));
         bytes32 root = entry.currentRoot();
         // proxy not configured to allow this tuple → ZkVerifier reverts.
 
         vm.prank(USER);
         vm.expectRevert();
         entry.withdraw(
-            keccak256("n"),
-            keccak256("r"),
+            _c("n"),
+            _c("r"),
             address(usdc),
             RECIPIENT,
             100e6,
@@ -292,7 +305,7 @@ contract PrivacyEntryTest is Test {
         // a balance note exists in the tree, but `_reserves[usdc] == 0`.
         // A withdraw against that note must hit the named guard, not a panic.
         vm.prank(POOL);
-        entry.creditBalance(keccak256("phantom-note"));
+        entry.creditBalance(_c("phantom-note"));
 
         bytes32 root = entry.currentRoot();
         proxy.setAllowed(1, 100, 0, true);
@@ -307,8 +320,8 @@ contract PrivacyEntryTest is Test {
             )
         );
         entry.withdraw(
-            keccak256("n"),
-            keccak256("r"),
+            _c("n"),
+            _c("r"),
             address(usdc),
             RECIPIENT,
             100e6,
@@ -320,14 +333,14 @@ contract PrivacyEntryTest is Test {
 
     function testRevert_withdraw_zeroRecipient() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("c-seed"));
+        entry.deposit(address(usdc), 1_000e6, _c("c-seed"));
         bytes32 root = entry.currentRoot();
 
         vm.prank(USER);
         vm.expectRevert(PrivacyEntry.ZeroAddress.selector);
         entry.withdraw(
-            keccak256("n"),
-            keccak256("r"),
+            _c("n"),
+            _c("r"),
             address(usdc),
             address(0),
             1,
@@ -339,14 +352,14 @@ contract PrivacyEntryTest is Test {
 
     function testRevert_withdraw_zeroAmount() public {
         vm.prank(USER);
-        entry.deposit(address(usdc), 1_000e6, keccak256("c-seed"));
+        entry.deposit(address(usdc), 1_000e6, _c("c-seed"));
         bytes32 root = entry.currentRoot();
 
         vm.prank(USER);
         vm.expectRevert(PrivacyEntry.ZeroAmount.selector);
         entry.withdraw(
-            keccak256("n"),
-            keccak256("r"),
+            _c("n"),
+            _c("r"),
             address(usdc),
             RECIPIENT,
             0,
@@ -362,13 +375,13 @@ contract PrivacyEntryTest is Test {
 
         vm.prank(USER);
         vm.expectRevert();
-        entry.deposit(address(usdc), 1, keccak256("c"));
+        entry.deposit(address(usdc), 1, _c("c"));
 
         vm.prank(ADMIN);
         entry.unpause();
 
         vm.prank(USER);
-        entry.deposit(address(usdc), 1, keccak256("c"));
+        entry.deposit(address(usdc), 1, _c("c"));
     }
 
     function testRevert_pause_byOutsider() public {
@@ -390,9 +403,9 @@ contract PrivacyEntryTest is Test {
     function test_rootHistory_keepsKnownRoots() public {
         // Insert two commitments; both roots should be reachable as `knownRoot`.
         vm.startPrank(USER);
-        entry.deposit(address(usdc), 1, keccak256("c1"));
+        entry.deposit(address(usdc), 1, _c("c1"));
         bytes32 root1 = entry.currentRoot();
-        entry.deposit(address(usdc), 1, keccak256("c2"));
+        entry.deposit(address(usdc), 1, _c("c2"));
         bytes32 root2 = entry.currentRoot();
         vm.stopPrank();
 
