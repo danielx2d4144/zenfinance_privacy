@@ -12,19 +12,20 @@ import { ConnectGate } from "./ConnectGate";
 import { ProofProgressModal, type ProofStage } from "./ProofProgressModal";
 
 import {
+  assetIdOf,
   balanceCommitment,
   balanceNullifier,
-  positionCommitment,
+  positionCommitmentSingleAsset,
   positionNullifier,
-  slotFor,
+  randomSalt,
   supplyCommitment,
   supplyNullifier,
-  zeroBytes32,
-} from "@/lib/witness";
+  toHex32,
+  ZERO_BYTES32,
+} from "@/lib/witness.ts";
+import type { LocalIMT } from "@/lib/imt.ts";
 
 import { LendingSdk, type AnyIntentInput, type IntentDetail } from "@lending/sdk-ts";
-
-const DUMMY_ROOT = zeroBytes32();
 
 export type LendingFormKind =
   | "supply"
@@ -78,7 +79,13 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? "";
 
 export function LendingForm({ kind }: { kind: LendingFormKind }) {
   const { isConnected, isCorrectChain, defaultChain, switchToDefault, switchStatus } = useWallet();
-  const { spendingKey } = useSpendingKey();
+  const {
+    secretKey,
+    spendingPubkey,
+    entryImt,
+    supplyImt,
+    positionImt,
+  } = useSpendingKey();
   const { tier, isProving, prove } = useProver();
 
   const [asset, setAsset] = useState<AssetSymbol>("USDC");
@@ -106,7 +113,7 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
         </button>
       </ConnectGate>
     );
-  if (!spendingKey)
+  if (!secretKey || !spendingPubkey)
     return (
       <div className="rounded-lg border border-amber-400/30 bg-amber-500/10 p-4 text-sm">
         <p className="text-amber-100/90">
@@ -142,15 +149,19 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
       });
 
       setStage("submitting");
-      const body = buildIntent(kind, {
+      const intent = buildIntent(kind, {
         asset,
         amountUnits,
         minHfBps,
-        spendingKey: spendingKey!,
+        secretKey: secretKey!,
+        spendingPubkey: spendingPubkey!,
+        entryImt,
+        supplyImt,
+        positionImt,
         proof: proof.proof,
         publicInputs: proof.publicInputs,
       });
-      const accepted = await sdk.intents.create(body, {
+      const accepted = await sdk.intents.create(intent.body, {
         idempotencyKey: `dapp-${kind}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
       });
 
@@ -161,6 +172,12 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
       });
 
       if (final.status === "confirmed") {
+        // Mirror the on-chain insert(s) so the next intent's
+        // rootAtProveTime is known() at the contract. Stage F will
+        // replace this best-effort mirror with a subgraph-driven sync.
+        for (const leaf of intent.leavesToInsert.entry) entryImt.insert(leaf);
+        for (const leaf of intent.leavesToInsert.supply) supplyImt.insert(leaf);
+        for (const leaf of intent.leavesToInsert.position) positionImt.insert(leaf);
         setStage("posting");
         setTxHash(final.jobs?.[0]?.tx_hash ?? null);
         await new Promise((res) => setTimeout(res, 250));
@@ -244,105 +261,239 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
   );
 }
 
+interface BuiltIntent {
+  body: AnyIntentInput;
+  /**
+   * Commitments the contract will insert when this intent confirms.
+   * The dapp mirrors each into its LocalIMT so the next intent's
+   * `rootAtProveTime` is `known()` on-chain.
+   */
+  leavesToInsert: {
+    entry: bigint[];
+    supply: bigint[];
+    position: bigint[];
+  };
+}
+
 function buildIntent(
   kind: LendingFormKind,
   args: {
     asset: AssetSymbol;
     amountUnits: string;
     minHfBps: string;
-    spendingKey: Uint8Array;
+    secretKey: bigint;
+    spendingPubkey: bigint;
+    entryImt: LocalIMT;
+    supplyImt: LocalIMT;
+    positionImt: LocalIMT;
     proof: `0x${string}`;
     publicInputs: string[];
   },
-): AnyIntentInput {
+): BuiltIntent {
   const hf = Number.parseInt(args.minHfBps || "0", 10);
   const proofBundle = { proof: args.proof, publicInputs: args.publicInputs };
-  const sk = args.spendingKey;
-  const slot = slotFor(kind);
-  const slotNew = slotFor(`${kind}-new`);
+  const sk = args.secretKey;
+  const pk = args.spendingPubkey;
+  const assetId = assetIdOf(args.asset);
+  const amount = BigInt(args.amountUnits);
+
+  // Fresh per-intent salts so commitments + nullifiers are unique.
+  // Real production would derive salts deterministically from a HKDF
+  // chain seeded by the secret key; Stage D uses CSPRNG salts because
+  // the dapp does not yet persist a note ledger.
+  const sIn = randomSalt();
+  const sOut = randomSalt();
+  const sPosOld = randomSalt();
+  const sPosNew = randomSalt();
+
+  // For ops that consume an existing position, the contract checks
+  // `_imt.known(rootAtProveTime)` against the depth-20 history ring.
+  // Empty history -> the dapp passes a real-history bytes32 only if
+  // there's been at least one prior position insert; otherwise the
+  // contract's conditional path (e.g. depositCollateral with
+  // oldPositionNullifier == 0) accepts ZERO_BYTES32.
+  const positionRoot =
+    args.positionImt.nextLeafIndex() > 0
+      ? toHex32(args.positionImt.currentRoot())
+      : ZERO_BYTES32;
+  const supplyRoot =
+    args.supplyImt.nextLeafIndex() > 0
+      ? toHex32(args.supplyImt.currentRoot())
+      : ZERO_BYTES32;
+
+  // Balance commitments bind to (assetId, amount, spending_pubkey, salt).
+  // For the residual we use `amount: 0n` -- the circuit-side withdraw
+  // path will compute the true residual at prove time; Stage D's value
+  // is a placeholder that's still a valid Field element.
+  const residualBalanceLeaf = balanceCommitment({
+    assetId,
+    amount: 0n,
+    spendingPubkey: pk,
+    salt: sOut,
+  });
+  const newBalanceLeaf = balanceCommitment({
+    assetId,
+    amount,
+    spendingPubkey: pk,
+    salt: sOut,
+  });
+  // Supply notes bind to the supply index at deposit time. For Stage D
+  // the index is a placeholder; Stage E pulls the real index from
+  // RateModel.state(assetId).supplyIndex via the data-api.
+  const supplyLeaf = supplyCommitment({
+    assetId,
+    amount,
+    supplyIndexAtDeposit: 0n,
+    spendingPubkey: pk,
+    salt: sOut,
+  });
+  // Position commitment: single-asset shape with `amount` going into
+  // the relevant slot (collateral for deposit/withdraw_collateral,
+  // debt for borrow/repay). Other 7 asset slots zero.
+  const newPositionLeaf = positionCommitmentSingleAsset({
+    spendingPubkey: pk,
+    assetId,
+    collateral:
+      kind === "deposit_collateral" || kind === "withdraw_collateral"
+        ? amount
+        : 0n,
+    debt: kind === "borrow" || kind === "repay" ? amount : 0n,
+    borrowIndexAtUpdate: 0n,
+    salt: sPosNew,
+  });
+
+  // Nullifiers.
+  const balNul = balanceNullifier(sk, sIn);
+  const supNul = supplyNullifier(sk, sPosOld);
+  const posNul = positionNullifier(sk, sPosOld);
 
   switch (kind) {
     case "supply":
       return {
-        kind: "supply",
-        asset: args.asset,
-        amount: args.amountUnits,
-        supplyCommitment: supplyCommitment(sk, slotNew),
-        balanceMove: {
-          balanceNullifier: balanceNullifier(sk, slot),
-          residualBalanceCommitment: balanceCommitment(sk, slotNew),
+        body: {
+          kind: "supply",
+          asset: args.asset,
+          amount: args.amountUnits,
+          supplyCommitment: toHex32(supplyLeaf),
+          balanceMove: {
+            balanceNullifier: toHex32(balNul),
+            residualBalanceCommitment: toHex32(residualBalanceLeaf),
+          },
+          proofBundle,
         },
-        proofBundle,
+        leavesToInsert: {
+          entry: [residualBalanceLeaf],
+          supply: [supplyLeaf],
+          position: [],
+        },
       };
     case "withdraw_supply":
       return {
-        kind: "withdraw_supply",
-        asset: args.asset,
-        amount: args.amountUnits,
-        supplyNullifier: supplyNullifier(sk, slot),
-        newBalanceCommitment: balanceCommitment(sk, slotNew),
-        rootAtProveTime: DUMMY_ROOT,
-        proofBundle,
+        body: {
+          kind: "withdraw_supply",
+          asset: args.asset,
+          amount: args.amountUnits,
+          supplyNullifier: toHex32(supNul),
+          newBalanceCommitment: toHex32(newBalanceLeaf),
+          rootAtProveTime: supplyRoot,
+          proofBundle,
+        },
+        leavesToInsert: {
+          entry: [newBalanceLeaf],
+          supply: [],
+          position: [],
+        },
       };
     case "deposit_collateral":
       return {
-        kind: "deposit_collateral",
-        asset: args.asset,
-        amount: args.amountUnits,
-        balanceMove: {
-          balanceNullifier: balanceNullifier(sk, slot),
-          residualBalanceCommitment: balanceCommitment(sk, slotNew),
+        body: {
+          kind: "deposit_collateral",
+          asset: args.asset,
+          amount: args.amountUnits,
+          balanceMove: {
+            balanceNullifier: toHex32(balNul),
+            residualBalanceCommitment: toHex32(residualBalanceLeaf),
+          },
+          positionMove: {
+            oldPositionNullifier:
+              args.positionImt.nextLeafIndex() > 0
+                ? toHex32(posNul)
+                : ZERO_BYTES32,
+            newPositionCommitment: toHex32(newPositionLeaf),
+            rootAtProveTime: positionRoot,
+          },
+          proofBundle,
         },
-        positionMove: {
-          oldPositionNullifier: positionNullifier(sk, slot),
-          newPositionCommitment: positionCommitment(sk, slotNew),
-          rootAtProveTime: DUMMY_ROOT,
+        leavesToInsert: {
+          entry: [residualBalanceLeaf],
+          supply: [],
+          position: [newPositionLeaf],
         },
-        proofBundle,
       };
     case "withdraw_collateral":
       return {
-        kind: "withdraw_collateral",
-        asset: args.asset,
-        amount: args.amountUnits,
-        minHfBps: Number.isFinite(hf) ? hf : 0,
-        newBalanceCommitment: balanceCommitment(sk, slotNew),
-        positionMove: {
-          oldPositionNullifier: positionNullifier(sk, slot),
-          newPositionCommitment: positionCommitment(sk, slotNew),
-          rootAtProveTime: DUMMY_ROOT,
+        body: {
+          kind: "withdraw_collateral",
+          asset: args.asset,
+          amount: args.amountUnits,
+          minHfBps: Number.isFinite(hf) ? hf : 0,
+          newBalanceCommitment: toHex32(newBalanceLeaf),
+          positionMove: {
+            oldPositionNullifier: toHex32(posNul),
+            newPositionCommitment: toHex32(newPositionLeaf),
+            rootAtProveTime: positionRoot,
+          },
+          proofBundle,
         },
-        proofBundle,
+        leavesToInsert: {
+          entry: [newBalanceLeaf],
+          supply: [],
+          position: [newPositionLeaf],
+        },
       };
     case "borrow":
       return {
-        kind: "borrow",
-        asset: args.asset,
-        amount: args.amountUnits,
-        minHfBps: Number.isFinite(hf) ? hf : 0,
-        newBalanceCommitment: balanceCommitment(sk, slotNew),
-        positionMove: {
-          oldPositionNullifier: positionNullifier(sk, slot),
-          newPositionCommitment: positionCommitment(sk, slotNew),
-          rootAtProveTime: DUMMY_ROOT,
+        body: {
+          kind: "borrow",
+          asset: args.asset,
+          amount: args.amountUnits,
+          minHfBps: Number.isFinite(hf) ? hf : 0,
+          newBalanceCommitment: toHex32(newBalanceLeaf),
+          positionMove: {
+            oldPositionNullifier: toHex32(posNul),
+            newPositionCommitment: toHex32(newPositionLeaf),
+            rootAtProveTime: positionRoot,
+          },
+          proofBundle,
         },
-        proofBundle,
+        leavesToInsert: {
+          entry: [newBalanceLeaf],
+          supply: [],
+          position: [newPositionLeaf],
+        },
       };
     case "repay":
       return {
-        kind: "repay",
-        asset: args.asset,
-        amount: args.amountUnits,
-        balanceMove: {
-          balanceNullifier: balanceNullifier(sk, slot),
-          residualBalanceCommitment: balanceCommitment(sk, slotNew),
+        body: {
+          kind: "repay",
+          asset: args.asset,
+          amount: args.amountUnits,
+          balanceMove: {
+            balanceNullifier: toHex32(balNul),
+            residualBalanceCommitment: toHex32(residualBalanceLeaf),
+          },
+          positionMove: {
+            oldPositionNullifier: toHex32(posNul),
+            newPositionCommitment: toHex32(newPositionLeaf),
+            rootAtProveTime: positionRoot,
+          },
+          proofBundle,
         },
-        positionMove: {
-          oldPositionNullifier: positionNullifier(sk, slot),
-          newPositionCommitment: positionCommitment(sk, slotNew),
-          rootAtProveTime: DUMMY_ROOT,
+        leavesToInsert: {
+          entry: [residualBalanceLeaf],
+          supply: [],
+          position: [newPositionLeaf],
         },
-        proofBundle,
       };
   }
 }
