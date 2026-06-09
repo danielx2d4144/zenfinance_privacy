@@ -33,6 +33,33 @@ fn h2(l: Field, r: Field) -> Field {
     Poseidon2::hash([l, r], 2)
 }
 
+// Emulates the Tornado-style empty-subtree convention the Solidity IMT
+// uses: zeros[0] = 0 (the Field zero-leaf), zeros[d] = h2(zeros[d-1],
+// zeros[d-1]). The lib_common::merkle_root function pairs the current
+// node with whatever sibling is given -- a leaf at index 0 in an
+// otherwise-empty tree has siblings = [zeros[0], zeros[1], ...,
+// zeros[D-1]] from leaf level upward.
+fn empty_subtree_root<let D: u32>() -> Field {
+    let mut z: Field = 0;
+    for _ in 0..D {
+        z = h2(z, z);
+    }
+    z
+}
+
+// Insert a single leaf at index 0 into an otherwise-empty depth-D tree
+// and return the root. This mirrors what PoseidonIMT.insert does
+// when nextLeafIndex == 0.
+fn root_after_one_leaf_at_zero<let D: u32>(leaf: Field) -> Field {
+    let mut cur: Field = leaf;
+    let mut z: Field = 0;
+    for _ in 0..D {
+        cur = h2(cur, z);
+        z = h2(z, z);
+    }
+    cur
+}
+
 fn main() {}
 
 #[test]
@@ -148,4 +175,39 @@ fn vec_12_two_commitments() {
     let r: Field = 0x1b2c3d4e5f60718293a4b5c6d7e8f9a0b1c2d3e4f5061728394a5b6c7d8e9f00;
     let out: Field = h2(l, r);
     println(f"VEC l={l} r={r} expected={out}");
+}
+
+// ---- Stage B vectors: empty-subtree roots ------------------------------
+
+#[test]
+fn imt_empty_depth_4() {
+    let out: Field = empty_subtree_root::<4>();
+    println(f"IMT_EMPTY depth=4 root={out}");
+}
+
+#[test]
+fn imt_empty_depth_5() {
+    let out: Field = empty_subtree_root::<5>();
+    println(f"IMT_EMPTY depth=5 root={out}");
+}
+
+#[test]
+fn imt_empty_depth_20() {
+    let out: Field = empty_subtree_root::<20>();
+    println(f"IMT_EMPTY depth=20 root={out}");
+}
+
+// ---- Stage B vectors: one-leaf-at-index-0 root -------------------------
+
+#[test]
+fn imt_one_leaf_depth_4_leaf_42() {
+    let out: Field = root_after_one_leaf_at_zero::<4>(42);
+    println(f"IMT_ONE depth=4 leaf=0x2a root={out}");
+}
+
+#[test]
+fn imt_one_leaf_depth_20_leaf_commit() {
+    let leaf: Field = 0x1f7e1b73f1c6a9c11de4fee5e57bcaff0e3a85a7b67afcd3edc8e1f9bbc4d3a2;
+    let out: Field = root_after_one_leaf_at_zero::<20>(leaf);
+    println(f"IMT_ONE depth=20 leaf={leaf} root={out}");
 }
