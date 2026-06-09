@@ -1,15 +1,16 @@
 //! Shared note structures, hashing, and Merkle helpers for all circuits.
 //! Per design-v2 sections 02 (ZK Circuits) and 12 (Privacy Entry Layer).
 //!
-//! Hashing choice: Pedersen (BN254 native). The design's S02 spec writes
-//! "Poseidon", but Noir 1.0.0-beta.21 moved Poseidon out of stdlib into an
-//! external crate. Pedersen is in stdlib, collision-resistant on BN254, and
-//! what Aztec Connect actually shipped -- same security properties for our
-//! use case. On-chain `PrivacyEntry` and pools see opaque bytes32, so the
-//! choice is internal to the circuit + client SDK.
+//! Hashing choice: Poseidon2 on BN254 (the design's original S02 spec). The
+//! Day-4 prototype shipped Pedersen as a stopgap because Poseidon had moved
+//! out of Noir stdlib. Day-14c (this swap) brings in the canonical
+//! `noir-lang/poseidon` library so the contract-side IMT can use a cheap
+//! BN254-native Solidity Poseidon2 (~30k gas per hash) instead of an
+//! expensive Grumpkin scalar-mul (~100k gas per hash; no EVM precompile).
+//! See `memory/project_pedersen_grumpkin_too_expensive.md`.
 //!
 //! Pinning choices:
-//! - Hash: Pedersen (`std::hash::pedersen_hash`).
+//! - Hash: Poseidon2 (`poseidon::poseidon2::Poseidon2::hash`).
 //! - MAX_ASSETS = 8 (4 launch assets + 4 future slots).
 //! - TREE_DEPTH = 20 (PrivacyEntry + per-pool Merkle trees).
 //!
@@ -19,7 +20,14 @@
 //! - PRICE_BITS  = 60   (USD price scaled 1e8; max realistic ~1e12 = 2^40, slack)
 //! - BPS_BITS    = 14   (ten-thousandths)
 
-use std::hash::pedersen_hash;
+use poseidon::poseidon2::Poseidon2;
+
+/// Local wrapper so the rest of the file reads close to the old
+/// `h([...])` calls. Poseidon2::hash takes an explicit
+/// message_size in addition to the array; we always pass message_size=N.
+fn h<let N: u32>(input: [Field; N]) -> Field {
+    Poseidon2::hash(input, N)
+}
 
 pub global MAX_ASSETS: u32 = 8;
 pub global TREE_DEPTH: u32 = 20;
@@ -69,11 +77,11 @@ global TAG_POSITION_NULLIFIER: Field = 23;
 // --- Commitments ---------------------------------------------------------
 
 pub fn balance_commitment(n: BalanceNote) -> Field {
-    pedersen_hash([TAG_BALANCE_NOTE, n.asset_id, n.amount, n.spending_pubkey, n.salt])
+    h([TAG_BALANCE_NOTE, n.asset_id, n.amount, n.spending_pubkey, n.salt])
 }
 
 pub fn supply_commitment(n: SupplyNote) -> Field {
-    pedersen_hash(
+    h(
         [
             TAG_SUPPLY_NOTE,
             n.asset_id,
@@ -95,25 +103,25 @@ pub fn position_commitment(p: Position) -> Field {
         buf[2 + 2 * MAX_ASSETS + i] = p.borrow_indices_at_update[i];
     }
     buf[26] = p.salt;
-    pedersen_hash(buf)
+    h(buf)
 }
 
 // --- Spending key + nullifiers -------------------------------------------
 
 pub fn spending_pubkey_of(secret_key: Field) -> Field {
-    pedersen_hash([TAG_SPENDING_PUBKEY, secret_key])
+    h([TAG_SPENDING_PUBKEY, secret_key])
 }
 
 pub fn balance_nullifier(secret_key: Field, salt: Field) -> Field {
-    pedersen_hash([TAG_BALANCE_NULLIFIER, secret_key, salt])
+    h([TAG_BALANCE_NULLIFIER, secret_key, salt])
 }
 
 pub fn supply_nullifier(secret_key: Field, salt: Field) -> Field {
-    pedersen_hash([TAG_SUPPLY_NULLIFIER, secret_key, salt])
+    h([TAG_SUPPLY_NULLIFIER, secret_key, salt])
 }
 
 pub fn position_nullifier(secret_key: Field, salt: Field) -> Field {
-    pedersen_hash([TAG_POSITION_NULLIFIER, secret_key, salt])
+    h([TAG_POSITION_NULLIFIER, secret_key, salt])
 }
 
 // --- Merkle tree ---------------------------------------------------------
@@ -128,7 +136,7 @@ pub fn merkle_root(
         let sib = siblings[d];
         let left = if index_bits[d] { sib } else { node };
         let right = if index_bits[d] { node } else { sib };
-        node = pedersen_hash([left, right]);
+        node = h([left, right]);
     }
     node
 }

@@ -44,6 +44,7 @@ use lib_common::{
     position_commitment, spending_pubkey_of, AMOUNT_BITS, BPS_BITS, BPS_DENOM,
     MAX_ASSETS, TREE_DEPTH,
 };
+use poseidon::poseidon2::Poseidon2;
 
 fn main(
     collateral_asset_id: pub Field,
@@ -161,8 +162,8 @@ fn main(
 }
 
 fn hash_target_nullifier(commitment: Field) -> Field {
-    // Tagged Pedersen hash for the "salt nullifier" scheme.
-    std::hash::pedersen_hash([24, commitment])
+    // Tagged Poseidon2 hash for the "salt nullifier" scheme.
+    Poseidon2::hash([24, commitment], 2)
 }
 
 fn compute_hf_terms(
@@ -201,7 +202,7 @@ fn empty_bits() -> [bool; TREE_DEPTH] { [false; TREE_DEPTH] }
 
 /// Helper: target's "salt nullifier" given the commitment.
 fn nullifier_from_commit(c: Field) -> Field {
-    std::hash::pedersen_hash([24, c])
+    Poseidon2::hash([24, c], 2)
 }
 
 #[test]
