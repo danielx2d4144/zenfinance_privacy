@@ -53,7 +53,7 @@ contract EmitTestEvents is Script {
 
         vm.startBroadcast(pk);
         Deployment memory d = _deployStack(admin);
-        _seedDeposits(d);
+        _seedDeposits(d, admin);
         _emitProofs(d.zk, d.proxy);
         vm.stopBroadcast();
 
@@ -123,11 +123,23 @@ contract EmitTestEvents is Script {
         d.lb.grantRole(d.lb.REGISTRAR_ROLE(), admin);
     }
 
-    function _seedDeposits(Deployment memory d) internal {
-        d.usdc.mint(msg.sender, 10_000_000_000 * 10**6);
+    /// @dev BN254 Fr prime. Day 14c Stage A: every leaf inserted into a
+    ///      PoseidonIMT must be a Field element. Seed commitments built
+    ///      from keccak("...") are reduced mod this prime so the seed
+    ///      script doesn't trip the `Poseidon2: input >= PRIME` guard.
+    uint256 internal constant BN254_FR =
+        0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001;
+
+    function _seedDeposits(Deployment memory d, address recipient) internal {
+        // Mint to the broadcaster (= admin). Forge's `msg.sender` inside
+        // a script function resolves to Foundry's DefaultSender, NOT the
+        // address signing the broadcast tx -- so the deposits below
+        // would otherwise revert with InsufficientBalance.
+        d.usdc.mint(recipient, 10_000_000_000 * 10**6);
         d.usdc.approve(address(d.pe), type(uint256).max);
         for (uint256 i = 0; i < 50; ++i) {
-            bytes32 commitment = keccak256(abi.encodePacked("commitment", i));
+            uint256 raw = uint256(keccak256(abi.encodePacked("commitment", i)));
+            bytes32 commitment = bytes32(raw % BN254_FR);
             d.pe.deposit(address(d.usdc), 1_000_000 + i, commitment);
         }
     }

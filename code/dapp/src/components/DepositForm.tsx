@@ -2,21 +2,30 @@
 
 import { useMemo, useState } from "react";
 
+import { useProver } from "@/hooks/useProver";
 import { useSpendingKey } from "@/hooks/useSpendingKey";
 import { useWallet } from "@/hooks/useWallet";
-import { bytesToHex } from "@/lib/spending-key";
 
 import { ConnectGate } from "./ConnectGate";
+
+import {
+  assetIdOf,
+  balanceCommitment,
+  randomSalt,
+  toHex32,
+} from "@/lib/witness";
+import { buildEntryDepositWitness } from "@/lib/prover/witnesses";
 
 import { LendingSdk, type IntentDetail } from "@lending/sdk-ts";
 
 /**
- * Day-13 PrivacyEntry deposit screen. The commitment is a placeholder
- * (random 32 bytes for now); Day 14 wires it to a real Pedersen note
- * commitment computed in a Web Worker with @aztec/bb.js.
+ * Day-13 PrivacyEntry deposit screen. Day 14c-E swap: commitment is now
+ * a REAL Poseidon2 balance-note hash (`lib_common::balance_commitment`)
+ * proved by the in-browser bb.js UltraHonkBackend against the
+ * entry_deposit circuit.
  *
  * Submission goes through the data-API; the dapp never speaks to the
- * chain directly — that's the relayer's job (S13 §3 / I-OPS-3).
+ * chain directly -- that's the relayer's job (S13 §3 / I-OPS-3).
  */
 
 type DepositState =
@@ -31,7 +40,17 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? "";
 
 export function DepositForm() {
   const { isConnected, isCorrectChain, defaultChain, switchToDefault, switchStatus } = useWallet();
-  const { spendingKey, derive, isDeriving, error: keyError } = useSpendingKey();
+  const {
+    spendingKey,
+    secretKey,
+    spendingPubkey,
+    entryImt,
+    noteStore,
+    derive,
+    isDeriving,
+    error: keyError,
+  } = useSpendingKey();
+  const { prove } = useProver();
 
   const [amount, setAmount] = useState("100");
   const [state, setState] = useState<DepositState>({ phase: "idle" });
@@ -84,10 +103,50 @@ export function DepositForm() {
 
   const onSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
+    if (!secretKey || !spendingPubkey) {
+      setState({ phase: "failed", reason: "spending key not derived" });
+      return;
+    }
     setState({ phase: "submitting" });
     try {
-      const commitment = randomCommitment();
       const amountUnits = toUnits(amount, 6); // USDC has 6 decimals
+      const amountField = BigInt(amountUnits);
+      const assetId = assetIdOf("USDC");
+      const salt = randomSalt();
+      const commitmentBig = balanceCommitment({
+        assetId,
+        amount: amountField,
+        spendingPubkey,
+        salt,
+      });
+      const commitment = toHex32(commitmentBig);
+
+      // Real bb.js entry_deposit proof against the depth-20 IMT.
+      const witness = buildEntryDepositWitness({
+        assetId,
+        amount: amountField,
+        commitment: commitmentBig,
+        spendingPubkey,
+        salt,
+      });
+      const proof = await prove("entry_deposit", {
+        witnessMap: witness,
+        publicInputs: [
+          toHex32(assetId),
+          toHex32(amountField),
+          toHex32(commitmentBig),
+        ],
+      });
+
+      // Day 14c-E note: the entry_deposit intent body doesn't yet
+      // carry a proofBundle field at the SDK / data-api layer (Day-13
+      // schema landed before lending handlers). We still PROVE in the
+      // worker so the witness exercises the real Poseidon2 path, but
+      // the proof bytes are not posted on this intent kind. Wiring the
+      // entry_deposit proof through to ZkVerifier.verifyAndConsume is
+      // a small data-api follow-up.
+      void proof;
+
       const accepted = await sdk.intents.create(
         {
           kind: "entry_deposit",
@@ -104,6 +163,16 @@ export function DepositForm() {
         pollMs: 500,
       });
       if (final.status === "confirmed") {
+        // Mirror the on-chain insert + remember the preimage so a
+        // follow-up supply / deposit_collateral / repay can spend it.
+        const result = entryImt.insert(commitmentBig);
+        noteStore.register(commitmentBig, {
+          kind: "balance",
+          leafIdx: result.idx,
+          assetId,
+          amount: amountField,
+          salt,
+        });
         const txHash = final.jobs?.[0]?.tx_hash ?? null;
         setState({ phase: "confirmed", intentId: accepted.intent_id, commitment, txHash });
         window.dispatchEvent(new CustomEvent("lending:deposit-confirmed"));
@@ -210,10 +279,8 @@ function short(value: string, head = 8): string {
   return `${value.slice(0, head)}…${value.slice(-head)}`;
 }
 
-function randomCommitment(): `0x${string}` {
-  const bytes = crypto.getRandomValues(new Uint8Array(32));
-  return `0x${bytesToHex(bytes)}`;
-}
+// randomCommitment was removed in Day 14c-E: commitments now come from
+// `balanceCommitment(...)` over the user's spending_pubkey + a real salt.
 
 function toUnits(amount: string, decimals: number): string {
   const trimmed = amount.trim();

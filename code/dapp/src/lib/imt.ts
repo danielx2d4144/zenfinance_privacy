@@ -43,6 +43,10 @@ export class LocalIMT {
   private readonly filled: bigint[];
   /** Ring buffer of the last ROOT_HISTORY_SIZE roots. */
   private readonly history: bigint[];
+  /** Full leaf list -- backs `proofFor(idx)` so the dapp can rebuild
+   *  the Merkle path for an existing leaf even after later inserts
+   *  rotated the cached filledSubtrees forward. */
+  private readonly leaves: bigint[] = [];
 
   constructor() {
     this.zeros = new Array<bigint>(TREE_DEPTH);
@@ -73,6 +77,11 @@ export class LocalIMT {
   zerosAt(d: number): bigint {
     if (d < 0 || d >= TREE_DEPTH) throw new Error("LocalIMT.zerosAt: depth OOR");
     return this.zeros[d];
+  }
+
+  /** The leaf value at `idx`, or `undefined` if `idx` hasn't been inserted. */
+  leafAt(idx: number): bigint | undefined {
+    return this.leaves[idx];
   }
 
   /**
@@ -111,8 +120,56 @@ export class LocalIMT {
     this.root = cur;
     this.history[this.nextHistory % ROOT_HISTORY_SIZE] = cur;
     this.nextHistory += 1;
+    this.leaves[idx] = leaf;
 
     return { idx, siblings, indexBits, newRoot: cur };
+  }
+
+  /**
+   * Rebuild the Merkle proof for the leaf at position `idx` against the
+   * CURRENT tree state. Returns the same {siblings, indexBits} shape
+   * an insert() call would produce, so callers can pass it as-is into
+   * a circuit witness for an `old_position` style private input.
+   *
+   * Walks every depth level, recomputing the partner node from the
+   * stored leaves array (for depth 0) or from inductive level data
+   * (for higher depths). Costs ~20 * Poseidon2 hash2 calls per query;
+   * cheap enough to run per spend without caching.
+   */
+  proofFor(idx: number): { siblings: bigint[]; indexBits: boolean[]; leaf: bigint } {
+    if (idx < 0 || idx >= this.next) {
+      throw new Error(`LocalIMT.proofFor: idx ${idx} out of range [0, ${this.next})`);
+    }
+
+    // Build level 0 padded out to a power of two so the path arithmetic
+    // is uniform across levels. Unfilled positions are zeros[0].
+    let level: bigint[] = [];
+    const populated = this.next;
+    for (let i = 0; i < populated; i++) level.push(this.leaves[i] ?? this.zeros[0]);
+
+    const siblings: bigint[] = new Array(TREE_DEPTH);
+    const indexBits: boolean[] = new Array(TREE_DEPTH);
+
+    let pos = idx;
+    for (let d = 0; d < TREE_DEPTH; d++) {
+      const bit = (pos & 1) === 1;
+      indexBits[d] = bit;
+      const sibPos = bit ? pos - 1 : pos + 1;
+      siblings[d] = sibPos < level.length ? level[sibPos] : this.zeros[d];
+
+      // Compute the next level by pairing every (2k, 2k+1) slot. Pair
+      // partners beyond the populated range fall back to zeros[d].
+      const next: bigint[] = [];
+      for (let i = 0; i < level.length; i += 2) {
+        const left = level[i];
+        const right = i + 1 < level.length ? level[i + 1] : this.zeros[d];
+        next.push(poseidon2Hash2(left, right));
+      }
+      level = next;
+      pos >>= 1;
+    }
+
+    return { siblings, indexBits, leaf: this.leaves[idx] };
   }
 
   /**

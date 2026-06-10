@@ -11,6 +11,7 @@ import {
 } from "react";
 
 import { LocalIMT } from "@/lib/imt.ts";
+import { NoteStore } from "@/lib/note-store.ts";
 import { spendingPubkeyOf } from "@/lib/witness.ts";
 import { deriveSpendingKey } from "@/lib/spending-key.ts";
 
@@ -43,6 +44,8 @@ type SpendingKeyContextValue = {
   supplyImt: LocalIMT;
   /** Local mirror of ShieldedPositionPool's Poseidon2 IMT. */
   positionImt: LocalIMT;
+  /** Session note store: leaf -> typed preimage. Day 14c-E. */
+  noteStore: NoteStore;
   isDeriving: boolean;
   error: string | null;
   derive: () => Promise<void>;
@@ -59,11 +62,12 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
   const [isDeriving, setIsDeriving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Refs so the IMT instances survive re-renders without forcing a
-  // new tree each time. On clear() we drop these too.
+  // Refs so the IMT instances + note store survive re-renders without
+  // forcing fresh ones each time. On clear() we drop them all together.
   const entryImtRef = useRef<LocalIMT>(new LocalIMT());
   const supplyImtRef = useRef<LocalIMT>(new LocalIMT());
   const positionImtRef = useRef<LocalIMT>(new LocalIMT());
+  const noteStoreRef = useRef<NoteStore>(new NoteStore());
 
   const derive = useCallback(async () => {
     if (!address) {
@@ -96,6 +100,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
     entryImtRef.current = new LocalIMT();
     supplyImtRef.current = new LocalIMT();
     positionImtRef.current = new LocalIMT();
+    noteStoreRef.current = new NoteStore();
   }, []);
 
   const value = useMemo(
@@ -106,6 +111,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
       entryImt: entryImtRef.current,
       supplyImt: supplyImtRef.current,
       positionImt: positionImtRef.current,
+      noteStore: noteStoreRef.current,
       isDeriving,
       error,
       derive,

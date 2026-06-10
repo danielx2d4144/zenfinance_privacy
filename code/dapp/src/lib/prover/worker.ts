@@ -1,65 +1,88 @@
 /**
- * Browser prover Web Worker.
+ * Browser prover Web Worker -- Day 14c-E swap from synthetic CPU load
+ * to real bb.js UltraHonkBackend proving.
  *
- * Currently a synthetic CPU load that mimics the wall-clock + memory
- * profile of a real bb.js UltraHonk proof. Real circuit-driven proving
- * lands in Day 14c (the Pedersen swap), not Day 14b — because today's
- * placeholder keccak Merkle root (PrivacyEntry.sol:233 Day-2 TODO)
- * makes the circuit's `computed_root == root_balance` assert
- * unsatisfiable: the contract hashes via keccak, the circuit via
- * Pedersen. Once the contract-side hash function lines up with the
- * circuit's, swap `syntheticCompute` here for the real
- * `UltraHonkBackend.prove(circuitJson, witness)` call against the
- * artifact at `public/circuits/<name>.json`.
+ * Per-prove flow:
+ *   1. Fetch the compiled circuit artifact at /circuits/<name>.json
+ *      (copied from code/circuits/<name>/target/<name>.json by
+ *      `scripts/copy-circuit-artifacts.mjs`).
+ *   2. Lazily construct a Noir.js + UltraHonkBackend pair per kind;
+ *      cache them across proves so subsequent calls skip wasm init.
+ *   3. Run `Noir.execute(witnessMap)` -- compiles the structured
+ *      witness map (produced by `src/lib/prover/witnesses/`) into the
+ *      compressed witness buffer bb.js expects.
+ *   4. Run `backend.generateProof(witness)` and return the proof
+ *      bytes + public inputs the verifier will check.
  *
- * Per S07 §6 + S17 §3 the heavy work MUST stay off the main thread.
- * T-14.1 covers this: scroll/click the page while a prove() is in
- * flight; the page must stay responsive.
+ * Per S07 §6 + S17 §3 the heavy work stays off the main thread. The
+ * UltraHonkBackend wasm load happens inside the worker, so the page
+ * remains responsive even on first prove.
  */
 
-import type { CircuitKind, ProveInput, Proof } from "./types";
+import { Barretenberg, UltraHonkBackend } from "@aztec/bb.js";
+import { Noir } from "@noir-lang/noir_js";
+
+import type { CircuitKind, Proof } from "./types";
+import { circuitArtifactName } from "./types";
+import type { WitnessMap } from "./witnesses";
 
 type Request = {
   id: number;
   kind: CircuitKind;
-  input: ProveInput;
+  witnessMap: WitnessMap;
 };
 
 type Response =
   | { id: number; ok: true; proof: Proof }
   | { id: number; ok: false; error: string };
 
-const ITERATIONS_PER_MS = 60_000;
+// Per-circuit lazy caches. wasm init is the bulk of first-prove cost
+// (~1-2s); proof generation itself dominates wall-clock afterwards.
+const artifactCache = new Map<string, unknown>();
+const noirCache = new Map<string, Noir>();
+const backendCache = new Map<string, UltraHonkBackend>();
 
-function syntheticProveDuration(kind: CircuitKind): number {
-  switch (kind) {
-    case "supply":
-    case "withdraw_supply":
-    case "deposit_collateral":
-    case "withdraw_collateral":
-    case "repay":
-      return 4_500;
-    case "borrow":
-    case "liquidate":
-      return 5_500;
-    case "consolidate_balance":
-      return 6_500;
-    default:
-      return 5_000;
+let apiPromise: Promise<Barretenberg> | null = null;
+
+function getBarretenberg(): Promise<Barretenberg> {
+  if (!apiPromise) {
+    // Single Worker thread; one worker per page is enough.
+    apiPromise = Barretenberg.new({ threads: 1 });
   }
+  return apiPromise;
 }
 
-function syntheticCompute(targetMs: number): Uint8Array {
-  const buf = new Uint8Array(64);
-  const deadline = performance.now() + targetMs;
-  let acc = 0;
-  while (performance.now() < deadline) {
-    for (let i = 0; i < ITERATIONS_PER_MS; i++) {
-      acc = (acc + 0x9e3779b1) | 0;
-      buf[i & 63] = (buf[i & 63] ^ (acc & 0xff)) & 0xff;
-    }
+async function getArtifact(name: string): Promise<unknown> {
+  const cached = artifactCache.get(name);
+  if (cached) return cached;
+  const res = await fetch(`/circuits/${name}.json`);
+  if (!res.ok) {
+    throw new Error(`prover: failed to fetch ${name}.json (${res.status})`);
   }
-  return buf;
+  const json = (await res.json()) as unknown;
+  artifactCache.set(name, json);
+  return json;
+}
+
+function getNoir(name: string, artifact: unknown): Noir {
+  let n = noirCache.get(name);
+  if (!n) {
+    // Noir.js's constructor accepts the full artifact JSON (it reads
+    // `.bytecode` + `.abi` for execute()).
+    n = new Noir(artifact as ConstructorParameters<typeof Noir>[0]);
+    noirCache.set(name, n);
+  }
+  return n;
+}
+
+function getBackend(name: string, artifact: unknown, api: Barretenberg): UltraHonkBackend {
+  let b = backendCache.get(name);
+  if (!b) {
+    const a = artifact as { bytecode: string };
+    b = new UltraHonkBackend(a.bytecode, api);
+    backendCache.set(name, b);
+  }
+  return b;
 }
 
 function toHex(bytes: Uint8Array): `0x${string}` {
@@ -68,22 +91,31 @@ function toHex(bytes: Uint8Array): `0x${string}` {
   return out as `0x${string}`;
 }
 
-function handle(req: Request): Response {
-  const start = performance.now();
+async function prove(kind: CircuitKind, witnessMap: WitnessMap): Promise<Proof> {
+  const t0 = performance.now();
+  const name = circuitArtifactName(kind);
+  const [artifact, api] = await Promise.all([getArtifact(name), getBarretenberg()]);
+  const noir = getNoir(name, artifact);
+  const backend = getBackend(name, artifact, api);
+
+  // Noir.js validates the witnessMap against the circuit ABI and
+  // returns the compressed witness Uint8Array bb.js consumes.
+  const { witness } = (await (noir as unknown as {
+    execute(inputs: WitnessMap): Promise<{ witness: Uint8Array }>;
+  }).execute(witnessMap));
+
+  const { proof: proofBytes, publicInputs } = await backend.generateProof(witness, {});
+
+  return {
+    proof: toHex(proofBytes),
+    publicInputs,
+    durationMs: performance.now() - t0,
+  };
+}
+
+async function handle(req: Request): Promise<Response> {
   try {
-    const target = syntheticProveDuration(req.kind);
-    const tail = syntheticCompute(target);
-    const header = new TextEncoder().encode(
-      `synthetic-${req.kind}-${req.input.publicInputs.join(",")}`,
-    );
-    const proofBytes = new Uint8Array(440);
-    proofBytes.set(header.slice(0, Math.min(header.length, proofBytes.length)));
-    proofBytes.set(tail, Math.max(0, proofBytes.length - tail.length));
-    const proof: Proof = {
-      proof: toHex(proofBytes),
-      publicInputs: req.input.publicInputs,
-      durationMs: performance.now() - start,
-    };
+    const proof = await prove(req.kind, req.witnessMap);
     return { id: req.id, ok: true, proof };
   } catch (err) {
     return {
@@ -95,6 +127,11 @@ function handle(req: Request): Response {
 }
 
 self.addEventListener("message", (ev: MessageEvent<Request>) => {
-  const res = handle(ev.data);
-  (self as unknown as Worker).postMessage(res);
+  // Fire-and-forget the async handler; postMessage from inside it
+  // when the proof is ready. Multiple concurrent proves are queued
+  // on the JS event loop -- bb.js's UltraHonkBackend is not
+  // reentrant, so the main thread must serialise via WorkerProver.
+  void handle(ev.data).then((res) => {
+    (self as unknown as Worker).postMessage(res);
+  });
 });

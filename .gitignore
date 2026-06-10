@@ -34,6 +34,11 @@ broadcast/
 **/kurier_vk_hash
 **/proof
 **/public_inputs
+
+# Dapp prebuild copies circuit JSON artifacts into public/circuits;
+# they are regenerated from code/circuits/<name>/target/<name>.json
+# by scripts/copy-circuit-artifacts.mjs on every dev/build.
+code/dapp/public/circuits/
 **/public_inputs.bad
 
 # External code mirrored locally for reference — each has its own upstream repo

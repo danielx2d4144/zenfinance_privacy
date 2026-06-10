@@ -78,6 +78,34 @@ services:
       timeout: 5s
       retries: 30
 
+  # Otterscan: open-source block explorer pointed at the Anvil RPC.
+  # Browser UI at http://localhost:5100. Day 14c addition so the user
+  # can inspect deposit / supply / borrow tx receipts + logs while
+  # clicking through the dapp.
+  otterscan:
+    image: otterscan/otterscan:latest
+    container_name: data-stack-otterscan
+    restart: unless-stopped
+    depends_on:
+      anvil:
+        condition: service_healthy
+    environment:
+      ERIGON_URL: "http://anvil:8545"
+      # Branding labels that show up in the Otterscan header.
+      OTTERSCAN_CONFIG: |
+        {
+          "chains": {
+            "31337": {
+              "name": "Anvil Local",
+              "rpc": "http://localhost:8545",
+              "currency": "ETH",
+              "blockExplorerUrl": "http://localhost:5100"
+            }
+          }
+        }
+    ports:
+      - "5100:80"
+
   graph-node:
     image: graphprotocol/graph-node:v0.36.0
     container_name: data-stack-graph-node

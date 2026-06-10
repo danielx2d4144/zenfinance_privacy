@@ -5,6 +5,10 @@ import type { CircuitKind, Proof, ProveInput, Prover } from "./types";
  * `new Worker(new URL(...), { type: "module" })` pattern so Next bundles
  * it as a separate chunk and never inlines the prover code into the
  * page bundle.
+ *
+ * Day 14c-E: the in-message payload is now the structured witness map
+ * (from `src/lib/prover/witnesses/`) plus the public inputs the UI
+ * already knows. The worker calls Noir.js -> bb.js.
  */
 export class WorkerProver implements Prover {
   private readonly worker: Worker;
@@ -30,7 +34,7 @@ export class WorkerProver implements Prover {
     const id = this.nextId++;
     return new Promise((resolve, reject) => {
       this.pending.set(id, { resolve, reject });
-      this.worker.postMessage({ id, kind, input });
+      this.worker.postMessage({ id, kind, witnessMap: input.witnessMap });
     });
   }
 
@@ -40,7 +44,9 @@ export class WorkerProver implements Prover {
     this.pending.clear();
   }
 
-  private onMessage(ev: MessageEvent<{ id: number; ok: boolean; proof?: Proof; error?: string }>) {
+  private onMessage(
+    ev: MessageEvent<{ id: number; ok: boolean; proof?: Proof; error?: string }>,
+  ) {
     const { id, ok, proof, error } = ev.data;
     const slot = this.pending.get(id);
     if (!slot) return;
