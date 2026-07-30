@@ -28,10 +28,11 @@ deposit-with-memo → wipe → recover-from-signature-alone.
       confirmed → recovered from chain (scripts/relayer-memo-e2e.mts PASS;
       data-api t11-1/t11-2 3/3 PASS against live stack)
 - [x] Automated browser smoke: all 5 routes 200, app content renders
-- [ ] FOUNDER QA (needs real wallet): unlock ceremony (2 signatures on
-      first setup), deposit→refresh→note persists, wipe site data→unlock→
-      recovery restores, two tabs (second shows read-only), private-mode
-      banner + confirm gate. Then M2 CLOSES.
+- [x] FOUNDER QA passed 2026-07-30 (real wallet): unlock ceremony (2 sigs
+      first setup), deposit→refresh→persists, wipe→recovery restores,
+      two-tab read-only, private-mode banner + confirm gate.
+
+**M2 CLOSED 2026-07-30.** Next Claude milestone: M3 (start-gated on Track 2).
 
 Per ADR-002: IndexedDB cache + on-chain recovery as source of truth; random salt + encrypted
 memo (additive `deposit` overload + event field); EIP-712→HKDF key derivation
