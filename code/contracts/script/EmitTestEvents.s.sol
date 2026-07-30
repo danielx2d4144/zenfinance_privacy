@@ -53,7 +53,15 @@ contract EmitTestEvents is Script {
 
         vm.startBroadcast(pk);
         Deployment memory d = _deployStack(admin);
-        _seedDeposits(d, admin);
+        // Mint test tokens to the broadcaster so the dapp can deposit
+        // from this account; SKIP the 50 seed deposits because they
+        // would put PrivacyEntry's IMT at leafIndex 50 while the dapp's
+        // session-only LocalIMT starts at 0 -- meaning every
+        // dapp-built `rootAtProveTime` would mismatch and trip
+        // UnknownRoot on-chain. The subgraph-driven IMT sync that
+        // makes seed leaves safe to keep lands in Day 17.
+        d.usdc.mint(admin, 10_000_000_000 * 10**6);
+        d.usdc.approve(address(d.pe), type(uint256).max);
         _emitProofs(d.zk, d.proxy);
         vm.stopBroadcast();
 
@@ -69,6 +77,18 @@ contract EmitTestEvents is Script {
         d.cbBtc = new MockERC20("Mock cbBTC", "cbBTC", 8);
         d.pe = new PrivacyEntry(admin, address(d.zk));
         d.oracle = new Oracle(admin, address(0));
+
+        // Day 14c-E: dapp's chain-reader calls Oracle.getPrice during
+        // every prove. Grant admin MANAGER_ROLE so we can push seed
+        // prices, then push 1 USDC = $1 and 1 cbBTC = $60k (matching
+        // the test fixtures). Widen staleness to Oracle's MAX (1h) so
+        // a long-idle local chain has the largest window currently
+        // allowed before Day 9's Stork pull adapter replaces this.
+        d.oracle.grantRole(d.oracle.MANAGER_ROLE(), admin);
+        d.oracle.setStalenessWindow(USDC_ID, 3_600);
+        d.oracle.setStalenessWindow(CBBTC_ID, 3_600);
+        d.oracle.pushPrice(USDC_ID, 1e8);
+        d.oracle.pushPrice(CBBTC_ID, 60_000e8);
 
         d.reg = new AssetRegistry(admin);
         d.reg.grantRole(d.reg.MANAGER_ROLE(), admin);
@@ -121,27 +141,6 @@ contract EmitTestEvents is Script {
         d.spp.grantRole(d.spp.LIQUIDATOR_ROLE(), address(d.lb));
 
         d.lb.grantRole(d.lb.REGISTRAR_ROLE(), admin);
-    }
-
-    /// @dev BN254 Fr prime. Day 14c Stage A: every leaf inserted into a
-    ///      PoseidonIMT must be a Field element. Seed commitments built
-    ///      from keccak("...") are reduced mod this prime so the seed
-    ///      script doesn't trip the `Poseidon2: input >= PRIME` guard.
-    uint256 internal constant BN254_FR =
-        0x30644e72e131a029b85045b68181585d2833e84879b9709143e1f593f0000001;
-
-    function _seedDeposits(Deployment memory d, address recipient) internal {
-        // Mint to the broadcaster (= admin). Forge's `msg.sender` inside
-        // a script function resolves to Foundry's DefaultSender, NOT the
-        // address signing the broadcast tx -- so the deposits below
-        // would otherwise revert with InsufficientBalance.
-        d.usdc.mint(recipient, 10_000_000_000 * 10**6);
-        d.usdc.approve(address(d.pe), type(uint256).max);
-        for (uint256 i = 0; i < 50; ++i) {
-            uint256 raw = uint256(keccak256(abi.encodePacked("commitment", i)));
-            bytes32 commitment = bytes32(raw % BN254_FR);
-            d.pe.deposit(address(d.usdc), 1_000_000 + i, commitment);
-        }
     }
 
     function _emitProofs(ZkVerifier zk, MockVerifyProofAggregation proxy) internal {

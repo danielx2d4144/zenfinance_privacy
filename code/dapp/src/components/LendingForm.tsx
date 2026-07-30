@@ -358,9 +358,13 @@ type Prep = PrepArgs & {
 
 async function prepareSupply(p: Prep): Promise<PreparedIntent> {
   const snapshot = await readChainSnapshot();
-  const supplyIndexNow = snapshot.supplyIndices[p.slot] || 1_000_000_000_000_000_000_000_000_000n;
+  // INDEX_BITS=60 in lib_common. chain-reader scales 1e27 ray ->
+  // ~1e12, which is the value the circuit + the note preimage both
+  // use. The fallback for a never-accrued asset is the scaled
+  // identity (1 RAY / 1e15 = 1e12).
+  const supplyIndexNow = snapshot.supplyIndices[p.slot] || 1_000_000_000_000n;
 
-  const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId);
+  const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId, p.amount);
   const newBalanceSalt = randomSalt();
   const newSupplySalt = randomSalt();
   const residualAmount = oldBalance.amount >= p.amount ? oldBalance.amount - p.amount : 0n;
@@ -464,7 +468,7 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
 
 async function prepareWithdrawSupply(p: Prep): Promise<PreparedIntent> {
   const snapshot = await readChainSnapshot();
-  const supplyIndexNow = snapshot.supplyIndices[p.slot] || 1_000_000_000_000_000_000_000_000_000n;
+  const supplyIndexNow = snapshot.supplyIndices[p.slot] || 1_000_000_000_000n;
 
   const oldSupply = mustGetSupplyFor(p.noteStore, p.assetId);
   const newBalanceSalt = randomSalt();
@@ -539,7 +543,7 @@ async function prepareWithdrawSupply(p: Prep): Promise<PreparedIntent> {
 
 async function prepareDepositCollateral(p: Prep): Promise<PreparedIntent> {
   const snapshot = await readChainSnapshot();
-  const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId);
+  const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId, p.amount);
   const newBalanceSalt = randomSalt();
   const newPositionSalt = randomSalt();
 
@@ -621,6 +625,17 @@ async function prepareDepositCollateral(p: Prep): Promise<PreparedIntent> {
   });
 
   const onConfirmed = () => {
+    // Forget the consumed balance (and the consumed position, if this
+    // wasn't a create_new=1 path). Skipping these caused the noteStore
+    // to keep returning stale "already spent on-chain" preimages on
+    // subsequent ops -- the bug behind the 0x3c4f9111
+    // NullifierAlreadySpent error.
+    const oldBalLeaf = p.entryImt.leafAt(oldBalance.leafIdx);
+    if (oldBalLeaf !== undefined) p.noteStore.forget(oldBalLeaf);
+    if (!createNew) {
+      const oldPosLeaf = p.positionImt.leafAt(oldPosition.leafIdx);
+      if (oldPosLeaf !== undefined) p.noteStore.forget(oldPosLeaf);
+    }
     const balanceResult = p.entryImt.insert(residualLeaf);
     const positionResult = p.positionImt.insert(newPositionLeaf);
     p.noteStore.register(residualLeaf, {
@@ -685,13 +700,24 @@ async function prepareWithdrawCollateral(p: Prep): Promise<PreparedIntent> {
 
   const newCollaterals = [...oldPosition.collaterals];
   newCollaterals[p.slot] = newCollaterals[p.slot] >= p.amount ? newCollaterals[p.slot] - p.amount : 0n;
+  // withdraw_collateral CALLS apply_accrual: ALL borrow-indices become
+  // the chain snapshot value; debts roll forward to their accrued
+  // values; then collaterals[slot] -= amount. Mirror exactly.
+  const accrual = computeAccrualHints(
+    oldPosition.debts,
+    snapshot.borrowIndices,
+    oldPosition.borrowIndicesAtUpdate,
+  );
+  const accruedDebts = accrual.accruedDebts;
+  const remainders = accrual.remainders;
+
   const newPosition: PositionPreimage = {
     kind: "position",
     leafIdx: -1,
     spendingPubkey: p.pk,
     collaterals: newCollaterals,
-    debts: [...oldPosition.debts],
-    borrowIndicesAtUpdate: [...oldPosition.borrowIndicesAtUpdate],
+    debts: [...accruedDebts],
+    borrowIndicesAtUpdate: [...snapshot.borrowIndices],
     salt: newPositionSalt,
   };
   const newPositionLeaf = positionCommitment({
@@ -704,12 +730,6 @@ async function prepareWithdrawCollateral(p: Prep): Promise<PreparedIntent> {
 
   const positionProof = p.positionImt.proofFor(oldPosition.leafIdx);
   const rootPosition = p.positionImt.currentRoot();
-
-  const { accruedDebts, remainders } = computeAccrualHints(
-    oldPosition.debts,
-    snapshot.borrowIndices,
-    oldPosition.borrowIndicesAtUpdate,
-  );
 
   const witness = buildWithdrawCollateralWitness({
     assetId: p.assetId,
@@ -735,6 +755,10 @@ async function prepareWithdrawCollateral(p: Prep): Promise<PreparedIntent> {
   });
 
   const onConfirmed = () => {
+    // Forget the position we just consumed on-chain so subsequent
+    // ops select the freshly-inserted one.
+    const oldPosLeaf = p.positionImt.leafAt(oldPosition.leafIdx);
+    if (oldPosLeaf !== undefined) p.noteStore.forget(oldPosLeaf);
     const balanceResult = p.entryImt.insert(newBalanceLeaf);
     const positionResult = p.positionImt.insert(newPositionLeaf);
     p.noteStore.register(newBalanceLeaf, {
@@ -795,10 +819,20 @@ async function prepareBorrow(p: Prep): Promise<PreparedIntent> {
   });
   const positionNul = positionNullifier(p.sk, oldPosition.salt);
 
-  const newDebts = [...oldPosition.debts];
+  // Mirror the circuit's `apply_accrual` before applying the borrow:
+  // ALL 8 borrow-indices become the chain snapshot value; debts roll
+  // forward to their accrued amounts; then debts[slot] += amount.
+  const accrual = computeAccrualHints(
+    oldPosition.debts,
+    snapshot.borrowIndices,
+    oldPosition.borrowIndicesAtUpdate,
+  );
+  const accruedDebts = accrual.accruedDebts;
+  const remainders = accrual.remainders;
+
+  const newDebts = [...accruedDebts];
   newDebts[p.slot] = (newDebts[p.slot] ?? 0n) + p.amount;
-  const newIndices = [...oldPosition.borrowIndicesAtUpdate];
-  newIndices[p.slot] = snapshot.borrowIndices[p.slot];
+  const newIndices = [...snapshot.borrowIndices];
   const newPosition: PositionPreimage = {
     kind: "position",
     leafIdx: -1,
@@ -818,12 +852,6 @@ async function prepareBorrow(p: Prep): Promise<PreparedIntent> {
 
   const positionProof = p.positionImt.proofFor(oldPosition.leafIdx);
   const rootPosition = p.positionImt.currentRoot();
-
-  const { accruedDebts, remainders } = computeAccrualHints(
-    oldPosition.debts,
-    snapshot.borrowIndices,
-    oldPosition.borrowIndicesAtUpdate,
-  );
 
   const witness = buildBorrowWitness({
     assetId: p.assetId,
@@ -849,6 +877,8 @@ async function prepareBorrow(p: Prep): Promise<PreparedIntent> {
   });
 
   const onConfirmed = () => {
+    const oldPosLeaf = p.positionImt.leafAt(oldPosition.leafIdx);
+    if (oldPosLeaf !== undefined) p.noteStore.forget(oldPosLeaf);
     const balanceResult = p.entryImt.insert(newBalanceLeaf);
     const positionResult = p.positionImt.insert(newPositionLeaf);
     p.noteStore.register(newBalanceLeaf, {
@@ -897,7 +927,7 @@ async function prepareBorrow(p: Prep): Promise<PreparedIntent> {
 
 async function prepareRepay(p: Prep): Promise<PreparedIntent> {
   const snapshot = await readChainSnapshot();
-  const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId);
+  const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId, p.amount);
   const oldPosition = mustGetPosition(p.noteStore);
   const newBalanceSalt = randomSalt();
   const newPositionSalt = randomSalt();
@@ -912,10 +942,22 @@ async function prepareRepay(p: Prep): Promise<PreparedIntent> {
   const balanceNul = balanceNullifier(p.sk, oldBalance.salt);
   const positionNul = positionNullifier(p.sk, oldPosition.salt);
 
-  const newDebts = [...oldPosition.debts];
+  // Mirror the circuit's apply_accrual: ALL borrow indices become the
+  // chain snapshot value; debts roll forward to accrued amounts; then
+  // debts[slot] -= amount (clamped at 0 -- the circuit asserts the
+  // amount fits in AMOUNT_BITS so paying more than owed must be done
+  // off-circuit by the UI).
+  const accrual = computeAccrualHints(
+    oldPosition.debts,
+    snapshot.borrowIndices,
+    oldPosition.borrowIndicesAtUpdate,
+  );
+  const accruedDebts = accrual.accruedDebts;
+  const remainders = accrual.remainders;
+
+  const newDebts = [...accruedDebts];
   newDebts[p.slot] = newDebts[p.slot] >= p.amount ? newDebts[p.slot] - p.amount : 0n;
-  const newIndices = [...oldPosition.borrowIndicesAtUpdate];
-  newIndices[p.slot] = snapshot.borrowIndices[p.slot];
+  const newIndices = [...snapshot.borrowIndices];
   const newPosition: PositionPreimage = {
     kind: "position",
     leafIdx: -1,
@@ -937,12 +979,6 @@ async function prepareRepay(p: Prep): Promise<PreparedIntent> {
   const positionProof = p.positionImt.proofFor(oldPosition.leafIdx);
   const rootBalance = p.entryImt.currentRoot();
   const rootPosition = p.positionImt.currentRoot();
-
-  const { accruedDebts, remainders } = computeAccrualHints(
-    oldPosition.debts,
-    snapshot.borrowIndices,
-    oldPosition.borrowIndicesAtUpdate,
-  );
 
   const witness = buildRepayWitness({
     assetId: p.assetId,
@@ -977,6 +1013,10 @@ async function prepareRepay(p: Prep): Promise<PreparedIntent> {
   });
 
   const onConfirmed = () => {
+    const oldBalLeaf = p.entryImt.leafAt(oldBalance.leafIdx);
+    if (oldBalLeaf !== undefined) p.noteStore.forget(oldBalLeaf);
+    const oldPosLeaf = p.positionImt.leafAt(oldPosition.leafIdx);
+    if (oldPosLeaf !== undefined) p.noteStore.forget(oldPosLeaf);
     const balanceResult = p.entryImt.insert(residualLeaf);
     const positionResult = p.positionImt.insert(newPositionLeaf);
     p.noteStore.register(residualLeaf, {
@@ -1045,15 +1085,32 @@ function extractPublicInputs(witness: WitnessMap, names: string[]): string[] {
   return out;
 }
 
-function mustGetBalanceFor(store: NoteStore, assetId: bigint): BalanceNotePreimage {
+function mustGetBalanceFor(
+  store: NoteStore,
+  assetId: bigint,
+  minAmount: bigint = 1n,
+): BalanceNotePreimage {
+  // Prefer the LARGEST sufficient balance note: minimises residual
+  // dust and avoids "first match" picking a tiny leftover that's
+  // smaller than the requested spend. Circuits assert
+  // `amount <= old_balance_amount`, so any insufficient note fails.
+  let best: BalanceNotePreimage | undefined;
   for (const [, preimage] of store.iter("balance")) {
-    if (preimage.kind === "balance" && preimage.assetId === assetId && preimage.amount > 0n) {
-      return preimage;
+    if (
+      preimage.kind === "balance" &&
+      preimage.assetId === assetId &&
+      preimage.amount >= minAmount &&
+      (!best || preimage.amount > best.amount)
+    ) {
+      best = preimage;
     }
   }
-  throw new Error(
-    `No spendable balance note for asset ${assetId}. Deposit on the home page first, then come back.`,
-  );
+  if (!best) {
+    throw new Error(
+      `No spendable balance note for asset ${assetId} with at least ${minAmount} units. Deposit / receive some first, then come back.`,
+    );
+  }
+  return best;
 }
 
 function mustGetSupplyFor(store: NoteStore, assetId: bigint): SupplyNotePreimage {

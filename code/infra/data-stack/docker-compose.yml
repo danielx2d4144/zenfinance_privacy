@@ -70,6 +70,9 @@ services:
       - --chain-id=31337
       - --block-time=1
       - --gas-limit=30000000
+      # CORS allow-list for the browser-side Otterscan SPA at :5100
+      # and the dapp dev server at :3000 (viem readContract from React).
+      - --allow-origin=*
     ports:
       - "8545:8545"
     healthcheck:
@@ -82,6 +85,11 @@ services:
   # Browser UI at http://localhost:5100. Day 14c addition so the user
   # can inspect deposit / supply / borrow tx receipts + logs while
   # clicking through the dapp.
+  #
+  # ERIGON_URL is consumed by the React frontend (which runs in the
+  # USER'S BROWSER, not inside the container) -- it must therefore
+  # resolve from the host, hence http://127.0.0.1:8545 rather than
+  # the docker-network hostname.
   otterscan:
     image: otterscan/otterscan:latest
     container_name: data-stack-otterscan
@@ -90,14 +98,13 @@ services:
       anvil:
         condition: service_healthy
     environment:
-      ERIGON_URL: "http://anvil:8545"
-      # Branding labels that show up in the Otterscan header.
+      ERIGON_URL: "http://127.0.0.1:8545"
       OTTERSCAN_CONFIG: |
         {
           "chains": {
             "31337": {
               "name": "Anvil Local",
-              "rpc": "http://localhost:8545",
+              "rpc": "http://127.0.0.1:8545",
               "currency": "ETH",
               "blockExplorerUrl": "http://localhost:5100"
             }

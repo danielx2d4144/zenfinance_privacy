@@ -23,6 +23,27 @@
 import { createPublicClient, http, type Address, type Hex } from "viem";
 import { defineChain } from "viem";
 
+// Day 14c-E: TWO in-circuit caps to satisfy at once.
+//
+//   - lending circuits (borrow / withdraw_collateral / repay) use
+//     `INDEX_BITS = 60` via lib_common::check_accrual, capping each
+//     borrow-index Field at 2^60 ~= 1.15e18.
+//   - withdraw_supply.nr uses `MAX_INDEX = 2^40` (~1.1e12) so the
+//     u128 product `amount * index` stays well-defined.
+//
+// RateModel.borrowIndex / supplyIndex are ray-scaled (1e27 ~= 90 bits),
+// so feeding them raw trips both. We scale by 1e15, mapping ray
+// (1e27) -> ~1e12 -- comfortably under 2^40 and even more so under
+// 2^60. Accrual is multiplicative (`debt * idx_now == accrued *
+// idx_at_update + r`), so dividing BOTH idx_now and idx_at_update
+// by the same constant preserves the relation.
+//
+// The Position preimage stored at deposit/borrow/repay time also
+// uses the scaled value (see LendingForm.tsx, which copies
+// snapshot.borrowIndices verbatim into borrowIndicesAtUpdate), so
+// the next spend's witness re-derives at the same scale.
+const INDEX_SCALE_DIVISOR = 1_000_000_000_000_000n; // 1e15
+
 export const MAX_ASSETS = 8;
 
 export interface ChainSnapshot {
@@ -204,8 +225,10 @@ export async function readChainSnapshot(): Promise<ChainSnapshot> {
         })
         .then((s) => {
           const st = s as { supplyIndex: bigint; borrowIndex: bigint };
-          supplyIndices[i] = BigInt(st.supplyIndex);
-          borrowIndices[i] = BigInt(st.borrowIndex);
+          // Scale into the circuit's INDEX_BITS=60 window. See the
+          // INDEX_SCALE_DIVISOR comment at the top of this file.
+          supplyIndices[i] = BigInt(st.supplyIndex) / INDEX_SCALE_DIVISOR;
+          borrowIndices[i] = BigInt(st.borrowIndex) / INDEX_SCALE_DIVISOR;
         }),
       client
         .readContract({
