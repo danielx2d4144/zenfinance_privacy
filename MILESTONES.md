@@ -1,0 +1,52 @@
+# MILESTONES.md — plan of record
+
+Replaces the 21-day day-locked roadmap (`design-v2/roadmap/code_roadmap.md`, RETIRED).
+Full plan detail: `~/.gstack/projects/danielx2d4144-zenfinance_privacy/Hi-main-resume-plan-20260729.md`.
+
+## Process rules (what killed the last run, fixed)
+
+1. **Git is the source of truth.** No tracker file may claim state git contradicts. GROUND_TRUTH.md is a map, updated when milestones close — never a gate.
+2. **No daily human ack-gates, no wait-forever.** When the founder is unavailable, the agent proceeds on recommended defaults and records each choice in the decision log below.
+3. **Milestones close on tests passing, not on days elapsing.** Scope changes get logged, not silently absorbed.
+4. **No checkpoint may depend on a dead external.** External dependencies (chain endpoints, faucets, proxies) are probed in a time-boxed spike with a pre-declared FAIL branch — a FAIL reroutes the plan, never stalls it.
+5. Honesty rules kept from agent_workflow_rules: never claim a test passed without running it; never invent chain data.
+
+## M1 — RECONCILE (in progress, 2026-07-30)
+
+- [x] M1.1 Gate 1 chain-health pull → **FAILED** (~20 daily actives vs 100; no TVL vs $5M). Whale-first is the active mainnet strategy; Horizen = funding channel. Re-check monthly.
+- [ ] M1.2 4 dirty files reviewed → verdicts awaiting founder approval (all COMMIT-AS-IS + 1 stale comment fix; see decision log)
+- [x] M1.3 GROUND_TRUTH.md + MILESTONES.md + TODOS.md in repo
+- [ ] M1.4 Typed chain-config module (Anvil / Base Sepolia / Horizen testnet 845320009; kills dead 2651420)
+- [x] M1.5 ADR-001 (4337 execution-phase policy) + ADR-002 (memo-based notes) + circuit-salt verification (no vkHash re-pin needed)
+
+## M2 — NOTE PERSISTENCE (~3-4 CC-days) — the funds-visibility fix
+
+Per ADR-002: IndexedDB cache + on-chain recovery as source of truth; random salt + encrypted
+memo (additive `deposit` overload + event field); EIP-712→HKDF key derivation
+(spending/viewing/storage); AES-GCM at rest; WAL for crash recovery; cross-tab locks;
+full-set log sync (privacy-preserving recovery); shared commitment-matcher.
+**Exit tests:** cross-stack vectors (TS == Noir == PoseidonIMT.sol), memo trial-decrypt
+roundtrip, WAL crash points, wipe→recover e2e on Anvil, two-device simulation, multi-tab lock,
+forge tests for the memo overload. Full list in resume plan §M2 + eng-review test plan.
+
+## M3 — HORIZEN TESTNET DEPLOY + DEMO (~1 CC-week)
+
+**Start gate: Thrive application SUBMITTED + 5 Mom-Test calls BOOKED.**
+1-day spike, pre-declared 4-point gate: RPC+faucet / canonical EntryPoint / **zkVerify proxy
+reachable on Horizen testnet (no proxy = FAIL)** / clean deploy. Any FAIL → demo ships on
+Base Sepolia, Thrive pitch says "Horizen-ready". Waitlist is privacy-friendly (self-attested
+size). Sentry + 6-event funnel feeds Gate 2 evidence. /plan-design-review before UI build.
+
+## M4 — THRIVE + VALIDATION (founder work, parallel from now)
+
+Thrive application; BD contact → written commitment + 3 whale intros; 5 Mom-Test calls scored
+vs Gate 2 (≥2/5 concrete past pain); audit scoping quotes from 2-3 firms (Gate 3: no mainnet
+without audit funding secured).
+
+## Decision log (agent defaults taken while founder unavailable)
+
+| Date | Decision | Basis |
+|---|---|---|
+| 2026-07-30 | Gate 1 honored → whale-first active, Horizen demoted to funding channel | Founder chose "Honor the gate" |
+| 2026-07-30 | ADRs placed in `docs/adr/` (new dir) | Standard location; design-v2 is legacy |
+| 2026-07-30 | M1.2 verdicts (agent recommendation, **pending founder approval**): commit all 4 dirty files as one "Day 14c-F" commit after fixing 1 stale comment in LendingForm.tsx; optionally delete dead `_seedDeposits` | Forensic review: pnpm build PASS, forge 217/217 PASS, no half-done work found |
