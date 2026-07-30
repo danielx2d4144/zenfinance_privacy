@@ -17,6 +17,13 @@ Everything here was consciously deferred, not forgotten. Source: resume plan §N
 - Server-assisted proving for low-end devices (old Day 20)
 - Governance / Safe migration (old Day 18)
 
+## Protocol observability gap (found during M2.5)
+- `spendBalance` inserts the residual commitment but never events its value
+  (only `MerkleRootUpdated` fires) — residual leaves can't be index-joined from
+  logs. Deposit-memo recovery doesn't need it, but full spend-flow recovery
+  will. Additive fix candidate: include the residual commitment in the
+  `BalanceSpent` event (new event version, subgraph handler addition).
+
 ## Doc debt (fix critical-path only per D3=B)
 - REWRITE: `design-v2/roadmap/code_roadmap.md` (retired — MILESTONES.md replaces), `design-v2/subsystems/06_data_layer.md`
 - UPDATE: remaining design-v2 files for Horizen 2.0 ground truth (chainId 845320009, no "Tachyon chain", no Goldsky) — batch, low priority
