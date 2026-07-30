@@ -33,6 +33,7 @@ export type VaultUnavailableReason =
 
 const DB_VERSION = 1;
 const STORE = "notes";
+const WAL_STORE = "wal";
 
 export class NoteVault {
   private constructor(
@@ -70,6 +71,9 @@ export class NoteVault {
       req.onupgradeneeded = () => {
         if (!req.result.objectStoreNames.contains(STORE)) {
           req.result.createObjectStore(STORE);
+        }
+        if (!req.result.objectStoreNames.contains(WAL_STORE)) {
+          req.result.createObjectStore(WAL_STORE);
         }
       };
       req.onsuccess = () => resolve({ ok: true, vault: new NoteVault(req.result, key) });
@@ -142,10 +146,80 @@ export class NoteVault {
   /** Drop every row (wallet disconnect-and-forget, or test cleanup). */
   async wipe(): Promise<void> {
     await this.tx("readwrite", (store) => store.clear());
+    await this.tx("readwrite", (store) => store.clear(), WAL_STORE);
   }
 
   close(): void {
     this.db.close();
+  }
+
+  // ------------------------------------------------------------------ WAL
+  //
+  // Write-ahead records for in-flight transactions (M2.4). A record is
+  // written BEFORE the tx is submitted, carrying every note the tx will
+  // create and every leaf it will spend. Reconciliation (crash recovery /
+  // next unlock) promotes or drops records by checking the chain — see
+  // commitment-matcher.ts. Records are encrypted exactly like note rows,
+  // with the WAL id as AAD.
+
+  /** Persist a pending record BEFORE submitting its transaction. */
+  async putPending(record: WalRecord): Promise<void> {
+    const nonce = crypto.getRandomValues(new Uint8Array(12));
+    const plaintext = new TextEncoder().encode(serializeWal(record));
+    const ciphertext = new Uint8Array(
+      await crypto.subtle.encrypt(
+        {
+          name: "AES-GCM",
+          iv: nonce as BufferSource,
+          additionalData: new TextEncoder().encode(record.id) as BufferSource,
+        },
+        this.key,
+        plaintext as BufferSource,
+      ),
+    );
+    await this.tx("readwrite", (store) => store.put({ nonce, ciphertext }, record.id), WAL_STORE);
+  }
+
+  /** Update a pending record in place (e.g. attach txHash after submit). */
+  async updatePending(record: WalRecord): Promise<void> {
+    await this.putPending(record);
+  }
+
+  /** Remove a record after its notes are safely promoted (or dropped). */
+  async deletePending(id: string): Promise<void> {
+    await this.tx("readwrite", (store) => store.delete(id), WAL_STORE);
+  }
+
+  /** All pending records, oldest first. Corrupt rows are dropped+counted. */
+  async listPending(): Promise<{ records: WalRecord[]; corruptRows: number }> {
+    const rows = await this.tx<Array<[IDBValidKey, VaultRow]>>(
+      "readonly",
+      (store) => collectAll(store),
+      WAL_STORE,
+    );
+    const records: WalRecord[] = [];
+    let corruptRows = 0;
+    for (const [rawKey, row] of rows) {
+      const id = String(rawKey);
+      try {
+        const plaintext = new Uint8Array(
+          await crypto.subtle.decrypt(
+            {
+              name: "AES-GCM",
+              iv: row.nonce as BufferSource,
+              additionalData: new TextEncoder().encode(id) as BufferSource,
+            },
+            this.key,
+            row.ciphertext as BufferSource,
+          ),
+        );
+        records.push(deserializeWal(new TextDecoder().decode(plaintext)));
+      } catch {
+        corruptRows += 1;
+      }
+    }
+    records.sort((a, b) => a.createdAtMs - b.createdAtMs);
+    return { records, corruptRows };
   }
 
   // -------------------------------------------------------------- internal
@@ -153,11 +227,12 @@ export class NoteVault {
   private tx<T = unknown>(
     mode: IDBTransactionMode,
     run: (store: IDBObjectStore) => IDBRequest | Promise<T>,
+    storeName: string = STORE,
   ): Promise<T> {
     return new Promise<T>((resolve, reject) => {
-      const tx = this.db.transaction(STORE, mode);
+      const tx = this.db.transaction(storeName, mode);
       tx.onerror = () => reject(tx.error);
-      const result = run(tx.objectStore(STORE));
+      const result = run(tx.objectStore(storeName));
       if (result instanceof Promise) {
         result.then(resolve, reject);
       } else {
@@ -166,6 +241,35 @@ export class NoteVault {
       }
     });
   }
+}
+
+/**
+ * One in-flight transaction's write-ahead record. `expectedNotes` are
+ * the (leaf, preimage) pairs the tx will create; `spendsLeaves` are the
+ * store leaves it consumes (evicted only AFTER confirmation).
+ */
+export interface WalRecord {
+  /** Unique id — the primary new leaf hex (commitments are unique). */
+  id: string;
+  createdAtMs: number;
+  /** Flow that created it: "deposit" | "supply" | "borrow" | ... */
+  flow: string;
+  /** Set once the wallet returns a tx hash; absent if we crashed first. */
+  txHash?: string;
+  expectedNotes: Array<[string, NotePreimage]>;
+  spendsLeaves: string[];
+}
+
+function serializeWal(record: WalRecord): string {
+  return JSON.stringify(record, (_k, v) =>
+    typeof v === "bigint" ? `#b:${v.toString(16)}` : v,
+  );
+}
+
+function deserializeWal(json: string): WalRecord {
+  return JSON.parse(json, (_k, v) =>
+    typeof v === "string" && v.startsWith("#b:") ? BigInt(`0x${v.slice(3)}`) : v,
+  ) as WalRecord;
 }
 
 interface VaultRow {
