@@ -43,6 +43,19 @@ const PRIVACY_ENTRY_ABI = [
     ],
     outputs: [],
   },
+  // ADR-002 memo-carrying overload — viem picks it by argument count.
+  {
+    type: "function",
+    name: "deposit",
+    stateMutability: "nonpayable",
+    inputs: [
+      { name: "token", type: "address" },
+      { name: "amount", type: "uint256" },
+      { name: "commitment", type: "bytes32" },
+      { name: "encryptedMemo", type: "bytes" },
+    ],
+    outputs: [],
+  },
 ] as const;
 
 /**
@@ -106,7 +119,9 @@ export async function handleEntryDeposit(
         address: privacyEntry,
         abi: PRIVACY_ENTRY_ABI,
         functionName: "deposit",
-        args: [mockUsdc, amount, body.commitment as Hex],
+        args: body.encryptedMemo
+          ? [mockUsdc, amount, body.commitment as Hex, body.encryptedMemo as Hex]
+          : [mockUsdc, amount, body.commitment as Hex],
       });
       const receipt = await publicClient.waitForTransactionReceipt({ hash: depositHash });
       if (receipt.status !== "success") {

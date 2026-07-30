@@ -115,6 +115,8 @@ export interface components {
             asset: "USDC" | "cbBTC" | "WETH" | "ZEN";
             amount: string;
             commitment: string;
+            /** ADR-002 encrypted note memo (hex, max 1024 bytes) */
+            encryptedMemo?: string;
         } | {
             /** @enum {string} */
             kind: "entry_withdraw";

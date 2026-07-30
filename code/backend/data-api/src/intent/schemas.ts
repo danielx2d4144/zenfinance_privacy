@@ -52,6 +52,16 @@ export const EntryDepositIntent = z.object({
   asset: AssetSymbol,
   amount: DecimalAmount,
   commitment: Bytes32,
+  /** ADR-002: encrypted note memo, forwarded verbatim to the 4-arg
+   *  deposit overload and emitted in the EncryptedMemo event. Bounded
+   *  to PrivacyEntry.MAX_MEMO_BYTES (1024 bytes = 2048 hex chars). */
+  encryptedMemo: z
+    .string()
+    .regex(/^0x[a-fA-F0-9]+$/, "encryptedMemo must be 0x-prefixed hex")
+    .refine((s) => s.length % 2 === 0 && s.length <= 2 + 2048, {
+      message: "encryptedMemo must be whole bytes, max 1024",
+    })
+    .optional(),
 });
 
 export const EntryWithdrawIntent = z.object({

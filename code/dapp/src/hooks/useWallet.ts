@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { useAccount, useChainId, useConnect, useDisconnect, useSignMessage, useSwitchChain } from "wagmi";
+import { useAccount, useChainId, useConnect, useDisconnect, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 
 import { DEFAULT_CHAIN, SUPPORTED_CHAINS } from "@/lib/chains";
 
@@ -20,6 +20,7 @@ export function useWallet() {
   const { disconnect } = useDisconnect();
   const { switchChain, status: switchStatus } = useSwitchChain();
   const { signMessageAsync } = useSignMessage();
+  const { signTypedDataAsync } = useSignTypedData();
 
   const activeChain = useMemo(
     () => SUPPORTED_CHAINS.find((c) => c.id === chainId),
@@ -47,5 +48,6 @@ export function useWallet() {
     switchStatus,
 
     signMessageAsync,
+    signTypedDataAsync,
   } as const;
 }

@@ -78,12 +78,28 @@ export class NoteStore {
     supply: new Set(),
     position: new Set(),
   };
+  /** M2.6 write-through mirror (the encrypted NoteVault). Fire-and-forget:
+   *  persistence failure must never block the sync spend path — the vault
+   *  is a cache of a cache; on-chain recovery is the source of truth. */
+  private mirror: {
+    onRegister: (leafHex: string, preimage: NotePreimage) => void;
+    onForget: (leafHex: string) => void;
+  } | null = null;
+
+  attachMirror(mirror: NonNullable<NoteStore["mirror"]>): void {
+    this.mirror = mirror;
+  }
+
+  detachMirror(): void {
+    this.mirror = null;
+  }
 
   /** Register the preimage of a freshly-inserted leaf. */
   register(leaf: bigint, preimage: NotePreimage): void {
     const key = bigIntToHex32(leaf);
     this.notes.set(key, preimage);
     this.byKind[preimage.kind].add(key);
+    this.mirror?.onRegister(key, preimage);
   }
 
   /** Same as `register`, but accepts a hex32 directly. */
@@ -91,6 +107,7 @@ export class NoteStore {
     const key = normaliseHex(leafHex);
     this.notes.set(key, preimage);
     this.byKind[preimage.kind].add(key);
+    this.mirror?.onRegister(key, preimage);
   }
 
   /** Mark a note as spent (forget its preimage). */
@@ -100,6 +117,7 @@ export class NoteStore {
     const preimage = this.notes.get(key);
     this.notes.delete(key);
     if (preimage) this.byKind[preimage.kind].delete(key);
+    this.mirror?.onForget(key);
   }
 
   /** Read the preimage of a leaf; returns undefined if unknown. */

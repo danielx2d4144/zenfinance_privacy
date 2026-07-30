@@ -15,6 +15,7 @@ import {
   toHex32,
 } from "@/lib/witness";
 import { buildEntryDepositWitness } from "@/lib/prover/witnesses";
+import { encryptMemo, NoteType } from "@/lib/memo-crypto";
 
 import { LendingSdk, type IntentDetail } from "@lending/sdk-ts";
 
@@ -41,11 +42,15 @@ const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? "";
 export function DepositForm() {
   const { isConnected, isCorrectChain, defaultChain, switchToDefault, switchStatus } = useWallet();
   const {
-    spendingKey,
+    unlocked,
     secretKey,
     spendingPubkey,
+    viewingKey,
     entryImt,
     noteStore,
+    vault,
+    storageUnavailable,
+    tabRole,
     derive,
     isDeriving,
     error: keyError,
@@ -54,6 +59,7 @@ export function DepositForm() {
 
   const [amount, setAmount] = useState("100");
   const [state, setState] = useState<DepositState>({ phase: "idle" });
+  const [riskAccepted, setRiskAccepted] = useState(false);
 
   const sdk = useMemo(
     () => new LendingSdk({ baseUrl: API_BASE, apiKey: API_KEY }),
@@ -78,15 +84,17 @@ export function DepositForm() {
     );
   }
 
-  if (!spendingKey) {
+  if (!unlocked) {
     return (
       <div className="rounded-lg border border-white/10 bg-white/5 p-6">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-white/70">
-          One-time spending-key derivation
+          Unlock your private balances
         </h3>
         <p className="mt-2 text-sm text-white/60">
-          We need your wallet signature to derive the secret that controls your private
-          balance. The key lives only in this tab — close it and the key is gone.
+          One typed-data signature derives your session keys (spending, viewing,
+          storage). Keys never leave this tab; only ciphertext is stored on this
+          device. First unlock asks for a second signature to verify your wallet
+          signs deterministically.
         </p>
         {keyError ? <p className="mt-3 text-sm text-red-300">{keyError}</p> : null}
         <button
@@ -95,16 +103,36 @@ export function DepositForm() {
           disabled={isDeriving}
           className="mt-4 rounded-md bg-emerald-500/90 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-400 disabled:opacity-50"
         >
-          {isDeriving ? "Awaiting signature…" : "Sign to derive spending key"}
+          {isDeriving ? "Awaiting signature…" : "Sign to unlock"}
         </button>
+      </div>
+    );
+  }
+
+  if (tabRole.role === "reader") {
+    return (
+      <div className="rounded-lg border border-amber-400/20 bg-amber-500/10 p-6 text-sm">
+        <p className="font-semibold text-amber-200">Read-only tab</p>
+        <p className="mt-2 text-amber-100/70">
+          ZenFinance is active in another tab. To avoid double-spending your
+          notes, deposits and other transactions run only there — close it to
+          make this tab the active one.
+        </p>
       </div>
     );
   }
 
   const onSubmit = async (ev: React.FormEvent) => {
     ev.preventDefault();
-    if (!secretKey || !spendingPubkey) {
-      setState({ phase: "failed", reason: "spending key not derived" });
+    if (!secretKey || !spendingPubkey || !viewingKey) {
+      setState({ phase: "failed", reason: "session keys not derived" });
+      return;
+    }
+    if (storageUnavailable && !riskAccepted) {
+      setState({
+        phase: "failed",
+        reason: "Storage is unavailable — confirm the risk checkbox to deposit anyway.",
+      });
       return;
     }
     setState({ phase: "submitting" });
@@ -120,6 +148,27 @@ export function DepositForm() {
         salt,
       });
       const commitment = toHex32(commitmentBig);
+
+      // ADR-002: the note's secrets, encrypted to our viewing key, ride
+      // the deposit so ANY device can recover this note from chain data.
+      const memoBytes = await encryptMemo({
+        viewingKey,
+        commitment: commitment as `0x${string}`,
+        secrets: { noteType: NoteType.Balance, assetId, amount: amountField, salt },
+      });
+      const encryptedMemo = `0x${Array.from(memoBytes, (b) => b.toString(16).padStart(2, "0")).join("")}`;
+
+      // WAL: persist the pending record BEFORE the intent leaves this
+      // tab, so a crash at any later point is recoverable on unlock.
+      await vault?.putPending({
+        id: commitment,
+        createdAtMs: Date.now(),
+        flow: "deposit",
+        expectedNotes: [
+          [commitment, { kind: "balance", leafIdx: -1, assetId, amount: amountField, salt }],
+        ],
+        spendsLeaves: [],
+      });
 
       // Real bb.js entry_deposit proof against the depth-20 IMT.
       const witness = buildEntryDepositWitness({
@@ -153,10 +202,21 @@ export function DepositForm() {
           asset: "USDC",
           amount: amountUnits,
           commitment,
+          encryptedMemo,
         },
         { idempotencyKey: `dapp-${commitment.slice(2, 18)}` },
       );
       setState({ phase: "pending", intentId: accepted.intent_id, commitment });
+      await vault?.updatePending({
+        id: commitment,
+        createdAtMs: Date.now(),
+        flow: "deposit",
+        txHash: accepted.intent_id, // relayer-side handle until tx hash arrives
+        expectedNotes: [
+          [commitment, { kind: "balance", leafIdx: -1, assetId, amount: amountField, salt }],
+        ],
+        spendsLeaves: [],
+      });
 
       const final: IntentDetail = await sdk.intents.waitFor(accepted.intent_id, {
         deadlineMs: 90_000,
@@ -165,6 +225,7 @@ export function DepositForm() {
       if (final.status === "confirmed") {
         // Mirror the on-chain insert + remember the preimage so a
         // follow-up supply / deposit_collateral / repay can spend it.
+        // register() write-throughs to the encrypted vault (M2.6).
         const result = entryImt.insert(commitmentBig);
         noteStore.register(commitmentBig, {
           kind: "balance",
@@ -173,10 +234,14 @@ export function DepositForm() {
           amount: amountField,
           salt,
         });
+        await vault?.deletePending(commitment);
         const txHash = final.jobs?.[0]?.tx_hash ?? null;
         setState({ phase: "confirmed", intentId: accepted.intent_id, commitment, txHash });
         window.dispatchEvent(new CustomEvent("lending:deposit-confirmed"));
       } else {
+        // Definite relayer-reported failure: the tx never landed, the
+        // WAL record has nothing to recover — drop it.
+        await vault?.deletePending(commitment);
         setState({
           phase: "failed",
           intentId: accepted.intent_id,
@@ -184,6 +249,8 @@ export function DepositForm() {
         });
       }
     } catch (err) {
+      // Crash/network path: KEEP the WAL record — reconciliation on next
+      // unlock decides promote vs drop against chain data.
       const reason = err instanceof Error ? err.message : String(err);
       setState({ phase: "failed", reason });
     }
@@ -198,6 +265,28 @@ export function DepositForm() {
         Move USDC into PrivacyEntry custody. Generates a balance commitment client-side
         and submits as an <code className="font-mono text-white/80">entry_deposit</code> intent.
       </p>
+
+      {storageUnavailable ? (
+        <div className="mt-4 rounded-md border border-amber-400/30 bg-amber-500/10 p-3 text-sm">
+          <p className="font-semibold text-amber-200">
+            Local note storage is unavailable ({storageUnavailable}).
+          </p>
+          <p className="mt-1 text-amber-100/70">
+            Your notes can still be recovered from chain data with your wallet
+            signature, but this browser won&apos;t remember them between visits
+            (private mode?). Recovery scans can take a while.
+          </p>
+          <label className="mt-2 flex items-start gap-2 text-amber-100/80">
+            <input
+              type="checkbox"
+              checked={riskAccepted}
+              onChange={(e) => setRiskAccepted(e.target.checked)}
+              className="mt-0.5"
+            />
+            I understand — deposit without local persistence.
+          </label>
+        </div>
+      ) : null}
 
       <label className="mt-5 block text-xs font-medium uppercase tracking-wide text-white/60">
         Amount (USDC)
