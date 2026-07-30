@@ -19,7 +19,13 @@ Full plan detail: `~/.gstack/projects/danielx2d4144-zenfinance_privacy/Hi-main-r
 - [x] M1.4 Typed chain-config module (Anvil / Base Sepolia / Horizen testnet 845320009; kills dead 2651420) — pnpm build PASS
 - [x] M1.5 ADR-001 (4337 execution-phase policy) + ADR-002 (memo-based notes) + circuit-salt verification (no vkHash re-pin needed)
 
-## M2 — NOTE PERSISTENCE (~3-4 CC-days) — the funds-visibility fix
+## M2 — NOTE PERSISTENCE — the funds-visibility fix — CODE COMPLETE 2026-07-30
+
+All library + wiring commits landed (M2.1–M2.6); live-Anvil e2e proves
+deposit-with-memo → wipe → recover-from-signature-alone. Remaining before
+M2 CLOSES: interactive /qa pass per the eng-review test plan (browser
+flows: refresh mid-prove, two real tabs, Safari private mode) and the
+relayer-path integration test with the docker data-api running.
 
 Per ADR-002: IndexedDB cache + on-chain recovery as source of truth; random salt + encrypted
 memo (additive `deposit` overload + event field); EIP-712→HKDF key derivation
