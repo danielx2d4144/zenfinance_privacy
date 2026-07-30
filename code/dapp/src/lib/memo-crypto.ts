@@ -62,9 +62,13 @@ export async function encryptMemo(args: {
 
   const ciphertext = new Uint8Array(
     await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: nonce, additionalData: memoAad(args.commitment) },
+      {
+        name: "AES-GCM",
+        iv: nonce as BufferSource,
+        additionalData: memoAad(args.commitment) as BufferSource,
+      },
       key,
-      plaintext,
+      plaintext as BufferSource,
     ),
   );
 
@@ -96,9 +100,13 @@ export async function tryDecryptMemo(args: {
     const ciphertext = memo.subarray(1 + NONCE_BYTES);
     const plaintext = new Uint8Array(
       await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: nonce, additionalData: memoAad(args.commitment) },
+        {
+          name: "AES-GCM",
+          iv: nonce as BufferSource,
+          additionalData: memoAad(args.commitment) as BufferSource,
+        },
         key,
-        ciphertext,
+        ciphertext as BufferSource,
       ),
     );
     if (plaintext.length !== PLAINTEXT_BYTES) return null;
