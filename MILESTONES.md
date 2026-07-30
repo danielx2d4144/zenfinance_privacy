@@ -14,9 +14,9 @@ Full plan detail: `~/.gstack/projects/danielx2d4144-zenfinance_privacy/Hi-main-r
 ## M1 — RECONCILE (in progress, 2026-07-30)
 
 - [x] M1.1 Gate 1 chain-health pull → **FAILED** (~20 daily actives vs 100; no TVL vs $5M). Whale-first is the active mainnet strategy; Horizen = funding channel. Re-check monthly.
-- [ ] M1.2 4 dirty files reviewed → verdicts awaiting founder approval (all COMMIT-AS-IS + 1 stale comment fix; see decision log)
+- [x] M1.2 4 dirty files reviewed, founder approved "fix nits + commit" → committed as Day 14c-F (34dcf7e); forge 217/217 re-verified post-cleanup
 - [x] M1.3 GROUND_TRUTH.md + MILESTONES.md + TODOS.md in repo
-- [ ] M1.4 Typed chain-config module (Anvil / Base Sepolia / Horizen testnet 845320009; kills dead 2651420)
+- [x] M1.4 Typed chain-config module (Anvil / Base Sepolia / Horizen testnet 845320009; kills dead 2651420) — pnpm build PASS
 - [x] M1.5 ADR-001 (4337 execution-phase policy) + ADR-002 (memo-based notes) + circuit-salt verification (no vkHash re-pin needed)
 
 ## M2 — NOTE PERSISTENCE (~3-4 CC-days) — the funds-visibility fix
