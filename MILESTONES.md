@@ -22,10 +22,16 @@ Full plan detail: `~/.gstack/projects/danielx2d4144-zenfinance_privacy/Hi-main-r
 ## M2 — NOTE PERSISTENCE — the funds-visibility fix — CODE COMPLETE 2026-07-30
 
 All library + wiring commits landed (M2.1–M2.6); live-Anvil e2e proves
-deposit-with-memo → wipe → recover-from-signature-alone. Remaining before
-M2 CLOSES: interactive /qa pass per the eng-review test plan (browser
-flows: refresh mid-prove, two real tabs, Safari private mode) and the
-relayer-path integration test with the docker data-api running.
+deposit-with-memo → wipe → recover-from-signature-alone.
+2026-07-30 close-out runs:
+- [x] Relayer-path integration: memo intent → data-api → 4-arg deposit →
+      confirmed → recovered from chain (scripts/relayer-memo-e2e.mts PASS;
+      data-api t11-1/t11-2 3/3 PASS against live stack)
+- [x] Automated browser smoke: all 5 routes 200, app content renders
+- [ ] FOUNDER QA (needs real wallet): unlock ceremony (2 signatures on
+      first setup), deposit→refresh→note persists, wipe site data→unlock→
+      recovery restores, two tabs (second shows read-only), private-mode
+      banner + confirm gate. Then M2 CLOSES.
 
 Per ADR-002: IndexedDB cache + on-chain recovery as source of truth; random salt + encrypted
 memo (additive `deposit` overload + event field); EIP-712→HKDF key derivation
