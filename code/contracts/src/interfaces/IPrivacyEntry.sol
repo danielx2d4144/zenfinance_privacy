@@ -9,6 +9,12 @@ pragma solidity 0.8.27;
 ///      one-shot `deposit` / `withdraw`.
 interface IPrivacyEntry {
     event Deposited(address indexed token, address indexed from, uint256 amount, bytes32 commitment);
+    /// @notice Encrypted note memo, emitted alongside `Deposited` by the
+    ///         memo-carrying `deposit` overload (ADR-002). The payload is
+    ///         the note's secrets encrypted to the depositor's viewing key;
+    ///         recovery trial-decrypts every EncryptedMemo and joins to the
+    ///         IMT leaf via `commitment`. Opaque to the contract.
+    event EncryptedMemo(bytes32 indexed commitment, bytes memo);
     event Withdrawn(address indexed token, address indexed to, uint256 amount, bytes32 nullifier);
     event BalanceSpent(bytes32 indexed nullifier);
     event BalanceCredited(bytes32 indexed commitment);
@@ -16,6 +22,13 @@ interface IPrivacyEntry {
     event MerkleRootUpdated(bytes32 newRoot, uint32 nextLeafIndex);
 
     function deposit(address token, uint256 amount, bytes32 commitment) external;
+
+    function deposit(
+        address token,
+        uint256 amount,
+        bytes32 commitment,
+        bytes calldata encryptedMemo
+    ) external;
 
     function spendBalance(
         bytes32 nullifier,

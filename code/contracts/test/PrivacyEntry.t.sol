@@ -100,6 +100,78 @@ contract PrivacyEntryTest is Test {
         vm.stopPrank();
     }
 
+    // ADR-002: memo-carrying deposit overload
+    function test_depositWithMemo_emitsBothEventsAndUpdatesReserves() public {
+        bytes32 c = _c("memo-commit-1");
+        bytes memory memo = bytes("ecies:ephemeral-pk|nonce|ciphertext|tag");
+
+        vm.expectEmit(true, true, false, true, address(entry));
+        emit IPrivacyEntry.Deposited(address(usdc), USER, 1_000e6, c);
+        vm.expectEmit(true, false, false, true, address(entry));
+        emit IPrivacyEntry.EncryptedMemo(c, memo);
+
+        vm.prank(USER);
+        entry.deposit(address(usdc), 1_000e6, c, memo);
+
+        assertEq(entry.reserves(address(usdc)), 1_000e6);
+        assertEq(usdc.balanceOf(address(entry)), 1_000e6);
+        assertEq(entry.nextLeafIndex(), 1);
+    }
+
+    function test_depositWithMemo_maxSizeMemoAccepted() public {
+        bytes memory memo = new bytes(entry.MAX_MEMO_BYTES());
+        memo[0] = 0x01; // non-degenerate payload
+
+        vm.prank(USER);
+        entry.deposit(address(usdc), 1e6, _c("memo-max"), memo);
+
+        assertEq(entry.nextLeafIndex(), 1);
+    }
+
+    function testRevert_depositWithMemo_emptyMemo() public {
+        vm.prank(USER);
+        vm.expectRevert(PrivacyEntry.EmptyMemo.selector);
+        entry.deposit(address(usdc), 1e6, _c("memo-empty"), bytes(""));
+    }
+
+    function testRevert_depositWithMemo_oversizeMemo() public {
+        bytes memory memo = new bytes(entry.MAX_MEMO_BYTES() + 1);
+
+        vm.prank(USER);
+        vm.expectRevert(
+            abi.encodeWithSelector(PrivacyEntry.MemoTooLong.selector, entry.MAX_MEMO_BYTES() + 1)
+        );
+        entry.deposit(address(usdc), 1e6, _c("memo-big"), memo);
+    }
+
+    function testRevert_depositWithMemo_zeroAmount() public {
+        vm.prank(USER);
+        vm.expectRevert(PrivacyEntry.ZeroAmount.selector);
+        entry.deposit(address(usdc), 0, _c("memo-zero"), bytes("m"));
+    }
+
+    function testRevert_depositWithMemo_duplicateCommitment() public {
+        bytes32 c = _c("memo-dup");
+        vm.startPrank(USER);
+        entry.deposit(address(usdc), 1e6, c, bytes("m1"));
+        vm.expectRevert(abi.encodeWithSelector(PrivacyEntry.CommitmentAlreadyInserted.selector, c));
+        entry.deposit(address(usdc), 1e6, c, bytes("m2"));
+        vm.stopPrank();
+    }
+
+    function test_depositWithMemo_mixedWithPlainDeposits() public {
+        // Plain and memo deposits interleave in one IMT; memo event only
+        // fires for the overload.
+        vm.startPrank(USER);
+        entry.deposit(address(usdc), 1e6, _c("plain-1"));
+        entry.deposit(address(usdc), 2e6, _c("memo-2"), bytes("m"));
+        entry.deposit(address(usdc), 3e6, _c("plain-3"));
+        vm.stopPrank();
+
+        assertEq(entry.reserves(address(usdc)), 6e6);
+        assertEq(entry.nextLeafIndex(), 3);
+    }
+
     // T-2.1: POOL_ROLE gating
     function test_spendBalance_byPool_marksNullifierAndInserts() public {
         bytes32 nul = _c("n1");

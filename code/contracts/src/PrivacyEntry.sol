@@ -47,6 +47,14 @@ contract PrivacyEntry is IPrivacyEntry, AccessControl, ReentrancyGuard, Pausable
     error UnknownRoot();
     error CommitmentAlreadyInserted(bytes32 commitment);
     error InsufficientReserves(address token, uint256 requested, uint256 available);
+    error EmptyMemo();
+    error MemoTooLong(uint256 length);
+
+    /// @dev ADR-002 memo bound. An ECIES memo (ephemeral pubkey + nonce +
+    ///      note-secret ciphertext + auth tag) is ~130 bytes; 1 KiB leaves
+    ///      generous headroom for format evolution while keeping indexer
+    ///      rows and event storage bounded.
+    uint256 public constant MAX_MEMO_BYTES = 1024;
 
     constructor(address admin, address verifier_) {
         if (admin == address(0)) revert ZeroAddress();
@@ -68,6 +76,37 @@ contract PrivacyEntry is IPrivacyEntry, AccessControl, ReentrancyGuard, Pausable
         nonReentrant
         whenNotPaused
     {
+        _deposit(token, amount, commitment);
+    }
+
+    /// @notice Deposit with an encrypted note memo (ADR-002).
+    /// @dev Identical custody semantics to the 3-arg `deposit`, plus an
+    ///      `EncryptedMemo` event carrying the note's secrets encrypted to
+    ///      the depositor's viewing key. `Deposited` is still emitted with
+    ///      its original signature so existing indexers/subgraph handlers
+    ///      are untouched; recovery clients scan `EncryptedMemo` and
+    ///      trial-decrypt. The memo is opaque calldata to the contract —
+    ///      an empty memo is rejected because a memo-less note is
+    ///      unrecoverable by the ADR-002 flow (use the 3-arg overload if
+    ///      that is genuinely intended).
+    function deposit(
+        address token,
+        uint256 amount,
+        bytes32 commitment,
+        bytes calldata encryptedMemo
+    ) external nonReentrant whenNotPaused {
+        if (encryptedMemo.length == 0) revert EmptyMemo();
+        if (encryptedMemo.length > MAX_MEMO_BYTES) revert MemoTooLong(encryptedMemo.length);
+
+        _deposit(token, amount, commitment);
+
+        emit EncryptedMemo(commitment, encryptedMemo);
+    }
+
+    /// @dev Shared body of both `deposit` overloads: pulls the token via
+    ///      SafeERC20.transferFrom, bumps `reserves[token]`, inserts the
+    ///      commitment into the IMT, and emits `Deposited`.
+    function _deposit(address token, uint256 amount, bytes32 commitment) private {
         if (token == address(0)) revert ZeroAddress();
         if (amount == 0) revert ZeroAmount();
         if (commitment == bytes32(0)) revert ZeroAmount();
