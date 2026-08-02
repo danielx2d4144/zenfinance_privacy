@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>zenfinance — lend and borrow on-chain, without broadcasting your balance sheet</title>
+<meta name="description" content="A privacy-preserving money market. Zero-knowledge proofs verify every position — without revealing it. Shielded positions, ZK-verified solvency, agent-native ERC-4337.">
+<meta property="og:title" content="zenfinance — the quiet money market">
+<meta property="og:description" content="Lend and borrow on-chain — without broadcasting your balance sheet. ZK-verified, private by construction.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%230a0a0b'/%3E%3Cpath d='M8 11h16l-16 10h16' stroke='url(%23g)' stroke-width='3' fill='none'/%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%23a3e635'/%3E%3C/linearGradient%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ticker -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    <span>shielded positions</span><i>·</i><span>zk-verified solvency</span><i>·</i><span>0 bytes of position data leaked</span><i>·</i><span>in-browser proving</span><i>·</i><span>agent-native erc-4337</span><i>·</i><span>proofs over promises</span><i>·</i>
+    <span>shielded positions</span><i>·</i><span>zk-verified solvency</span><i>·</i><span>0 bytes of position data leaked</span><i>·</i><span>in-browser proving</span><i>·</i><span>agent-native erc-4337</span><i>·</i><span>proofs over promises</span><i>·</i>
+  </div>
+</div>
+
+<!-- nav -->
+<header class="nav" id="nav">
+  <a class="wordmark" href="#top"><span class="wordmark-tick"></span>zenfinance</a>
+  <nav class="nav-links">
+    <a href="#proof">Proof</a>
+    <a href="#spec">Protocol</a>
+    <a href="#how">How it works</a>
+    <a href="#faq">FAQ</a>
+    <a class="nav-gh" href="https://github.com/danielx2d4144/zenfinance_privacy" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+  <a class="btn btn-gradient btn-sm" href="#waitlist">Join the waitlist</a>
+</header>
+
+<!-- hero -->
+<main id="top">
+<section class="hero" id="hero">
+  <div class="hero-spot" id="spot" aria-hidden="true"></div>
+  <p class="kicker reveal">// SIGNAL / NOISE&nbsp;&nbsp;·&nbsp;&nbsp;PRIVACY-PRESERVING MONEY MARKET</p>
+  <h1 class="reveal">Lend and borrow on-chain —
+    <span class="decrypt-wrap"><span class="decrypt" id="decrypt" data-text="without broadcasting">without broadcasting</span><span class="grad-underline" id="underline"></span></span>
+    your balance sheet.</h1>
+  <p class="sub reveal">A privacy-preserving money market. Zero-knowledge proofs verify every
+    position — without revealing it.</p>
+  <div class="cta-row reveal">
+    <a class="btn btn-gradient" href="#waitlist">Join the waitlist</a>
+    <a class="btn btn-outline" href="https://github.com/danielx2d4144/zenfinance_privacy" target="_blank" rel="noopener">Read the docs</a>
+  </div>
+
+  <div class="stats reveal" id="stats">
+    <div class="stat"><em class="count" data-target="224" data-suffix="/224">0/224</em><label>tests passing</label></div>
+    <div class="stat"><em class="count" data-target="11">0</em><label>circuits compiled</label></div>
+    <div class="stat"><em>100<span class="pct">%</span></em><label>client-side proving</label></div>
+    <div class="stat"><em class="count" data-target="0" data-suffix=" bytes">0 bytes</em><label>position data leaked</label></div>
+  </div>
+</section>
+
+<!-- proof of build -->
+<section class="section" id="proof">
+  <p class="kicker reveal">// PROOF OF BUILD</p>
+  <div class="split">
+    <div class="reveal">
+      <h2>We ship proofs,<br>not promises.</h2>
+      <p class="body">Every claim on this page is checked in the repo. The circuits are
+        compiled, the verification keys are pinned, and the prover runs in your
+        browser — your secrets never touch our servers, because there are none.</p>
+    </div>
+    <div class="terminal reveal" id="terminal">
+      <div class="term-bar"><span class="dots"><i></i><i></i><i></i></span><span class="term-title">zenfinance — ci · main</span></div>
+      <div class="term-body">
+        <p class="term-line" data-cmd="forge test" data-out="224/224 tests <b>PASS</b>"></p>
+        <p class="term-line" data-cmd="circuits" data-out="11 compiled · vk pinned"></p>
+        <p class="term-line" data-cmd="prover" data-out="in-browser UltraHonk"></p>
+        <p class="term-line" data-cmd="recovery" data-out="1 signature · full restore"></p>
+        <p class="term-cursor" id="termCursor">$ <span class="blink">▌</span></p>
+      </div>
+      <div class="term-foot"><span>OPEN SOURCE</span><span class="grad-tick"></span><span>REPRODUCIBLE · DETERMINISTIC</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- spec sheet -->
+<section class="section" id="spec">
+  <p class="kicker reveal">// SPEC SHEET</p>
+  <h2 class="reveal">Private by construction.<br>Verifiable by anyone.</h2>
+  <div class="grid3">
+    <article class="card reveal">
+      <span class="idx">01/</span><span class="grad-tick"></span>
+      <h3>Shielded positions</h3>
+      <p>Deposits, debts, and collateral live as encrypted notes. Your counterparties
+        see a valid market — never your book.</p>
+      <dl class="kv">
+        <div><dt>state</dt><dd>encrypted notes</dd></div>
+        <div><dt>visibility</dt><dd>owner-only</dd></div>
+        <div><dt>leakage</dt><dd>zero</dd></div>
+      </dl>
+    </article>
+    <article class="card reveal">
+      <span class="idx">02/</span><span class="grad-tick"></span>
+      <h3>ZK-verified solvency</h3>
+      <p>Every borrow carries an UltraHonk proof that the position is
+        over-collateralized. The chain verifies math, not identities.</p>
+      <dl class="kv">
+        <div><dt>proof</dt><dd>UltraHonk</dd></div>
+        <div><dt>verified</dt><dd>on-chain</dd></div>
+        <div><dt>trust</dt><dd>none required</dd></div>
+      </dl>
+    </article>
+    <article class="card reveal">
+      <span class="idx">03/</span><span class="grad-tick"></span>
+      <h3>Agent-native ERC-4337</h3>
+      <p>Smart accounts and autonomous agents transact through account
+        abstraction — session keys, sponsored gas, policy-bound strategies.</p>
+      <dl class="kv">
+        <div><dt>accounts</dt><dd>ERC-4337</dd></div>
+        <div><dt>execution</dt><dd>intent relayer</dd></div>
+        <div><dt>policies</dt><dd>user-signed</dd></div>
+      </dl>
+    </article>
+  </div>
+</section>
+
+<!-- how it works -->
+<section class="section" id="how">
+  <p class="kicker reveal">// HOW IT WORKS</p>
+  <h2 class="reveal">Three steps. One signature.</h2>
+  <div class="steps">
+    <div class="step reveal">
+      <span class="step-n">1</span>
+      <h3>Sign once</h3>
+      <p>One wallet signature derives your session keys. No accounts, no email,
+        no KYC to see your own money.</p>
+    </div>
+    <div class="step-arrow reveal" aria-hidden="true">→</div>
+    <div class="step reveal">
+      <span class="step-n">2</span>
+      <h3>Prove in your browser</h3>
+      <p>Deposits and borrows are proven client-side. What leaves your machine
+        is a proof — never a number.</p>
+    </div>
+    <div class="step-arrow reveal" aria-hidden="true">→</div>
+    <div class="step reveal">
+      <span class="step-n">3</span>
+      <h3>The chain verifies</h3>
+      <p>Contracts check the proof and update the shielded pool. Lose your
+        device? One signature restores everything.</p>
+    </div>
+  </div>
+</section>
+
+<!-- faq -->
+<section class="section" id="faq">
+  <p class="kicker reveal">// FAQ</p>
+  <h2 class="reveal">Fair questions.</h2>
+  <div class="faqs reveal">
+    <details>
+      <summary>If positions are private, how do you stop bad debt?<span class="faq-x">+</span></summary>
+      <p>Per-user amounts are hidden, but protocol-level totals stay public and every
+        operation carries a zero-knowledge proof that health-factor and liquidity rules
+        hold. The market is auditable; individuals are not.</p>
+    </details>
+    <details>
+      <summary>Is this live? What exists today?<span class="faq-x">+</span></summary>
+      <p>The full stack is built and test-covered: 11 contracts (224 passing tests,
+        including solvency invariants), 11 zk circuits with pinned verification keys,
+        in-browser proving, and signature-only recovery. A public testnet demo is the
+        next milestone; mainnet follows a security audit — not before.</p>
+    </details>
+    <details>
+      <summary>What about compliance?<span class="faq-x">+</span></summary>
+      <p>Privacy is not anonymity from everyone, always. The design supports optional
+        auditor-decryption at deposit time, so users who need a compliance trail can
+        have one — chosen, not imposed.</p>
+    </details>
+    <details>
+      <summary>Who can see my balance?<span class="faq-x">+</span></summary>
+      <p>You. Your balance lives as encrypted notes only your keys can open. The
+        protocol sees commitments; explorers see proofs; your counterparties see a
+        solvent market.</p>
+    </details>
+  </div>
+</section>
+
+<!-- waitlist -->
+<section class="section closing" id="waitlist">
+  <p class="kicker reveal">// EARLY ACCESS</p>
+  <h2 class="reveal">The quiet money market.</h2>
+  <p class="status-line reveal">open source · 224/224 tests green · audits being scoped · testnet demo next</p>
+  <div class="cta-row center reveal">
+    <a class="btn btn-gradient" href="mailto:danielwork4144@gmail.com?subject=zenfinance%20waitlist&body=Wallet%20or%20contact%20(optional)%3A%0AWhat%20I%27d%20use%20private%20lending%20for%3A">Join the waitlist</a>
+    <a class="btn btn-outline" href="https://github.com/danielx2d4144/zenfinance_privacy" target="_blank" rel="noopener">Star the repo</a>
+  </div>
+  <p class="tiny reveal">No forms, no trackers. The waitlist is an email — fitting, for a privacy protocol.</p>
+</section>
+</main>
+
+<footer class="footer">
+  <span>zenfinance © 2026</span>
+  <nav>
+    <a href="#proof">proof</a>
+    <a href="#spec">protocol</a>
+    <a href="https://github.com/danielx2d4144/zenfinance_privacy" target="_blank" rel="noopener">github</a>
+  </nav>
+  <span class="foot-sig">signal / noise — proofs over promises</span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
