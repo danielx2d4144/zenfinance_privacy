@@ -6,7 +6,7 @@
  * ruleset".
  */
 import { describe, expect, it } from "vitest";
-import { Spectral } from "@stoplight/spectral-core";
+import { Spectral, type RulesetDefinition } from "@stoplight/spectral-core";
 import * as spectralRulesets from "@stoplight/spectral-rulesets";
 import { buildOpenApiSpec } from "../src/openapi";
 
@@ -14,8 +14,10 @@ describe("T-11.4 — OpenAPI 3.1 lints clean", () => {
   it("spectral oas ruleset returns 0 errors and 0 warnings", async () => {
     const spectral = new Spectral();
     // The canonical OpenAPI ruleset from @stoplight/spectral-rulesets.
-    // CommonJS interop: `oas` is the exported ruleset object.
-    spectral.setRuleset((spectralRulesets as unknown as { oas: { rules: Record<string, unknown> } }).oas);
+    // CommonJS interop: `oas` is the exported ruleset object. Assert it as
+    // RulesetDefinition — the parameter type — rather than a hand-written
+    // shape that only approximates it and therefore does not assign.
+    spectral.setRuleset((spectralRulesets as unknown as { oas: RulesetDefinition }).oas);
     const spec = buildOpenApiSpec();
     const results = await spectral.run(JSON.stringify(spec));
 

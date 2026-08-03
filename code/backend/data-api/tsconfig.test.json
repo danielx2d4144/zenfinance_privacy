@@ -1,0 +1,13 @@
+{
+  // Typecheck-only project covering everything the emitting build leaves out.
+  // `rootDir` is dropped deliberately: the gate tests import the SDK straight
+  // from ../../sdks/sdk-ts/src, which is legitimate for a test and impossible
+  // under a rootDir that has to stay pinned for dist/ layout.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": null,
+    "outDir": null
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts", "scripts/**/*.ts"]
+}

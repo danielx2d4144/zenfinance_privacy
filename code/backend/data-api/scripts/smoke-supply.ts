@@ -17,7 +17,10 @@
  */
 import { randomBytes } from "node:crypto";
 
-import { LendingSdk } from "@lending/sdk-ts";
+// Relative, not "@lending/sdk-ts": the SDK is not a dependency of this
+// package, so the bare specifier never resolved and this script could not run
+// at all. Same path the gate tests under test/ already use.
+import { LendingSdk } from "../../../sdks/sdk-ts/src/index";
 
 const API = process.env.API_BASE_URL ?? "http://127.0.0.1:8787";
 const KEY = process.env.API_KEY ?? "day11-local-test-api-key-please-rotate";
