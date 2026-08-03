@@ -57,6 +57,40 @@ Last verified: 2026-07-30. This file supersedes any conflicting claim in `design
 Consequence: the Base-Sepolia-fallback branch is **not needed**. The demo can ship on
 Horizen testnet, which is what the founder publicly committed to (August beta).
 
+## Aggregation path proven on Horizen testnet (2026-08-03) — M3 Phase-0 gate PASS
+
+A real `entry_deposit` UltraHonk proof was submitted to Kurier with `chainId=2651420`,
+aggregated by zkVerify, published to the Horizen proxy, and verified on-chain. Reproduce
+with `npm run probe:horizen` in `code/backend/prover-service`.
+
+| Kurier status | Elapsed | Δ |
+|---|---|---|
+| Submitted | 2s | 2s |
+| IncludedInBlock | 7s | 6s |
+| AggregationPending | 25s | 17s |
+| **Aggregated** | **2m 54s** | 2m 29s |
+
+- Job `2d1e0210-8f37-11f1-a611-d6f56b47605a`, aggregation **1185**, leaf **4 of 5**,
+  root `0x7d7bc6b7…ee773`, merkle path depth 1.
+- `AggregationPosted` landed in tx
+  [`0xc0c5c9f4…97029`](https://horizen-testnet.explorer.caldera.xyz/tx/0xc0c5c9f47c3ebb81066d39f8d0034c39ea5ab68211f5afa22806e3cfb7297029)
+  at block **24,171,240**.
+- `verifyProofAggregation(175, 1185, leaf, path, 5, 4)` on
+  `0x3098A6974649478f0133046e44105AA84e868C21` returns **true**.
+
+**Domain 175 is Horizen testnet's on-chain aggregation domain.** This corrects the comment
+in `code/backend/prover-service/.env`, which claimed 175 was "a Kurier-internal queue id,
+NOT the on-chain proxy domain". Domains are logical aggregation containers, one set per
+destination chain: Base Sepolia = 2, Horizen testnet = 175. Both are real on-chain domains.
+
+**The domain is not idle.** An earlier `eth_getLogs` scan over the last 200k blocks found
+nothing and suggested the last publication was 2026-07-14; the scan window was simply too
+narrow. Our proof landed as leaf 4 of a 5-leaf batch, i.e. other traffic shared it.
+
+Consequence: ~3 minutes is the **measured UX budget** for any proof-backed action, and the
+guided borrow (three sequential proofs) is ~9 minutes — long enough that it must run as a
+background job with notification, not a blocking modal.
+
 ## Strategy state (from approved design doc, 2026-07-30)
 
 - **Gate 1 (Horizen chain health: ≥$5M TVL AND ≥100 daily actives): FAILED** — measured ~20 avg daily actives (peak 69), 7,047 lifetime addresses, no measurable TVL (explorer.horizen.io Blockscout API).

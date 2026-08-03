@@ -15,7 +15,8 @@
     "register-vks": "tsx scripts/register-all-vks.ts",
     "smoke": "tsx scripts/smoke-submit.ts",
     "consume": "tsx scripts/consume.ts",
-    "e2e": "tsx scripts/e2e.ts"
+    "e2e": "tsx scripts/e2e.ts",
+    "probe:horizen": "tsx scripts/horizen-aggregation-probe.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

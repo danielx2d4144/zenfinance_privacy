@@ -37,6 +37,11 @@ const EnvSchema = z.object({
     .int()
     .refine((n) => n === 2651420, "expected Horizen testnet chain id 2651420"),
   HORIZEN_EXPLORER: httpsUrl,
+  ZKVERIFY_PROXY_HORIZEN: hexAddress,
+  // Aggregation domain the zkVerify publisher uses for Horizen testnet.
+  // Different chains sit on different domains — see the note in .env.example.
+  ZKVERIFY_HORIZEN_DOMAIN_ID: z.coerce.number().int().positive(),
+  ZKVERIFIER_HORIZEN: hexAddress.optional().or(z.literal("")),
 
   RELAYER_PRIVATE_KEY: hexPrivateKey,
   RELAYER_ADDRESS: hexAddress,

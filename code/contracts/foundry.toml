@@ -33,9 +33,11 @@ remappings = [
 fuzz = { runs = 256 }
 invariant = { runs = 256, depth = 32 }
 
-# Allow scripts to write deployment manifests into the subgraph package.
+# Allow scripts to write deployment manifests into the subgraph package
+# (Anvil harness) and into ./deployments (public-chain deploy manifests).
 fs_permissions = [
     { access = "read-write", path = "../backend/subgraph" },
+    { access = "read-write", path = "./deployments" },
 ]
 
 [fmt]
