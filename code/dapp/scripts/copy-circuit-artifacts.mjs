@@ -14,6 +14,10 @@
 // pick up the freshest target/<name>.json output. The dev server also
 // re-copies if the script is invoked manually after a `nargo compile`.
 //
+// The sources are committed (see code/.gitignore) precisely so this works on
+// Vercel, which has no Noir toolchain and cannot regenerate them. A missing
+// source is therefore fatal, not a warning — see the end of main().
+//
 // Run with: node scripts/copy-circuit-artifacts.mjs
 
 import { copyFileSync, existsSync, mkdirSync, readdirSync, statSync } from "node:fs";
@@ -72,15 +76,24 @@ function main() {
     copied += 1;
   }
 
-  if (missing.length > 0) {
-    console.warn(
-      `[copy-circuits] WARN missing artifacts (run nargo compile first): ${missing.join(", ")}`,
-    );
-  }
-
   console.log(
     `[copy-circuits] ${copied} copied, ${skipped} up-to-date, ${missing.length} missing`,
   );
+
+  // A missing artifact used to be a warning. That is the wrong severity for a
+  // hosted build: the Next build would go green and ship a dapp whose worker
+  // 404s on the circuit it needs, so the failure surfaces to a user mid-proof
+  // instead of to us in CI. The artifacts are committed now, so anything
+  // missing here means a broken checkout, not an unbuilt circuit.
+  if (missing.length > 0) {
+    console.error(
+      `[copy-circuits] FATAL missing artifacts: ${missing.join(", ")}\n` +
+        `  Expected at ${CIRCUITS_DIR}/<name>/target/<name>.json — these are committed\n` +
+        `  (see code/.gitignore). Restore them with \`git checkout -- code/circuits\`,\n` +
+        `  or rebuild with \`code/circuits/scripts/build_all.sh\`.`,
+    );
+    process.exit(1);
+  }
 }
 
 main();

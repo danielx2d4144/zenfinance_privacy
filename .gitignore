@@ -35,6 +35,10 @@ broadcast/
 **/proof
 **/public_inputs
 
+# The compiled circuit JSON and kurier_vk_hash are exceptions to `target/` —
+# see code/.gitignore, which is the deeper file and therefore the one that
+# actually decides for anything under code/.
+
 # Dapp prebuild copies circuit JSON artifacts into public/circuits;
 # they are regenerated from code/circuits/<name>/target/<name>.json
 # by scripts/copy-circuit-artifacts.mjs on every dev/build.
@@ -64,3 +68,4 @@ Thumbs.db
 # Claude Code local settings (machine-specific permissions, hooks, etc.)
 .claude/
 !.claude/settings.json
+.gstack/

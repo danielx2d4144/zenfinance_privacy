@@ -1,0 +1,8 @@
+# The compiled circuit artifacts under code/circuits/*/target/ are committed
+# (see code/.gitignore) because Vercel has no Noir toolchain. They are build
+# output reproduced by `nargo compile` on Linux, so keep them byte-exact:
+# without this, checking out on Windows rewrites LF to CRLF and every artifact
+# shows up as modified against a freshly compiled one, hiding real drift in
+# noise. `-text` disables end-of-line conversion in both directions.
+code/circuits/*/target/*.json -text
+code/circuits/*/target/kurier_vk_hash -text
