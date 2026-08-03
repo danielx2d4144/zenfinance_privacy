@@ -12,6 +12,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { randomBytes } from "node:crypto";
+
+import { randomFieldElement } from "./helpers/field";
 import { request } from "undici";
 import { LendingSdk } from "../../../sdks/sdk-ts/src/index";
 
@@ -72,7 +74,7 @@ describe("G3.4 — subgraph SLO (p95 indexing lag ≤ 30s)", () => {
     const lagsMs: number[] = [];
 
     for (let i = 0; i < SAMPLES; i++) {
-      const commitment = `0x${randomBytes(32).toString("hex")}`;
+      const commitment = randomFieldElement();
       const accepted = await sdk.intents.create(
         { kind: "entry_deposit", asset: "USDC", amount: "100000", commitment },
         { idempotencyKey: `g3-4-${randomBytes(8).toString("hex")}` },

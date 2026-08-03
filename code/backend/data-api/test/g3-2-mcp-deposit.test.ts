@@ -11,6 +11,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { randomBytes } from "node:crypto";
+
+import { randomFieldElement } from "./helpers/field";
 import { LendingSdk } from "../../../sdks/sdk-ts/src/index";
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8787";
@@ -24,7 +26,7 @@ describe("G3.2 — MCP equivalent of G3.1", () => {
     const names = (tools.tools ?? []).map((t) => t.name);
     expect(names).toContain("action.entry_deposit");
 
-    const commitment = `0x${randomBytes(32).toString("hex")}`;
+    const commitment = randomFieldElement();
     const accepted = await sdk.intents.create(
       { kind: "entry_deposit", asset: "USDC", amount: "100000", commitment },
       { idempotencyKey: `g3-2-${randomBytes(8).toString("hex")}` },

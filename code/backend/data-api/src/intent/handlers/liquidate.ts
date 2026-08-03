@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
 import type { z } from "zod";
 
-import { getChainClients } from "../../chain/anvil.js";
+import { getChainClients } from "../../chain/clients.js";
 import { ASSET_ID, type LiquidateIntent } from "../schemas.js";
 import type { IntentRow } from "../state.js";
 import { LIQUIDATION_BOARD_ABI } from "./pool-abis.js";

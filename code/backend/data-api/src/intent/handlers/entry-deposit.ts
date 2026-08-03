@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
 import type { Address, Hex } from "viem";
 
-import { getChainClients } from "../../chain/anvil.js";
+import { getChainClients } from "../../chain/clients.js";
 import { withChainLock } from "../../chain/mutex.js";
 import { insertJobWithTx, updateIntentStatus, type IntentRow } from "../state.js";
 import type { z } from "zod";

@@ -12,7 +12,7 @@
  */
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
-import { randomBytes } from "node:crypto";
+import { randomFieldElement } from "./helpers/field";
 
 import { buildApp } from "../src/server";
 import { getConfig } from "../src/config";
@@ -58,7 +58,7 @@ async function poll(id: string, deadlineMs = 30_000): Promise<IntentEnvelope> {
 
 describe("T-11.1 — entry_deposit intent reaches confirmed", () => {
   it("submits and finalises against local Anvil", async () => {
-    const commitment = `0x${randomBytes(32).toString("hex")}`;
+    const commitment = randomFieldElement();
     const body = {
       kind: "entry_deposit",
       asset: "USDC",

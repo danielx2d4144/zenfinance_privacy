@@ -12,6 +12,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { randomBytes } from "node:crypto";
+
+import { randomFieldElement } from "./helpers/field";
 import { LendingSdk } from "../../../sdks/sdk-ts/src/index";
 
 const API_BASE_URL = process.env.API_BASE_URL ?? "http://localhost:8787";
@@ -20,7 +22,7 @@ const API_KEY = process.env.API_KEY ?? "day11-local-test-api-key-please-rotate";
 describe("G3.3 — concurrent idempotent submissions", () => {
   it("10 parallel POSTs with the same key share intent_id and produce one tx", async () => {
     const sdk = new LendingSdk({ baseUrl: API_BASE_URL, apiKey: API_KEY });
-    const commitment = `0x${randomBytes(32).toString("hex")}`;
+    const commitment = randomFieldElement();
     const key = `g3-3-${randomBytes(8).toString("hex")}`;
     const body = { kind: "entry_deposit", asset: "USDC", amount: "100000", commitment } as const;
 

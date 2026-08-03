@@ -1,6 +1,8 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
 import { getConfig } from "./config.js";
+import { getPool } from "./db.js";
+import { resumeInFlightIntents } from "./intent/resume.js";
 import { registerHealthRoutes } from "./routes/health.js";
 import { registerIntentRoutes } from "./routes/intents.js";
 import { registerOpenApiRoutes } from "./routes/openapi.js";
@@ -38,6 +40,13 @@ async function main() {
   const cfg = getConfig();
   const app = await buildApp();
   await app.listen({ port: cfg.PORT, host: cfg.HOST });
+
+  // After `listen`, deliberately: the sweep can spend minutes re-attaching to
+  // Kurier jobs, and the health check must be answering before then. Not in
+  // `buildApp` because tests build the app without wanting a sweep.
+  resumeInFlightIntents(getPool(), app.log).catch((err) => {
+    app.log.error({ err }, "intent-resume-sweep-failed");
+  });
 }
 
 import { pathToFileURL } from "node:url";

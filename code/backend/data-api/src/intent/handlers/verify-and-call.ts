@@ -1,12 +1,23 @@
 import type { Pool } from "pg";
 import type { Abi, Address, Hex } from "viem";
 
-import { getChainClients } from "../../chain/anvil.js";
+import { getChainClients } from "../../chain/clients.js";
 import { setMockProxyAllowed } from "../../chain/mock-proxy.js";
 import type { AggregationProofTuple } from "../../chain/zk-verifier.js";
 import { withChainLock } from "../../chain/mutex.js";
-import { insertJobWithTx, updateIntentStatus, type IntentRow } from "../state.js";
-import { submitAndWait, type AggregationReceipt } from "../kurier-poll.js";
+import { getConfig } from "../../config.js";
+import {
+  getKurierJobId,
+  insertJobWithTx,
+  recordKurierJobId,
+  updateIntentStatus,
+  type IntentRow,
+} from "../state.js";
+import {
+  resumeAggregation,
+  submitAndWait,
+  type AggregationReceipt,
+} from "../kurier-poll.js";
 import type { CircuitName } from "../vk-registry.js";
 
 const ZERO_ROOT: Hex = "0x0000000000000000000000000000000000000000000000000000000000000000";
@@ -51,12 +62,13 @@ async function resolveRootArg(
  *
  * Flow per handler:
  *   1. updateIntentStatus(proving) — proof is in hand from the dapp
- *   2. submitAndWait stub — returns a synthetic AggregationReceipt
+ *   2. submit to Kurier (or the mock receipt on Anvil), persisting the job id
+ *      before the wait so a restart can re-attach; wait for aggregation
  *   3. updateIntentStatus(aggregated) — receipt available
  *   4. withChainLock(async () => {
- *        setAllowed on the mock proxy
- *        verifyAndConsume on ZkVerifier
- *        the caller-provided pool method (e.g., supplyAsset)
+ *        setAllowed on the mock proxy   [mock mode only]
+ *        the caller-provided pool method (e.g., supplyAsset), which runs
+ *        verifyAndConsume on ZkVerifier internally
  *      })
  *   5. updateIntentStatus(confirmed) + insertJobWithTx
  *
@@ -91,11 +103,7 @@ export async function verifyAndCall(args: VerifyAndCallArgs): Promise<void> {
   try {
     await updateIntentStatus(pool, intent.id, "proving");
 
-    const receipt = await submitAndWait({
-      circuit: args.circuit,
-      proof: args.proof,
-      publicInputs: args.publicInputs,
-    });
+    const receipt = await attest(pool, intent, args);
 
     await updateIntentStatus(pool, intent.id, "aggregated");
 
@@ -106,20 +114,28 @@ export async function verifyAndCall(args: VerifyAndCallArgs): Promise<void> {
 
     let depositHash: Hex;
     await withChainLock(async () => {
-      // Step 1: open the synthetic aggregation slot on the mock proxy
-      // so when the pool's internal verifyAndConsume calls
+      // Step 1 (mock mode only): open the synthetic aggregation slot on the
+      // mock proxy so when the pool's internal verifyAndConsume calls
       // verifyProofAggregation, the proxy returns true.
       //
       // The pool contracts already invoke ZkVerifier.verifyAndConsume
       // themselves (e.g., ShieldedSupplyPool.supplyAsset:99). Calling
       // it ourselves would consume the replay slot first and make the
       // pool's internal call revert with AlreadyConsumed.
-      await setMockProxyAllowed({
-        proxyAddress: mockProxy,
-        domainId: aggregationProof.domainId,
-        aggregationId: aggregationProof.aggregationId,
-        leafIndex: aggregationProof.leafIndex,
-      });
+      //
+      // Against the real zkVerify proxy there is nothing to open: the
+      // aggregation root is already published on-chain and the merkle witness
+      // in the receipt is what proves membership. This is the seam where the
+      // cryptography stops being theatre.
+      if (getConfig().ATTESTATION_MODE === "mock") {
+        if (!mockProxy) throw new Error("ATTESTATION_MODE=mock but MOCK_PROXY_ADDRESS is unset");
+        await setMockProxyAllowed({
+          proxyAddress: mockProxy,
+          domainId: aggregationProof.domainId,
+          aggregationId: aggregationProof.aggregationId,
+          leafIndex: aggregationProof.leafIndex,
+        });
+      }
 
       // Step 2: pool method. The pool runs its own verifyAndConsume
       // against ZkVerifier as part of the externals.
@@ -154,6 +170,37 @@ export async function verifyAndCall(args: VerifyAndCallArgs): Promise<void> {
     const reason = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
     await updateIntentStatus(pool, intent.id, "failed", reason.slice(0, 500));
   }
+}
+
+/**
+ * Get an aggregation receipt for this intent, re-attaching rather than
+ * re-submitting when a previous process already handed the proof to Kurier.
+ *
+ * Re-submitting after a restart would be worse than wasteful: the first
+ * submission is still aggregating, and its leaf — once published — consumes
+ * the ZkVerifier replay slot for this proof. The second receipt would then
+ * revert with `AlreadyConsumed` and the user would see a failure for an action
+ * that actually succeeded.
+ */
+async function attest(
+  pool: Pool,
+  intent: IntentRow,
+  args: VerifyAndCallArgs,
+): Promise<AggregationReceipt> {
+  const existing = await getKurierJobId(pool, intent.id);
+  if (existing && getConfig().ATTESTATION_MODE === "kurier") {
+    return resumeAggregation(args.circuit, existing);
+  }
+
+  return submitAndWait({
+    circuit: args.circuit,
+    proof: args.proof,
+    publicInputs: args.publicInputs,
+    onSubmitted: async (jobId) => {
+      await recordKurierJobId(pool, intent.id, jobId);
+      await updateIntentStatus(pool, intent.id, "submitted");
+    },
+  });
 }
 
 function receiptToTuple(

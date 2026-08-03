@@ -1,6 +1,6 @@
 import type { Address, Hex } from "viem";
 
-import { getChainClients } from "./anvil.js";
+import { getChainClients } from "./clients.js";
 
 /**
  * MockVerifyProofAggregation admin helper. On Anvil we use the mock

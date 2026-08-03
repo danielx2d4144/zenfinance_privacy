@@ -106,6 +106,7 @@ export async function registerIntentRoutes(app: FastifyInstance): Promise<void> 
         kind: body.kind,
         assetId,
         amount,
+        requestBody: body,
       });
       intentId = intent.id;
       responseBody = intentResponse(intent);
@@ -118,6 +119,7 @@ export async function registerIntentRoutes(app: FastifyInstance): Promise<void> 
         kind: body.kind,
         assetId,
         amount,
+        requestBody: body,
       });
       intentId = intent.id;
       responseBody = intentResponse(intent);
@@ -155,7 +157,14 @@ export async function registerIntentRoutes(app: FastifyInstance): Promise<void> 
   });
 }
 
-async function runHandler(body: AnyIntentInput, intentId: string): Promise<void> {
+/**
+ * Dispatch one intent body to its handler.
+ *
+ * Exported because the boot sweep replays it: handlers derive the pool, the
+ * method and every argument from the body deterministically, so replaying the
+ * stored body is enough to rebuild an interrupted call.
+ */
+export async function runHandler(body: AnyIntentInput, intentId: string): Promise<void> {
   const pool = getPool();
   const intent = await getIntent(pool, intentId);
   if (!intent) return;

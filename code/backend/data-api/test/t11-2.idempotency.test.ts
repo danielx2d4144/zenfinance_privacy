@@ -5,6 +5,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
 import { randomBytes } from "node:crypto";
 
+import { randomFieldElement } from "./helpers/field";
+
 import { buildApp } from "../src/server";
 import { getConfig } from "../src/config";
 import { closePool } from "../src/db";
@@ -25,7 +27,7 @@ afterAll(async () => {
 
 describe("T-11.2 — Idempotency-Key replay returns same intent", () => {
   it("two POSTs with the same key resolve to the same intent_id", async () => {
-    const commitment = `0x${randomBytes(32).toString("hex")}`;
+    const commitment = randomFieldElement();
     const body = {
       kind: "entry_deposit",
       asset: "USDC",

@@ -15,6 +15,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { KURIER_VK_HASHES } from "./kurier-vk-hashes.js";
 import type { CircuitName } from "./registry.js";
 
 function targetDir(name: CircuitName): string {
@@ -33,12 +34,49 @@ export async function writeKurierVkHash(name: CircuitName, vkHash: string): Prom
   await writeFile(filePath(name), `${vkHash}\n`, "utf8");
 }
 
+/**
+ * Resolve a circuit's Kurier vkHash.
+ *
+ * Disk wins when present, because that's what `register-all-vks` just wrote
+ * and a freshly rebuilt circuit is the case where the constant is stale. When
+ * the file is absent — the deployed data-API container, which has no
+ * `code/circuits/` tree — fall back to the pinned constant.
+ *
+ * A disk value that disagrees with the constant is a hard error: it means the
+ * circuit was rebuilt and re-registered without updating
+ * `kurier-vk-hashes.ts`, so anything deployed from this commit would submit
+ * proofs against the wrong key and be rejected by Kurier with a confusing
+ * message. Fail here instead, where the cause is legible.
+ */
 export async function readKurierVkHash(name: CircuitName): Promise<`0x${string}`> {
-  const raw = await readFile(filePath(name), "utf8");
-  const trimmed = raw.trim();
+  const pinned = KURIER_VK_HASHES[name];
+
+  let trimmed: string;
+  try {
+    trimmed = (await readFile(filePath(name), "utf8")).trim();
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") {
+      if (!pinned) {
+        throw new Error(
+          `${name}: no kurier_vk_hash on disk and no pinned constant. ` +
+            `Run \`npm run register-vks\` in a checkout with built circuits.`,
+        );
+      }
+      return pinned;
+    }
+    throw err;
+  }
+
   if (!/^0x[a-fA-F0-9]{64}$/.test(trimmed)) {
     throw new Error(
       `${name}: kurier_vk_hash file missing or malformed. Run \`npm run register-vks\` first.`,
+    );
+  }
+  if (pinned && trimmed.toLowerCase() !== pinned.toLowerCase()) {
+    throw new Error(
+      `Kurier vkHash drift for ${name}: pinned=${pinned} disk=${trimmed}. ` +
+        `The circuit was re-registered without updating src/circuits/kurier-vk-hashes.ts — ` +
+        `update it in the same commit, or the deployed API will submit against the wrong key.`,
     );
   }
   return trimmed as `0x${string}`;

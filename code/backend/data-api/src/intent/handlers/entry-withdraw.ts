@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
 import type { z } from "zod";
 
-import { getChainClients } from "../../chain/anvil.js";
+import { getChainClients } from "../../chain/clients.js";
 import { type EntryWithdrawIntent } from "../schemas.js";
 import { getCircuit } from "../vk-registry.js";
 import type { IntentRow } from "../state.js";

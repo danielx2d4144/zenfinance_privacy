@@ -1,7 +1,7 @@
 import type { Pool } from "pg";
 import type { z } from "zod";
 
-import { getChainClients } from "../../chain/anvil.js";
+import { getChainClients } from "../../chain/clients.js";
 import { ASSET_ID, type DepositCollateralIntent } from "../schemas.js";
 import type { IntentRow } from "../state.js";
 import { SHIELDED_POSITION_POOL_ABI } from "./pool-abis.js";

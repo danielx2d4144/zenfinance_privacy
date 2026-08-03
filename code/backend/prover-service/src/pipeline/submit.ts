@@ -25,9 +25,96 @@ export interface SubmitOptions {
   poll?: PollOptions;
 }
 
+export interface SubmitProofArgs extends SubmitOptions {
+  circuit: CircuitName;
+  /** 0x-prefixed UltraHonk proof bytes. */
+  proof: `0x${string}`;
+  /** 0x-prefixed field elements, in circuit order. */
+  publicSignals: string[];
+  /**
+   * Called with the Kurier job id the moment it is known, before polling
+   * starts. Callers that must survive a restart persist it here — without it
+   * a crash mid-aggregation orphans a job that is still being aggregated.
+   */
+  onSubmitted?: (jobId: string) => void | Promise<void>;
+}
+
 /**
- * Submit one proof artifact for the named circuit, wait for aggregation, and
- * return the receipt that on-chain consumers feed to `IVerifyProofAggregation`.
+ * Submit proof bytes for the named circuit, wait for aggregation, and return
+ * the receipt that on-chain consumers feed to `IVerifyProofAggregation`.
+ *
+ * This is the shape a server wants: the dapp posts proof bytes over HTTP, so
+ * there is no artifact on disk to read. The disk-reading `submitAndWait`
+ * below is a thin wrapper for the CLI scripts.
+ */
+export async function submitProofAndWait(
+  client: KurierClient,
+  args: SubmitProofArgs,
+): Promise<AggregationReceipt> {
+  const { circuit, proof, publicSignals } = args;
+  const vkRegistered = args.vkRegistered ?? true;
+
+  const vkField = vkRegistered
+    ? await readKurierVkHash(circuit)
+    : await readVkBytes(circuit);
+
+  log.info(
+    {
+      circuit,
+      vkRegistered,
+      chainId: args.chainId,
+      proofBytes: (proof.length - 2) / 2,
+      publicSignals: publicSignals.length,
+    },
+    "kurier-submit",
+  );
+
+  const submitted = await client.submitProof({
+    proofType: "ultrahonk",
+    proofOptions: { variant: "ZK", version: "V3_0" },
+    vkRegistered,
+    ...(args.chainId !== undefined ? { chainId: args.chainId } : {}),
+    proofData: { proof, publicSignals, vk: vkField },
+  });
+
+  await args.onSubmitted?.(submitted.jobId);
+
+  return waitForAggregation(client, circuit, submitted.jobId, args.poll);
+}
+
+/**
+ * Poll an already-submitted Kurier job to a terminal state.
+ *
+ * Split out of `submitProofAndWait` so a process that restarts mid-flight can
+ * re-attach to a persisted jobId instead of paying for the proof twice.
+ */
+export async function waitForAggregation(
+  client: KurierClient,
+  circuit: CircuitName | string,
+  jobId: string,
+  poll: PollOptions = defaultPoll,
+): Promise<AggregationReceipt> {
+  const terminal = await pollUntilTerminal(client, jobId, poll);
+  if (terminal.kind !== "succeeded") {
+    throw new Error(
+      `Kurier job ${jobId} ended in ${terminal.kind} (status=${terminal.status})` +
+        (terminal.kind === "failed" && terminal.error ? `: ${terminal.error}` : ""),
+    );
+  }
+
+  return {
+    jobId,
+    circuit,
+    status: terminal.status,
+    aggregationId: terminal.aggregationId,
+    details: terminal.details,
+  };
+}
+
+/**
+ * Submit one proof **artifact** for the named circuit — the CLI shape, used by
+ * `scripts/e2e.ts`, `scripts/smoke-submit.ts` and the Horizen probe. Reads the
+ * proof off disk and delegates to `submitProofAndWait`.
  */
 export async function submitAndWait(
   client: KurierClient,
@@ -35,7 +122,6 @@ export async function submitAndWait(
   opts: SubmitOptions = {},
 ): Promise<AggregationReceipt> {
   const pinned = getCircuit(circuit);
-  const vkRegistered = opts.vkRegistered ?? true;
 
   const [proof, publicSignals, onDiskPedersen] = await Promise.all([
     readProofBytes(circuit),
@@ -50,42 +136,5 @@ export async function submitAndWait(
     );
   }
 
-  const vkField = vkRegistered
-    ? await readKurierVkHash(circuit)
-    : await readVkBytes(circuit);
-
-  log.info(
-    {
-      circuit,
-      pedersenVkHash: pinned.vkHash,
-      vkRegistered,
-      proofBytes: (proof.length - 2) / 2,
-      publicSignals: publicSignals.length,
-    },
-    "kurier-submit",
-  );
-
-  const submitted = await client.submitProof({
-    proofType: "ultrahonk",
-    proofOptions: { variant: "ZK", version: "V3_0" },
-    vkRegistered,
-    ...(opts.chainId !== undefined ? { chainId: opts.chainId } : {}),
-    proofData: { proof, publicSignals, vk: vkField },
-  });
-
-  const terminal = await pollUntilTerminal(client, submitted.jobId, opts.poll ?? defaultPoll);
-  if (terminal.kind !== "succeeded") {
-    throw new Error(
-      `Kurier job ${submitted.jobId} ended in ${terminal.kind} (status=${terminal.status})` +
-        (terminal.kind === "failed" && terminal.error ? `: ${terminal.error}` : ""),
-    );
-  }
-
-  return {
-    jobId: submitted.jobId,
-    circuit,
-    status: terminal.status,
-    aggregationId: terminal.aggregationId,
-    details: terminal.details,
-  };
+  return submitProofAndWait(client, { ...opts, circuit, proof, publicSignals });
 }
