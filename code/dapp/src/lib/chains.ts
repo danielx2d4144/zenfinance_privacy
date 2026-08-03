@@ -2,8 +2,8 @@
  * Legacy shim — the chain registry moved to `chain-config.ts` (M1.4).
  * Kept so existing imports (`wagmi.ts`, `useWallet.ts`) keep working.
  *
- * NOTE: the old Horizen testnet chainId 2651420 (Caldera) is DEAD.
- * The live Horizen testnet is chainId 845320009 — see chain-config.ts.
+ * NOTE: the live Horizen testnet is chainId 2651420 on Caldera
+ * (re-verified 2026-08-03). See chain-config.ts for the full record.
  */
 export {
   anvil,

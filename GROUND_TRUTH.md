@@ -18,13 +18,44 @@ Last verified: 2026-07-30. This file supersedes any conflicting claim in `design
 | Note store | **IN-MEMORY ONLY** | Funds "disappear" from UI on refresh (chain-safe, UX-broken). Fix = M2. |
 | SDKs | SCAFFOLD | sdk-ts, sdk-py — untested against live stack |
 
-## Chain ground truth (corrects design-v2 everywhere)
+## Chain ground truth (re-verified live 2026-08-03 — supersedes the 07-30 entry)
 
-- **Horizen 2.0** = EVM-native L3 on **Base**, mainnet live since Dec 2025, chainId **26514**, explorer https://explorer.horizen.io
-- **Horizen testnet**: chainId **845320009**, RPC `https://horizen-rpc-testnet.appchain.base.org`, explorer `https://horizen-explorer-testnet.appchain.base.org`
-- **DEAD**: old Caldera testnet chainId **2651420** (still referenced in `design-v2/` and `code/dapp/src/lib/chains.ts` — the latter is fixed by the M1.4 chain-config module)
-- **"Tachyon" is an ecosystem APP** (private cross-chain transfers, May 2026), NOT the chain or testnet
-- Current deploy targets: **Anvil 31337** (daily dev), **Base Sepolia 84532** (attestation E2E), **Horizen testnet 845320009** (M3, gated on spike)
+- **Horizen mainnet**: chainId **26514**. Explorers https://explorer.horizen.io and
+  https://horizen.calderaexplorer.xyz serve the **same chain** (identical `/api/v2/stats`
+  payloads), so the Gate-1 health numbers below were measured on the correct chain.
+- **Horizen testnet**: chainId **2651420**, RPC `https://horizen-testnet.rpc.caldera.xyz`,
+  explorer `https://horizen-testnet.explorer.caldera.xyz`, hub/faucet
+  `https://horizen-testnet.hub.caldera.xyz`. **LIVE**: 24.1M+ blocks, ~1 block/sec
+  measured, gas ~0.001 gwei.
+- **CORRECTION:** the 2026-07-30 revision of this file claimed 2651420 was dead and
+  845320009 was the live testnet. That was **backwards**. `horizen-rpc-testnet.appchain.base.org`
+  and `horizen-explorer-testnet.appchain.base.org` have **no DNS A record** (checked via
+  8.8.8.8 and 1.1.1.1), while 2651420 answers and is the chain **zkVerify officially
+  supports**. Source of the error: a search result treated as authoritative without an
+  RPC probe. Rule: never record a chain endpoint without an `eth_chainId` call.
+- **zkVerify aggregation proxies** (zkVerify "Supported Networks" table, verified on-chain):
+  - Horizen testnet 2651420 → `0x3098A6974649478f0133046e44105AA84e868C21`
+    (ERC-1967 proxy; implementation slot → `0x03225ff1ff4f1bac6e81bb6317006a509422d51c`)
+  - Horizen mainnet 26514 → `0xCb47A3C3B9Eb2E549a3F2EA4729De28CafbB2b69`
+  - Base Sepolia 84532 → `0x0807C544D38aE7729f8798388d89Be6502A1e8A8`
+    — **matches this repo's working T-8.1 config exactly**, which cross-validates the table.
+- **Canonical ERC-4337 EntryPoints on Horizen testnet**: v0.7
+  `0x0000000071727De22E5E9d8BAf0edAc6f37da032` (~16KB bytecode) AND v0.6 both deployed.
+- **"Tachyon" is an ecosystem APP** (private cross-chain transfers, May 2026), NOT the chain.
+- Deploy targets: **Anvil 31337** (dev), **Base Sepolia 84532** (attestation E2E),
+  **Horizen testnet 2651420** (M3).
+
+## M3 spike result (run 2026-08-03) — 3 of 4 gates PASS
+
+| Gate | Result | Evidence |
+|---|---|---|
+| 1. RPC + faucet usable | **PASS** | RPC live, 24,142,208 blocks, 21 blocks/20s, gas 0.001 gwei; hub/faucet HTTP 200 |
+| 2. Canonical EntryPoint present | **PASS** | v0.7 and v0.6 both have bytecode on-chain |
+| 3. zkVerify proxy on Horizen testnet | **PASS** | ERC-1967 proxy with non-zero implementation (addresses above) |
+| 4. Deploy script clean | **OPEN** | Requires an actual deploy run — the remaining M3 work |
+
+Consequence: the Base-Sepolia-fallback branch is **not needed**. The demo can ship on
+Horizen testnet, which is what the founder publicly committed to (August beta).
 
 ## Strategy state (from approved design doc, 2026-07-30)
 

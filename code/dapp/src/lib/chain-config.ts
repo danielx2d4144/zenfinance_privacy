@@ -7,12 +7,16 @@ import { defineChain, type Address, type Chain } from "viem";
  * RPC, explorer, contract addresses, 4337 EntryPoint, zkVerify proxy,
  * and the deployment block (the recovery scan floor for M2).
  *
- * Ground truth (see /GROUND_TRUTH.md):
- *   - Anvil          31337      — daily dev loop
- *   - Base Sepolia   84532      — zkVerify/Kurier attestation E2E (Day 8)
- *   - Horizen testnet 845320009 — M3 target, gated on the spike
+ * Ground truth (see /GROUND_TRUTH.md), re-verified live 2026-08-03:
+ *   - Anvil           31337   — daily dev loop
+ *   - Base Sepolia    84532   — zkVerify/Kurier attestation E2E (Day 8)
+ *   - Horizen testnet 2651420 — M3 target; spike gates 1-3 PASS
+ *   - Horizen mainnet 26514   — has a zkVerify proxy too (post-audit path)
  *
- * The old Caldera testnet chainId 2651420 is DEAD — do not resurrect it.
+ * NOTE: an earlier revision claimed 2651420 was dead and 845320009 was the
+ * live testnet. That was WRONG, and it is the reverse: 2651420 answers on
+ * Caldera (24M+ blocks, ~1s blocks) and is the chain zkVerify officially
+ * supports; the *.appchain.base.org hostnames have no DNS A record.
  */
 
 export interface ContractAddresses {
@@ -77,21 +81,21 @@ export const baseSepolia = defineChain({
 });
 
 export const horizenTestnet = defineChain({
-  id: 845320009,
+  id: 2651420,
   name: "Horizen Testnet",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
       http: [
         process.env.NEXT_PUBLIC_HORIZEN_TESTNET_RPC ??
-          "https://horizen-rpc-testnet.appchain.base.org",
+          "https://horizen-testnet.rpc.caldera.xyz",
       ],
     },
   },
   blockExplorers: {
     default: {
       name: "Horizen Testnet Explorer",
-      url: "https://horizen-explorer-testnet.appchain.base.org",
+      url: "https://horizen-testnet.explorer.caldera.xyz",
     },
   },
   testnet: true,
@@ -135,13 +139,19 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     chain: horizenTestnet,
     rpcUrl: horizenTestnet.rpcUrls.default.http[0],
     explorerUrl: horizenTestnet.blockExplorers!.default.url,
-    // Populated by the M3 spike: EntryPoint presence and zkVerify proxy
-    // reachability are spike gates #2 and #3 — leave undefined until proven.
     contracts: {
+      // Set by the M3 deploy (spike gate #4 — the only gate still open).
       privacyEntry: addr(process.env.NEXT_PUBLIC_HORIZEN_PRIVACY_ENTRY),
     },
-    entryPoint: addr(process.env.NEXT_PUBLIC_HORIZEN_ENTRYPOINT),
-    zkVerifyProxy: addr(process.env.NEXT_PUBLIC_HORIZEN_ZKVERIFY_PROXY),
+    // Verified on-chain 2026-08-03: canonical v0.7 EntryPoint has ~16KB of
+    // bytecode here (v0.6 is deployed too).
+    entryPoint: addr(process.env.NEXT_PUBLIC_HORIZEN_ENTRYPOINT) ?? ENTRYPOINT_V07,
+    // zkVerify aggregation proxy, from zkVerify's Supported Networks table
+    // and verified on-chain: ERC-1967 proxy, implementation
+    // 0x03225ff1ff4f1bac6e81bb6317006a509422d51c (non-zero).
+    zkVerifyProxy:
+      addr(process.env.NEXT_PUBLIC_HORIZEN_ZKVERIFY_PROXY) ??
+      ("0x3098A6974649478f0133046e44105AA84e868C21" as Address),
     deploymentBlock: BigInt(
       process.env.NEXT_PUBLIC_HORIZEN_DEPLOY_BLOCK ?? "0",
     ),
