@@ -32,6 +32,10 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...except the example, which carries no secrets and is the only record of
+# which NEXT_PUBLIC_* vars the dapp needs. Without it a fresh clone — and the
+# Vercel project — has nothing to copy from. Mirrors backend/data-api.
+!.env.example
 
 # vercel
 .vercel

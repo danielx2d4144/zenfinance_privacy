@@ -140,8 +140,20 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     rpcUrl: horizenTestnet.rpcUrls.default.http[0],
     explorerUrl: horizenTestnet.blockExplorers!.default.url,
     contracts: {
-      // Set by the M3 deploy (spike gate #4 — the only gate still open).
+      // Set by the M3 deploy (2026-08-03, block 24177251). Addresses are in
+      // code/contracts/deployments/horizen-testnet-2651420.json, which is the
+      // source of truth these env vars are copied from.
       privacyEntry: addr(process.env.NEXT_PUBLIC_HORIZEN_PRIVACY_ENTRY),
+      mockUsdc: addr(process.env.NEXT_PUBLIC_HORIZEN_MOCK_USDC),
+      oracle: addr(process.env.NEXT_PUBLIC_HORIZEN_ORACLE),
+      rateModel: addr(process.env.NEXT_PUBLIC_HORIZEN_RATE_MODEL),
+      assetRegistry: addr(process.env.NEXT_PUBLIC_HORIZEN_ASSET_REGISTRY),
+      shieldedSupplyPool: addr(
+        process.env.NEXT_PUBLIC_HORIZEN_SHIELDED_SUPPLY_POOL,
+      ),
+      shieldedPositionPool: addr(
+        process.env.NEXT_PUBLIC_HORIZEN_SHIELDED_POSITION_POOL,
+      ),
     },
     // Verified on-chain 2026-08-03: canonical v0.7 EntryPoint has ~16KB of
     // bytecode here (v0.6 is deployed too).

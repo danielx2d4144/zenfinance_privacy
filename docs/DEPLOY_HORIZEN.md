@@ -98,13 +98,50 @@ The script refuses to run if:
    forge verify-contract <address> <src/Contract.sol:Contract> \
      --chain-id 2651420 \
      --verifier blockscout \
-     --verifier-url https://horizen-testnet.explorer.caldera.xyz/api \
-     --constructor-args $(cast abi-encode "constructor(...)" ...)
+     --verifier-url https://horizen-testnet.explorer.caldera.xyz/api/ \
+     --constructor-args 0x<abi-encoded args> --watch
    ```
 
-3. **Wire the env vars.** From the manifest, into `code/dapp/.env`:
-   `NEXT_PUBLIC_HORIZEN_PRIVACY_ENTRY`, `NEXT_PUBLIC_HORIZEN_DEPLOY_BLOCK`,
-   and the pool/registry addresses. Into `prover-service/.env`: `ZKVERIFIER_HORIZEN`.
+   Get the constructor args by stripping the creation bytecode off what was
+   actually broadcast, rather than re-deriving them by hand:
+
+   ```python
+   # creation input = artifact bytecode ++ abi-encoded ctor args
+   inp  = tx["transaction"]["input"]          # broadcast/.../run-latest.json
+   code = artifact["bytecode"]["object"]      # out/<File>.sol/<Name>.json
+   args = inp[len(code):]                     # assert inp.startswith(code) first
+   ```
+
+   Two traps, both hit during the M3 deploy:
+
+   - **Read `out/<File>.sol/<Name>.json` directly, not `forge inspect`.**
+     `forge inspect test/mocks/MockERC20.sol:MockERC20 bytecode` cannot resolve
+     that path and returns *empty*, which makes `startswith` pass trivially and
+     the whole 2997-byte creation code look like constructor args.
+   - **Assert the prefix match.** Without it a mismatch is silent.
+
+   Cross-check at least one against `cast abi-encode` — for the mocks,
+   `cast abi-encode "constructor(string,string,uint8)" "ZenFinance Test USDC" "tUSDC" 6`
+   reproduces the stripped bytes exactly.
+
+   Confirm the result independently of forge, which reports "already verified"
+   for contracts it merely skipped:
+
+   ```bash
+   curl -s https://horizen-testnet.explorer.caldera.xyz/api/v2/smart-contracts/<addr> \
+     | python -c "import sys,json;d=json.load(sys.stdin);print(d['name'],d['is_verified'])"
+   ```
+
+3. **Wire the env vars.** From the manifest, into `code/dapp/.env.local`:
+   `NEXT_PUBLIC_HORIZEN_PRIVACY_ENTRY`, `NEXT_PUBLIC_HORIZEN_DEPLOY_BLOCK`, and the
+   pool/registry/oracle addresses (see `code/dapp/.env.example` for the full list —
+   `chain-reader.ts` needs oracle, rate model and asset registry to build witnesses,
+   not just the pools). Into `prover-service/.env`: `ZKVERIFIER_HORIZEN`.
+
+   For data-api, write a separate **`.env.horizen`** instead of editing `.env`.
+   dotenv does not override variables already present in the environment, so
+   `set -a; source .env.horizen; set +a; npm start` takes precedence and the
+   Anvil profile stays intact for local dev.
 
 4. **Start the price keeper.** `Oracle.MAX_STALENESS_WINDOW` is 3600s and the deploy seeds
    prices once. Without a heartbeat every borrow and collateral flow reverts within the
@@ -114,6 +151,31 @@ The script refuses to run if:
    cast send $ORACLE "pushPrice(uint8,uint128)" 0 100000000 \
      --rpc-url $HORIZEN_TESTNET_HTTPS --private-key $DEPLOYER_PRIVATE_KEY
    ```
+
+## Deployed — 2026-08-03, block 24177251
+
+Live on Horizen testnet (2651420), all verified on Blockscout. Admin is
+`0x5d8De68615Dd389234d44478Ca5B0f3356A9fd4F`.
+
+| Contract | Address |
+|---|---|
+| ZkVerifier | `0xb30323CAbcBC75Cb4F789232C4DAD3793f2A8AA5` |
+| PrivacyEntry | `0xaFf6608e440799c669145997fC230d51404A5142` |
+| ShieldedSupplyPool | `0x43c5Ba0B57b5fb99B09f34De89825335D82681f1` |
+| ShieldedPositionPool | `0x2433D5ef60b0444A2830636e754417eA76C7FE87` |
+| LiquidationBoard | `0xBB58b1457f6c486873FC85c42ED1380df475eff2` |
+| AssetRegistry | `0x0D6097E8E5804Cd540D317B9A633AAB925d782A6` |
+| RateModel | `0x32Db36d6FeDf7a1D4D0317C0AaD3b08B03eB8297` |
+| Oracle | `0x852da28C9Bc35870eB01e2D49296b8c1E3204024` |
+| InsuranceFund | `0xb53bfef209aCFD6Ae533B6aa72663bCf0e2861E0` |
+| tUSDC (faucet) | `0xebb4B50494BFa79FF0B33ea927000aC48b0C2Fa1` |
+| tcbBTC (faucet) | `0xc7845AF9A8262323602e7b6471ab600Cc4ce4d95` |
+| zkVerify proxy (theirs) | `0x3098A6974649478f0133046e44105AA84e868C21` |
+
+Confirmed on-chain after deploy: `ZkVerifier.proxy()` returns the real zkVerify
+proxy, all four pools hold `CALLER_ROLE`, and both seed prices are set (USDC
+`1e8`, cbBTC `6e12`). Total gas cost was ~0.0000000114 ETH — the 0.05 ETH of
+funding is effectively untouched.
 
 ## Faucet
 

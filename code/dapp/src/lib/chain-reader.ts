@@ -21,7 +21,8 @@
 // currently exposes.
 
 import { createPublicClient, http, type Address, type Hex } from "viem";
-import { defineChain } from "viem";
+
+import { getChainConfig } from "./chain-config";
 
 // Day 14c-E: TWO in-circuit caps to satisfy at once.
 //
@@ -63,21 +64,12 @@ export interface ChainSnapshot {
   numAssets: number;
 }
 
-const RPC_URL =
-  process.env.NEXT_PUBLIC_ANVIL_RPC ?? "http://127.0.0.1:8545";
-const CHAIN_ID = Number(process.env.NEXT_PUBLIC_DEFAULT_CHAIN_ID ?? 31337);
-
-const anvilLocal = defineChain({
-  id: CHAIN_ID,
-  name: "Anvil Local",
-  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
-  rpcUrls: { default: { http: [RPC_URL] } },
-});
-
-const ORACLE = process.env.NEXT_PUBLIC_ANVIL_ORACLE as Address | undefined;
-const RATE_MODEL = process.env.NEXT_PUBLIC_ANVIL_RATE_MODEL as Address | undefined;
-const ASSET_REGISTRY =
-  process.env.NEXT_PUBLIC_ANVIL_ASSET_REGISTRY as Address | undefined;
+// M3: read whichever chain the dapp is pointed at, not Anvil unconditionally.
+// This module used to hardcode NEXT_PUBLIC_ANVIL_{RPC,ORACLE,RATE_MODEL,
+// ASSET_REGISTRY}, which on Horizen would have built every witness from local
+// Anvil state (or thrown) while the tx went to the public chain — a silent
+// desync between the proof's public inputs and what the verifier checks.
+// `chain-config.ts` is already the per-chain address table, so defer to it.
 
 const oracleAbi = [
   {
@@ -161,9 +153,10 @@ let cachedClient: ReturnType<typeof createPublicClient> | null = null;
 
 function getClient() {
   if (cachedClient) return cachedClient;
+  const cfg = getChainConfig();
   cachedClient = createPublicClient({
-    chain: anvilLocal,
-    transport: http(RPC_URL),
+    chain: cfg.chain,
+    transport: http(cfg.rpcUrl),
   });
   return cachedClient;
 }
@@ -174,9 +167,16 @@ function getClient() {
  * viem.multicall so they all reflect the same chain snapshot.
  */
 export async function readChainSnapshot(): Promise<ChainSnapshot> {
+  const cfg = getChainConfig();
+  const ORACLE = cfg.contracts.oracle;
+  const RATE_MODEL = cfg.contracts.rateModel;
+  const ASSET_REGISTRY = cfg.contracts.assetRegistry;
   if (!ORACLE || !RATE_MODEL || !ASSET_REGISTRY) {
+    // Name the chain: the failure mode we care about is pointing the dapp at
+    // Horizen while only the Anvil addresses are set.
     throw new Error(
-      "chain-reader: missing NEXT_PUBLIC_ANVIL_{ORACLE,RATE_MODEL,ASSET_REGISTRY}",
+      `chain-reader: ${cfg.chain.name} (chainId ${cfg.chain.id}) is missing ` +
+        "oracle/rateModel/assetRegistry — set the NEXT_PUBLIC_* addresses for this chain",
     );
   }
   const client = getClient();
