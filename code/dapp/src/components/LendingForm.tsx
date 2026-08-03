@@ -109,7 +109,7 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
     positionImt,
     noteStore,
   } = useSpendingKey();
-  const { tier, isProving, prove } = useProver();
+  const { tierWarning, isProving, prove } = useProver();
 
   const [asset, setAsset] = useState<AssetSymbol>("USDC");
   const [amount, setAmount] = useState("100");
@@ -227,11 +227,20 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
           </div>
           <span
             className="rounded-full border border-white/10 px-2 py-0.5 text-xs text-white/60"
-            title="Device tier from S17 §3 — high tier proves in-browser; low tier routes through server-assist."
+            title="The proof is computed on this device. No witness — no amount, no balance, no key — is sent anywhere."
           >
-            prover: {tier}
+            proves in-browser
           </span>
         </header>
+
+        {tierWarning ? (
+          <p
+            role="status"
+            className="mt-4 rounded-md border border-amber-400/30 bg-amber-400/5 px-3 py-2 text-xs text-amber-200/90"
+          >
+            {tierWarning}
+          </p>
+        ) : null}
 
         <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <AssetSelector value={asset} onChange={setAsset} disabled={isBusy} />

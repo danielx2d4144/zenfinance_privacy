@@ -2,17 +2,23 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { createProverForTier, detectDeviceTier, type DeviceTier } from "@/lib/prover";
+import {
+  createProver,
+  detectDeviceTier,
+  proverTierWarning,
+  type DeviceTier,
+} from "@/lib/prover";
 import type { CircuitKind, Proof, ProveInput, Prover } from "@/lib/prover/types";
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8787";
-const API_KEY = process.env.NEXT_PUBLIC_API_KEY ?? "";
 
 /**
  * Owns the per-session Prover. The hook is the only place the rest of
  * the app touches the prover; the worker is constructed lazily on
  * first prove() call so we don't spin up workers for users who never
  * trigger a lending flow.
+ *
+ * `tier` is advisory now — every device proves in the browser. It only drives
+ * `tierWarning`, so a weak device is told the truth up front instead of being
+ * quietly handed a fake proof.
  */
 export function useProver() {
   const [tier, setTier] = useState<DeviceTier>("high");
@@ -30,14 +36,10 @@ export function useProver() {
 
   const ensureProver = useCallback((): Prover => {
     if (!proverRef.current) {
-      proverRef.current = createProverForTier({
-        tier,
-        baseUrl: API_BASE_URL,
-        apiKey: API_KEY,
-      });
+      proverRef.current = createProver();
     }
     return proverRef.current;
-  }, [tier]);
+  }, []);
 
   const prove = useCallback(
     async (kind: CircuitKind, input: ProveInput): Promise<Proof> => {
@@ -54,8 +56,10 @@ export function useProver() {
     [ensureProver],
   );
 
+  const tierWarning = useMemo(() => proverTierWarning(tier), [tier]);
+
   return useMemo(
-    () => ({ tier, isProving, lastDurationMs, prove }),
-    [tier, isProving, lastDurationMs, prove],
+    () => ({ tier, tierWarning, isProving, lastDurationMs, prove }),
+    [tier, tierWarning, isProving, lastDurationMs, prove],
   );
 }
