@@ -14,7 +14,9 @@
     "test:watch": "vitest",
     "push-once": "tsx scripts/push-once.ts",
     "start": "tsx scripts/start.ts",
-    "accrue": "tsx scripts/accrue.ts"
+    "accrue": "tsx scripts/accrue.ts",
+    "horizen:push-once": "tsx scripts/keep-horizen-fresh.ts --once",
+    "horizen:keep": "tsx scripts/keep-horizen-fresh.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

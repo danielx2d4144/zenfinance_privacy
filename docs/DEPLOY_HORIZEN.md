@@ -145,7 +145,29 @@ The script refuses to run if:
 
 4. **Start the price keeper.** `Oracle.MAX_STALENESS_WINDOW` is 3600s and the deploy seeds
    prices once. Without a heartbeat every borrow and collateral flow reverts within the
-   hour. This is a Phase-3 Railway cron, but if you demo before that lands, push manually:
+   hour — this was observed for real: ~4 hours after the deploy, `getPrice` reverted
+   `PriceStale(assetId, updatedAt, now, 3600)` for both assets.
+
+   Use `backend/price-keeper`, not a manual `cast send`:
+
+   ```bash
+   cd code/backend/price-keeper
+   npm run horizen:push-once   # one sweep — the Railway cron shape
+   npm run horizen:keep        # long-running loop — for a local demo
+   ```
+
+   It signs with the **relayer**, which was granted `MANAGER_ROLE` on the Oracle
+   (tx `0x17f7113d…18fe5`) specifically so the deployer key never has to reach a
+   hosting dashboard — the deployer also holds `DEFAULT_ADMIN_ROLE`, and anyone
+   with it can pause the protocol.
+
+   The keeper pushes at 900s against a 1800s max age, so three consecutive
+   failed runs still land inside the contract's 3600s window. If the spot feed
+   is unreachable it re-pushes the last on-chain value rather than skipping:
+   a repeated price keeps lending usable, a skipped round marches every flow
+   toward a revert.
+
+   Manual fallback, if you need one:
 
    ```bash
    cast send $ORACLE "pushPrice(uint8,uint128)" 0 100000000 \
