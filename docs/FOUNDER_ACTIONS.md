@@ -48,18 +48,67 @@ a real past action taken because of position visibility (paid CEX spread, split
 wallets, avoided borrowing, got hunted near liquidation). ≥2/5 concrete = consumer
 wedge lives. 0-1/5 = wedge is dead → whale-first only or pause (honor it like Gate 1).
 
-## 3. Horizen BD contact — one message
+## 3. Horizen BD contact — ✅ DONE, reply received 2026-08-01
 
-Goal: convert interest into something written + intros. Send:
+**Fradique (Horizen):** *"you don't need to…but we'd love to understand the integration
+and see how we can support the beta. feel free to drop deets in the dev channel with
+your docs and timeline."*
 
-> "ZenFinance update: the privacy lending stack is code-complete through note
-> persistence — 224 contract tests, 11 circuits, in-browser proving, and
-> signature-only balance recovery shipped this week. Two asks: (1) we're submitting
-> to Thrive — can you flag it internally? (2) can you intro me to 2-3 of the larger
-> ZEN/Horizen holders for a 20-min feedback call on private borrowing? Happy to demo
-> the deposit→borrow flow live."
+Reading: no permission gate, an explicit offer of support, and a request for a technical
+post. This is the written interest the design doc's Premise 2 wanted. **Next action is
+the dev-channel post below.** You have publicly committed to an **August beta on
+Horizen** — the spike (run 2026-08-03) says that is technically achievable.
 
-Log the reply verbatim — a written "we want this on Horizen" is Gate-relevant evidence.
+### Dev-channel post — ready to paste
+
+> **zenfinance — privacy-preserving lending, integrating on Horizen testnet**
+>
+> gm — dropping technical details + timeline as suggested.
+>
+> **What it is:** an Aave-style money market where per-user positions are shielded.
+> Supply, borrow, repay and liquidate work the usual way, but deposits, debts and
+> collateral live as encrypted commitments. Protocol-level totals stay public so risk
+> stays auditable; individual positions don't. Zero-knowledge proofs enforce
+> health-factor and liquidity rules without revealing the numbers.
+>
+> **Why Horizen:** you have a DEX and private transfers, but no lending primitive.
+> That's the gap we fill, and privacy-native L3 + cheap proof verification is exactly
+> the environment this design needs.
+>
+> **Integration surface (what we actually touch on your chain):**
+> • Standard EVM deploy — 11 Solidity contracts, no custom precompiles, no chain mods.
+> • **zkVerify aggregation proxy** `0x3098A6974649478f0133046e44105AA84e868C21` —
+>   our on-chain verifier consumes aggregated attestations through it. Already verified
+>   it's live on testnet (ERC-1967, non-zero implementation). Same pattern we have
+>   working end-to-end on Base Sepolia today.
+> • **ERC-4337** — confirmed canonical EntryPoint v0.7 (`0x…032`) is deployed on
+>   testnet. Agent accounts execute under user-signed spending policies.
+> • Proving runs **in the user's browser** (Noir + bb.js, UltraHonk) — no prover
+>   servers, no custody of secrets.
+>
+> **State of the build:** 224/224 contract tests green including solvency invariants,
+> 11 circuits compiled with pinned verification keys, full deposit→borrow loop working
+> locally, and encrypted note persistence with signature-only recovery (wipe your
+> browser, sign once, positions come back).
+>
+> **Timeline:**
+> • **August — testnet beta on Horizen:** deploy + public demo (deposit → shielded
+>   borrow), waitlist, funnel metrics we're happy to share with your team.
+> • **After that — audit.** We won't touch mainnet before a security audit; we're
+>   scoping quotes now. That's the honest gate on a mainnet date.
+>
+> **Where support would help most:** (1) visibility for the testnet beta, (2) intros to
+> larger holders who'd give feedback on private borrowing, (3) anything on the grant
+> side — we're applying to Thrive.
+>
+> Repo: https://github.com/danielx2d4144/zenfinance_privacy
+> Site: <paste your Vercel URL>
+>
+> Happy to walk anyone through the circuits or the deposit flow live.
+
+**Before posting:** deploy to Horizen testnet if you can (makes the post far stronger —
+"it's live at 0x…"), or post now and follow up with the address. Ask Claude to "run the
+M3 deploy" when you're ready.
 
 ## 4. Audit scoping quotes — start now (weeks of lead time)
 

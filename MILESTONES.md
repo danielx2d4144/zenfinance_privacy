@@ -42,13 +42,23 @@ full-set log sync (privacy-preserving recovery); shared commitment-matcher.
 roundtrip, WAL crash points, wipe→recover e2e on Anvil, two-device simulation, multi-tab lock,
 forge tests for the memo overload. Full list in resume plan §M2 + eng-review test plan.
 
-## M3 — HORIZEN TESTNET DEPLOY + DEMO (~1 CC-week)
+## M3 — HORIZEN TESTNET DEPLOY + DEMO (~1 CC-week) — SPIKE PASSED 2026-08-03
 
-**Start gate: Thrive application SUBMITTED + 5 Mom-Test calls BOOKED.**
-1-day spike, pre-declared 4-point gate: RPC+faucet / canonical EntryPoint / **zkVerify proxy
-reachable on Horizen testnet (no proxy = FAIL)** / clean deploy. Any FAIL → demo ships on
-Base Sepolia, Thrive pitch says "Horizen-ready". Waitlist is privacy-friendly (self-attested
-size). Sentry + 6-event funnel feeds Gate 2 evidence. /plan-design-review before UI build.
+**Start gate AMENDED 2026-08-03.** Original gate was "Thrive SUBMITTED + 5 calls BOOKED".
+Horizen BD (Fradique) replied inviting docs + timeline in the dev channel, and the founder
+publicly committed to an **August beta on Horizen** — so the deploy now unblocks the
+relationship rather than waiting on it. Thrive + the 5 calls stay must-do (Track 2,
+`docs/FOUNDER_ACTIONS.md`) but no longer block M3.
+
+**Spike result: gates 1-3 PASS** (evidence in GROUND_TRUTH.md). Horizen testnet 2651420 is
+live, canonical EntryPoint v0.7 is deployed, and the zkVerify aggregation proxy
+`0x3098A697…8C21` is a live ERC-1967 proxy. **The Base Sepolia fallback branch is dropped —
+the demo ships on Horizen.** Gate 4 (clean deploy run) is the remaining spike item and the
+first task of M3.
+
+Rest of M3 unchanged: deploy via chain-config; privacy-friendly waitlist (self-attested
+size); demo flow deposit→shielded borrow; Sentry + 6-event funnel feeding Gate 2 evidence;
+UI built on the approved Signal/Noise design system (see homepage repo).
 
 ## M4 — THRIVE + VALIDATION (founder work, parallel from now)
 
