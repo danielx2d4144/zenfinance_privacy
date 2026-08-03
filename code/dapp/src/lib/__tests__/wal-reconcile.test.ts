@@ -61,7 +61,16 @@ describe("WAL persistence (encrypted, survives reopen)", () => {
     expect(corruptRows).toBe(0);
     expect(records).toHaveLength(1);
     expect(records[0]).toEqual(record());
-    expect(records[0].expectedNotes[0][1].amount).toBe(500_000n);
+
+    // The point of this line is that the bigint survived the WAL's
+    // serialize/deserialize roundtrip as a bigint, not as a string. Narrow on
+    // the discriminant first: NotePreimage is a union and PositionPreimage has
+    // no `amount`, so reading it off the union does not typecheck.
+    const restored = records[0].expectedNotes[0][1];
+    if (restored.kind !== "balance") {
+      throw new Error(`expected a balance note, got kind=${restored.kind}`);
+    }
+    expect(restored.amount).toBe(500_000n);
   });
 
   it("updatePending attaches the txHash in place", async () => {
