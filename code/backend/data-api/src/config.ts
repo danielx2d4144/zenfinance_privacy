@@ -23,6 +23,20 @@ const Schema = z
     // Auth (Day-11 API-key-only; SIWE lands Day 14)
     API_KEY: z.string().min(16),
 
+    /**
+     * Exact browser origins allowed to call this API, comma-separated.
+     *
+     * This used to be `origin: true` — reflect whatever Origin the caller
+     * sent — paired with `credentials: true`. That combination is what makes
+     * a cross-site request able to carry the caller's cookies, so it stops
+     * being merely loose the moment the invite cookie exists.
+     *
+     * The default is the local dapp and nothing else. There is deliberately
+     * no permissive setting to forget to turn off: hosting means naming the
+     * Vercel origin here.
+     */
+    CORS_ORIGINS: z.string().default("http://localhost:3000"),
+
     // ---- destination chain -------------------------------------------------
     // Anvil 31337 for local dev, Horizen testnet 2651420 for the hosted demo.
     // Named CHAIN_* rather than ANVIL_* since M3: the code path is identical,
@@ -93,7 +107,62 @@ const Schema = z
         message: "required when ATTESTATION_MODE=kurier",
       });
     }
+
+    // Anything other than Anvil is a public chain, and the placeholder key is
+    // published in this repo — it is the default in every SDK example and
+    // gate test. Refuse to boot rather than serve a hosted API whose auth is
+    // a documented constant. Checked here so the failure is at startup, not
+    // at the first unauthorised write.
+    const isLocalAnvil = cfg.CHAIN_ID === 31337;
+    if (!isLocalAnvil && cfg.API_KEY === PLACEHOLDER_API_KEY) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["API_KEY"],
+        message:
+          `is still the placeholder from the repo, which is public. Generate one: ` +
+          `node -e "console.log(require('crypto').randomBytes(32).toString('base64url'))"`,
+      });
+    }
+
+    for (const origin of splitOrigins(cfg.CORS_ORIGINS)) {
+      // A trailing slash or a path silently never matches, because the
+      // browser's Origin header is scheme://host[:port] and nothing else.
+      // Catching it here beats debugging a CORS failure against a live API.
+      let parsed: URL;
+      try {
+        parsed = new URL(origin);
+      } catch {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["CORS_ORIGINS"],
+          message: `"${origin}" is not a URL`,
+        });
+        continue;
+      }
+      if (origin !== parsed.origin) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["CORS_ORIGINS"],
+          message: `"${origin}" must be exactly scheme://host[:port] — did you mean "${parsed.origin}"?`,
+        });
+      }
+    }
   });
+
+/** The key published throughout this repo's examples and gate tests. */
+const PLACEHOLDER_API_KEY = "day11-local-test-api-key-please-rotate";
+
+function splitOrigins(raw: string): string[] {
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
+/** Parsed `CORS_ORIGINS`. Exact-match allowlist; never wildcards. */
+export function corsOrigins(cfg: Pick<Config, "CORS_ORIGINS">): string[] {
+  return splitOrigins(cfg.CORS_ORIGINS);
+}
 
 export type Config = z.infer<typeof Schema>;
 

@@ -1,6 +1,6 @@
 import Fastify, { type FastifyInstance } from "fastify";
 import cors from "@fastify/cors";
-import { getConfig } from "./config.js";
+import { corsOrigins, getConfig } from "./config.js";
 import { getPool } from "./db.js";
 import { resumeInFlightIntents } from "./intent/resume.js";
 import { registerHealthRoutes } from "./routes/health.js";
@@ -18,15 +18,24 @@ export async function buildApp(): Promise<FastifyInstance> {
   // can swap in pino-pretty under dev if someone wants colour locally.
   const app = Fastify({ logger: { level: cfg.LOG_LEVEL } });
 
-  // Day-13: the browser dapp at :3000 needs to call the API at :8787.
-  // Permissive policy is fine for local dev; tighten to a domain list
-  // before any non-local deployment.
+  // Exact-match allowlist from CORS_ORIGINS, defaulting to the local dapp.
+  // `origin: true` reflected whatever Origin arrived, and with
+  // `credentials: true` that is the setting that lets any page on the web make
+  // a credentialed call to this API on a visitor's behalf.
+  const allowed = new Set(corsOrigins(cfg));
   await app.register(cors, {
-    origin: true,
+    origin(origin, cb) {
+      // No Origin header means this is not a browser cross-origin request —
+      // curl, the MCP client, server-to-server. CORS has nothing to say about
+      // those, and the API key still guards every write.
+      if (!origin) return cb(null, true);
+      cb(null, allowed.has(origin));
+    },
     credentials: true,
     methods: ["GET", "POST", "DELETE", "OPTIONS"],
     allowedHeaders: ["content-type", "x-api-key", "idempotency-key"],
   });
+  app.log.info({ corsOrigins: [...allowed] }, "cors-allowlist");
 
   await registerHealthRoutes(app);
   await registerIntentRoutes(app);
