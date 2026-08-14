@@ -117,10 +117,11 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
     async (keys: { spendingKey: bigint; viewingKey: Uint8Array }) => {
       const vault = vaultRef.current;
       try {
-        const { client, privacyEntry, scanFloor } = makeScanClient(chainId);
+        const { client, privacyEntry, scanFloor, chunkSize } = makeScanClient(chainId);
         const scanner = new RecoveryScanner({
           fetchLogs: makeFetchLogs({ client, privacyEntry }),
           scanFloor,
+          chunkSize,
         });
         const head = await client.getBlockNumber();
         const view = await scanner.syncTo(head, (scannedTo) =>

@@ -41,6 +41,17 @@ export interface ChainConfig {
   zkVerifyProxy?: Address;
   /** Block the stack was deployed at — M2 recovery scan floor. */
   deploymentBlock: bigint;
+  /**
+   * Blocks per `eth_getLogs` during recovery. Omitted = DEFAULT_CHUNK_SIZE.
+   *
+   * This is per-chain because it is a property of the RPC provider, not of us.
+   * The 2000 default is the conservative floor that every public RPC accepts;
+   * on Horizen it meant 45 sequential round trips to cover the ~91k blocks
+   * since deployment, growing by one more every 33 minutes as the chain
+   * advances at ~1s per block. Caldera answers a 100k-block range fine, and a
+   * 50k one in under a second, so the whole scan collapses to two requests.
+   */
+  logScanChunkSize?: bigint;
 }
 
 const ENTRYPOINT_V07 =
@@ -48,6 +59,18 @@ const ENTRYPOINT_V07 =
 
 const addr = (v: string | undefined): Address | undefined =>
   v && /^0x[0-9a-fA-F]{40}$/.test(v) ? (v as Address) : undefined;
+
+/**
+ * An env override, or the fallback when the var is absent *or empty*.
+ *
+ * `??` alone is wrong here. A declared-but-blank line in .env.local —
+ * `NEXT_PUBLIC_HORIZEN_TESTNET_RPC=` — is inlined by Next as `""`, which is
+ * not nullish, so `?? fallback` keeps the empty string and viem ends up with
+ * a transport pointed at "". That is exactly the state .env.local was in, and
+ * it would have broken every read the moment the dapp switched to Horizen.
+ */
+const envUrl = (v: string | undefined, fallback: string): string =>
+  v && v.trim().length > 0 ? v.trim() : fallback;
 
 // ---------------------------------------------------------------- chains
 
@@ -57,7 +80,7 @@ export const anvil = defineChain({
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_ANVIL_RPC ?? "http://127.0.0.1:8545"],
+      http: [envUrl(process.env.NEXT_PUBLIC_ANVIL_RPC, "http://127.0.0.1:8545")],
     },
   },
   testnet: true,
@@ -70,7 +93,7 @@ export const baseSepolia = defineChain({
   rpcUrls: {
     default: {
       http: [
-        process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC ?? "https://sepolia.base.org",
+        envUrl(process.env.NEXT_PUBLIC_BASE_SEPOLIA_RPC, "https://sepolia.base.org"),
       ],
     },
   },
@@ -87,8 +110,12 @@ export const horizenTestnet = defineChain({
   rpcUrls: {
     default: {
       http: [
-        process.env.NEXT_PUBLIC_HORIZEN_TESTNET_RPC ??
-          "https://horizen-testnet.rpc.caldera.xyz",
+        // Both the bare host and the /http suffix answer eth_chainId with
+        // 0x28751c (2651420); verified 2026-08-03.
+        envUrl(
+          process.env.NEXT_PUBLIC_HORIZEN_TESTNET_RPC,
+          "https://horizen-testnet.rpc.caldera.xyz/http",
+        ),
       ],
     },
   },
@@ -167,6 +194,10 @@ export const CHAIN_CONFIGS: Record<number, ChainConfig> = {
     deploymentBlock: BigInt(
       process.env.NEXT_PUBLIC_HORIZEN_DEPLOY_BLOCK ?? "0",
     ),
+    // Caldera served a 100k-block range without complaint and a 50k one in
+    // 0.99s (measured 2026-08-04). Held at 50k rather than pushed to the
+    // limit so a busier future range still fits in one response.
+    logScanChunkSize: 50_000n,
   },
 };
 
