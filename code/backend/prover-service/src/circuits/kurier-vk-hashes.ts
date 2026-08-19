@@ -19,34 +19,34 @@
  * same commit — `readKurierVkHash` throws on a disk/constant mismatch
  * precisely so that drift is loud.
  *
- * Captured 2026-08-03 from each circuit's `target/kurier_vk_hash`; the
- * `entry_deposit` entry is the one exercised end to end by the Phase-0
- * Horizen aggregation probe.
+ * Updated 2026-08-19 with Keccak-format VKs (1888 bytes). Previous VKs were
+ * Poseidon2 format (3680 bytes), which Kurier rejected. Keccak format is
+ * required for on-chain verification with zkVerify.
  */
 import type { CircuitName } from "./registry.js";
 
 export const KURIER_VK_HASHES: Readonly<Record<CircuitName, `0x${string}`>> =
   Object.freeze({
     entry_deposit:
-      "0x324bffc3082940f27925fcf4cb080794e02ee9ba00e2dfde9c2ab88fcf4f5aec",
+      "0x0063b1d06d07c6c2f95c85450bf47e324fd92901fa0009ecf1193a80ea8a4270",
     entry_withdraw:
-      "0x65b188181a1391a15c32304383c3221976411d68a4c0af09878f098bbb46023b",
+      "0x7f23d01f0f374830c798db6f83f5bd016468d036437628ddfc762f8b513a823c",
     supply_asset:
-      "0x5d7e2731bcfc9f0e6706ece84063394024241cb9f1878adc7cc15a76cd579298",
+      "0x6d827ab8e9cda14748279168d08e083b72fa7469e8fe83226e5ccf77118be373",
     withdraw_supply:
-      "0x068515bb7c81ddc269915adc00c361a16070e28cb5c69bf7d52ce71ff6f55df0",
+      "0xd6f1bb92d97aa596b227aa556f0b4010761c6ee55780b27c1397c5927497efc2",
     deposit_collateral:
-      "0x81854bf49e8378dba88aff409a18403410eaa43e5d651bb222fd4ee5360b3b4d",
+      "0xb14b868cd59033bc935723bd1b427c1128df838a180a6be878f9a5da08346704",
     withdraw_collateral:
-      "0x9471fd08b1c8d3b0a3a68ad1c876f109f2511470b15962050a4a831cc240f148",
+      "0x28499c36b7cf01004d99578626afbbc9843b88a0e829f8c540830f5ef96c4c8a",
     borrow:
-      "0x8eb1255477ca86160a303e891914ded679792eedc2cee4cd80b160cc6af4f055",
+      "0xd8683cd6f52f93cb0ca080b964e29c9b83048fdbdbe4488c2546ce540b5f7568",
     repay:
-      "0xc2983fcba67a3669933f00508e321b7715eeacd7775e087e4c6f8d23ab73690d",
+      "0xca9cd26328f61b020accacbbba348bf8d783dc78e9d6eba54ed007d6535e50b4",
     liquidate:
-      "0x05bbd845065e93244c94db32948fbe4b9e1a146c0897178d61107602ae20f829",
+      "0xac31cdb92f463d7958513b4fd52b688c4444ef631a6ef75614d9bad6619f27db",
     consolidate_balance:
-      "0xd1e8dfe0833e031936868f9e0b5461d1a0279128b5f6fc4cdc72ab90f11238dc",
+      "0xf45292467c13d34aeb8654e23bb2e8976954aedfc8d1c82395a5feb4b1480a48",
     compute_triggers:
-      "0x19f988f73a819cc24b01efa6e3d1121501bf68433ca159624b43ad035e8b1465",
+      "0x26f19d4f331dd3905d3eda2b9254ca4da3252cb8fad7d170fe5cd5a4bc1c2bb7",
   } as const);

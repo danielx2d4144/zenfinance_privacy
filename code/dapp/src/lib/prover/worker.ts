@@ -104,7 +104,7 @@ async function prove(kind: CircuitKind, witnessMap: WitnessMap): Promise<Proof> 
     execute(inputs: WitnessMap): Promise<{ witness: Uint8Array }>;
   }).execute(witnessMap));
 
-  const { proof: proofBytes, publicInputs } = await backend.generateProof(witness, {});
+  const { proof: proofBytes, publicInputs } = await backend.generateProof(witness, { keccakZK: true });
 
   return {
     proof: toHex(proofBytes),

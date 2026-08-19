@@ -91,6 +91,11 @@ const SpendingKeyContext = createContext<SpendingKeyContextValue | null>(null);
 const determinismMarker = (chainId: number, address: string) =>
   `zenfinance:eoa-determinism-ok:v1:${chainId}:${address.toLowerCase()}`;
 
+// Stores the last successfully-scanned block per {chainId, address} so
+// subsequent unlocks skip already-scanned history.
+const scanCursorKey = (chainId: number, address: string) =>
+  `noctfinance:scan-cursor:v1:${chainId}:${address.toLowerCase()}`;
+
 export function SpendingKeyProvider({ children }: { children: ReactNode }) {
   const { address, chainId, signTypedDataAsync } = useWallet();
   const [unlocked, setUnlocked] = useState(false);
@@ -118,15 +123,37 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
       const vault = vaultRef.current;
       try {
         const { client, privacyEntry, scanFloor, chunkSize } = makeScanClient(chainId);
+
+        // Resume from the last successfully-scanned block so subsequent
+        // unlocks don't re-fetch the entire chain history. On Horizen testnet
+        // after ~10 days this cuts ~17 getLogs calls down to 1-2.
+        const cursorKey = scanCursorKey(chainId, address ?? "");
+        const cachedCursor =
+          typeof localStorage !== "undefined" ? localStorage.getItem(cursorKey) : null;
+        const cachedBlock = cachedCursor ? BigInt(cachedCursor) : null;
+        // Always start at scanFloor on a contract redeploy (cachedBlock before floor).
+        const resumeFloor =
+          cachedBlock !== null && cachedBlock + 1n > scanFloor
+            ? cachedBlock + 1n
+            : scanFloor;
+
         const scanner = new RecoveryScanner({
           fetchLogs: makeFetchLogs({ client, privacyEntry }),
-          scanFloor,
+          scanFloor: resumeFloor,
           chunkSize,
         });
         const head = await client.getBlockNumber();
-        const view = await scanner.syncTo(head, (scannedTo) =>
-          setRecovery({ status: "scanning", scannedTo, head }),
-        );
+
+        // Throttle progress state updates: each setRecovery triggers a full
+        // provider re-render for all consumers. Cap at one update per 600ms.
+        let lastProgressMs = 0;
+        const view = await scanner.syncTo(head, (scannedTo) => {
+          const now = Date.now();
+          if (now - lastProgressMs >= 600) {
+            lastProgressMs = now;
+            setRecovery({ status: "scanning", scannedTo, head });
+          }
+        });
 
         // 1) WAL reconciliation — crash-recover in-flight transactions.
         let walPromoted = 0;
@@ -172,6 +199,12 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
             recovered += 1;
           }
         }
+
+        // Persist the cursor so the next unlock skips already-scanned blocks.
+        if (typeof localStorage !== "undefined") {
+          localStorage.setItem(cursorKey, head.toString());
+        }
+
         setRecovery({ status: "done", recovered, walPromoted });
       } catch (err) {
         // Scan is resumable, but surface the interruption loudly rather
@@ -180,7 +213,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
         setRecovery({ status: "error", message });
       }
     },
-    [chainId],
+    [chainId, address],
   );
 
   const derive = useCallback(async () => {
