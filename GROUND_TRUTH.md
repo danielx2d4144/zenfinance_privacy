@@ -1,17 +1,20 @@
-# GROUND_TRUTH.md — canonical state of ZenFinance
+# GROUND_TRUTH.md — canonical state of NoctFinance
 
-Last verified: 2026-07-30. This file supersedes any conflicting claim in `design-v2/`
+Last verified: 2026-08-19. This file supersedes any conflicting claim in `design-v2/`
 (notably `roadmap/progress_tracker.md`, which stops at Day 11 while git reaches Day 14c-E).
 **Git history is the source of truth for what is built; this file is the map.**
+
+**PROJECT NAME:** NoctFinance (privacy lending protocol on Horizen)  
+**CCN PIVOT STATUS:** On hold — focusing on consumer lending protocol first
 
 ## What is built (verified, not aspirational)
 
 | Layer | Status | Evidence |
 |---|---|---|
 | Contracts (11): PrivacyEntry, ShieldedSupplyPool, ShieldedPositionPool, LiquidationBoard, AgentAccount, PolicyRegistry, AssetRegistry, Oracle, RateModel, InsuranceFund, ZkVerifier | BUILT | `forge test` 217/217 PASS (re-run 2026-07-30) |
-| Noir circuits (11): entry_deposit, entry_withdraw, supply_asset, withdraw_supply, deposit_collateral, withdraw_collateral, borrow, repay, liquidate, consolidate_balance, compute_triggers (+ lib_common) | BUILT | Poseidon2/BN254; vkHashes pinned Day 14c (`design-v2/roadmap/progress_tracker.md` registry) |
+| Noir circuits (11): entry_deposit, entry_withdraw, supply_asset, withdraw_supply, deposit_collateral, withdraw_collateral, borrow, repay, liquidate, consolidate_balance, compute_triggers (+ lib_common) | BUILT | **UltraHonk with Keccak oracle hash** (1888-byte VKs); all 11 VKs re-registered with Kurier on 2026-08-19 after format fix |
 | Browser proving | BUILT | bb.js web-worker prover + adaptive tiering (Day 14) |
-| Attestation E2E | BUILT on **Base Sepolia** | entry proof → Kurier → aggregation → `verifyAndConsume` (Day 8, T-8.1). **zkVerify proxy has NEVER been verified on Horizen testnet** — that is the M3 spike's job. |
+| Attestation E2E | BUILT on **Horizen Testnet** | entry proof → Kurier → aggregation → `verifyAndConsume` verified on Horizen testnet (2026-08-03 probe). VK format issue resolved 2026-08-19 (switched from Poseidon2 to Keccak oracle hash). All 11 VKs re-registered with Kurier. Pending: VkRegistry redeployment + live proof test. |
 | Data stack | BUILT (local only) | docker graph-node subgraph — **local docker only, never Goldsky** |
 | Backend | BUILT | data-api (Fastify 5 REST + MCP), price-keeper (Stork), prover-service scaffold |
 | Dapp | BUILT (demo-grade) | Next.js; deposit/borrow loop works on Anvil; IMT mirror; real Poseidon2 witness |
@@ -91,12 +94,17 @@ Consequence: ~3 minutes is the **measured UX budget** for any proof-backed actio
 guided borrow (three sequential proofs) is ~9 minutes — long enough that it must run as a
 background job with notification, not a blocking modal.
 
-## Strategy state (from approved design doc, 2026-07-30)
+## Strategy state (updated 2026-08-19)
 
-- **Gate 1 (Horizen chain health: ≥$5M TVL AND ≥100 daily actives): FAILED** — measured ~20 avg daily actives (peak 69), 7,047 lifetime addresses, no measurable TVL (explorer.horizen.io Blockscout API).
-- Consequence honored: **whale-first (Approach C) is the active mainnet strategy**. Horizen = funding/optionality channel only (Thrive grant + testnet demo). Re-check chain health monthly.
-- Gate 2: ≥2/5 Mom-Test calls surface concrete past pain → consumer wedge lives. Pending (M4).
-- Gate 3: audit funding secured before ANY mainnet deploy ($230k–$410k range). Pending.
+- **Focus:** Consumer privacy lending protocol on Horizen testnet (NoctFinance)
+- **Current phase:** Phase 2 completion - VK format fixed, awaiting VkRegistry redeployment + live proof test
+- **Next phases:** 
+  - Phase 3: Host on Railway + Vercel with invite gate
+  - Phase 4: Rebuild dapp interaction model and restyle
+  - Phase 5: QA and evidence pack
+- **CCN pivot (RWA/institutional):** On hold until consumer protocol is proven
+- **Vela TEE proving:** Confirmed feasible by Horizen team, implementation pending Phase 3+
+- **Mainnet strategy:** TBD after testnet validation
 
 ## Decisions of record
 
@@ -107,8 +115,10 @@ background job with notification, not a blocking modal.
 
 ## Known stale docs (do not trust without checking here first)
 
+- `design-v2/` folder — REFERENCE ONLY, original design specs from earlier iteration
+- `CCN_TECHNICAL_PIVOT.md` — ON HOLD, future institutional direction
 - `design-v2/roadmap/progress_tracker.md` — frozen at Day 11; vkHash registry + decisions log still valid
 - `design-v2/roadmap/code_roadmap.md`, `design-v2/subsystems/06_data_layer.md` — verdict REWRITE
 - `design-v2/subsystems/09_note_management.md` — superseded by ADR-002
 - `design-v2/subsystems/03_smart_accounts_policies.md` §validateUserOp — superseded by ADR-001
-- Any mention of chainId 2651420, Goldsky, or "Tachyon testnet" — dead/wrong
+- `NEXT_STEPS.md` — outdated, VK issue resolved 2026-08-19

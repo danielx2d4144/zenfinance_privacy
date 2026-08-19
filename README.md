@@ -25,17 +25,18 @@ Unlike Aave or Compound where every transaction is public, NoctFinance keeps you
 
 | Network | Chain ID | Status |
 |---------|----------|--------|
-| **Horizen Testnet** | 2651420 | 🟢 Active |
+| **Horizen Testnet** | 2651420 | 🟡 Testing Phase |
 
+**Current Phase:** Phase 2 completion - VK format fixed, pending contract redeployment + live proof testing  
 **Testnet deployment** — contract addresses and parameters subject to change before mainnet.
 
 ---
 
 ## Core Technologies
 
-**UltraHonk Proofs via Noir + Barretenberg** as the privacy engine. NoctFinance uses UltraHonk (a modern ZK proving system) to generate compact proofs verified on-chain. Circuits are written in Noir, and proofs use the Keccak oracle hash format (1888 bytes) required by zkVerify.
+**UltraHonk Proofs via Noir + Barretenberg** as the privacy engine. NoctFinance uses UltraHonk (a modern ZK proving system) to generate compact proofs verified on-chain. Circuits are written in Noir, and proofs use the **Keccak oracle hash format (1888 bytes)** required by zkVerify.
 
-**Poseidon2 Hash** optimized for ZK circuits. Used to seal private data (balances, spending keys, salts) into short commitments.
+**Poseidon2 Hash** optimized for ZK circuits. Used to seal private data (balances, spending keys, salts) into short commitments inside the circuits. The **circuit outputs** use Poseidon2, but the **proof transcripts** use Keccak for zkVerify compatibility.
 
 **Incremental Merkle Tree** stores all user commitments. Allows proving a commitment exists without revealing what others are.
 
@@ -135,7 +136,7 @@ NoctFinance uses **11 Noir circuits** verified by UltraHonk + zkVerify:
 | `consolidate_balance` | Merge multiple commitments into one |
 | `compute_triggers` | Compute interest accrual and health factors |
 
-All circuits use **Keccak oracle hash** (not Poseidon2) for zkVerify compatibility.
+All circuits use **Keccak oracle hash** for proof transcripts (zkVerify requirement) while using **Poseidon2 internally** for efficient commitment computation.
 
 ---
 
@@ -145,21 +146,26 @@ All circuits use **Keccak oracle hash** (not Poseidon2) for zkVerify compatibili
 NoctFinance
 │
 ├── POOL CONTRACTS
-│   ├── Pool                    ← lending logic (supply/borrow/repay/liquidate)
-│   ├── AssetManager            ← asset configuration and price feeds
-│   └── InterestRateModel       ← utilization-based rates
+│   ├── ShieldedSupplyPool      ← private lending pool (supply/withdraw supply)
+│   ├── ShieldedPositionPool    ← private positions (collateral/borrow/repay)
+│   ├── LiquidationBoard        ← liquidation discovery + execution
+│   ├── AssetRegistry           ← asset configuration
+│   ├── RateModel               ← utilization-based interest rates
+│   └── InsuranceFund           ← bad debt coverage
 │
 ├── PRIVACY CONTRACTS
-│   ├── PrivacyEntry            ← deposit/withdraw with commitments
-│   ├── CommitmentRegistry      ← Merkle tree of all commitments
-│   └── NullifierRegistry       ← prevents double-spends
+│   └── PrivacyEntry            ← deposit/withdraw with commitments + IMT
 │
 ├── VERIFICATION
-│   ├── ZkVerifier              ← zkVerify proof verification
-│   └── VkRegistry              ← pins circuit VK hashes
+│   ├── ZkVerifier              ← zkVerify aggregation proof verification
+│   └── VkRegistry (library)    ← pins circuit VK hashes (Keccak format)
+│
+├── ACCOUNT ABSTRACTION
+│   ├── AgentAccount            ← ERC-4337 smart accounts (future use)
+│   └── PolicyRegistry          ← delegation policies (future use)
 │
 └── ORACLES
-    └── ChainlinkAdapter        ← price feeds for liquidations
+    └── Oracle                  ← Stork price feeds
 ```
 
 All contracts verified on Horizen block explorer.
@@ -170,11 +176,11 @@ All contracts verified on Horizen block explorer.
 
 | Token | Role | Type |
 |-------|------|------|
-| USDC | Primary supply asset | ERC20 |
-| ZEN | Native collateral (wrapped) | ERC20 |
-| WETH | Alternative collateral | ERC20 |
+| USDC | Primary supply/borrow asset | ERC20 (testnet) |
+| ZEN | Native collateral (wrapped) | ERC20 (testnet) |
+| WETH | Alternative collateral | ERC20 (testnet) |
 
-More assets will be added based on testnet feedback.
+**Note:** Testnet versions of these tokens. More assets may be added based on testnet feedback.
 
 ---
 
@@ -198,14 +204,16 @@ More assets will be added based on testnet feedback.
 
 ## Documentation
 
+- **[Current Status](NEXT_STEPS.md)** — project status and next steps
+- **[Ground Truth](GROUND_TRUTH.md)** — canonical project state (technical details)
 - **[Architecture Overview](docs/ARCHITECTURE.md)** — system design and data flow
-- **[Developer Guide](docs/DEVELOPER_GUIDE.md)** — setup and build instructions
-- **[Privacy Guarantees](docs/PRIVACY.md)** — what's private, what's not
-- **[Circuit Specifications](docs/CIRCUITS.md)** — ZK circuit details
-- **[Smart Contracts](docs/CONTRACTS.md)** — contract documentation
-- **[Deployment Addresses](docs/DEPLOYMENTS.md)** — testnet contracts
-- **[Security Model](SECURITY.md)** — threat model and responsible disclosure
+- **[Deployment Addresses](docs/DEPLOYMENTS.md)** — testnet contracts and VK hashes
 - **[Glossary](GLOSSARY.md)** — technical term definitions
+- **[Changelog](CHANGELOG.md)** — version history
+
+**Implementation Patterns:**
+- **[Zendex Patterns](docs/ZENDEX_PATTERNS_ANALYSIS.md)** — production patterns from Horizen ecosystem
+- **[Layrs Patterns](docs/LAYRS_PATTERNS_ANALYSIS.md)** — privacy patterns from prediction market
 
 ---
 
@@ -256,7 +264,9 @@ We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 Please do NOT file public GitHub issues for security vulnerabilities. See [SECURITY.md](SECURITY.md) for our security model and disclosure policy.
 
-**Audit Status:** Pre-audit testnet. External audit planned before mainnet launch.
+**Audit Status:** Pre-audit testnet phase. External audit planned before mainnet launch.
+
+**Bug Bounty:** Not yet active (testnet phase).
 
 ---
 

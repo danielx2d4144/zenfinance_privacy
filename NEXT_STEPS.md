@@ -1,120 +1,185 @@
-# NoctFinance Phase 2 — Next Steps
+# NoctFinance — Current Status & Next Steps
 
-## Current Status: BLOCKED on Kurier VK Size Mismatch
+**Last Updated:** 2026-08-19  
+**Project:** Privacy lending protocol on Horizen testnet  
+**Phase:** Phase 2 completion
 
-### What We Accomplished
-✅ Successfully identified root cause of `status=Failed` errors  
-✅ Created `derive-vks.mjs` script that generates VKs using bb.js 3.0.x Node.js WASM  
-✅ Confirmed all 11 circuits now have 3680-byte VKs (matching browser prover)  
-✅ Tested bb.js versions 3.0.0-rc.6, 3.0.1, 3.0.3 — all produce 3680-byte VKs  
-✅ Documented the issue with technical details for Horizen support  
+---
 
-### The Problem
-**Kurier's Substrate pallet has VK sizes hardcoded:**
-- `V3_0`: expects `[u8;1888]` (1888 bytes)
-- `V0_84`: expects `[u8;1760]` (1760 bytes)  
-- `Legacy`: expects `[u8;1760]` (1760 bytes)
+## ✅ VK Format Issue — RESOLVED
 
-**All modern bb.js 3.0.x versions generate 3680-byte VKs** — which the pallet rejects with:
+### What Was Fixed (2026-08-19)
+
+The Kurier VK format mismatch has been **completely resolved**:
+
+1. ✅ **Root cause identified:** zkVerify requires Keccak oracle hash format (1888-byte VKs), not Poseidon2 (3680-byte VKs)
+2. ✅ **Browser prover fixed:** Added `keccakZK: true` to `worker.ts:107`
+3. ✅ **VK derivation fixed:** Updated `derive-vks.mjs` to use `oracleHashType: "keccak"`
+4. ✅ **All 11 VKs re-derived:** Each circuit now has 1888-byte Keccak VK
+5. ✅ **All 11 VKs re-registered:** Kurier accepted all new VK hashes
+6. ✅ **Kurier VK hashes updated:** `kurier-vk-hashes.ts` has all new hashes
+
+### Technical Details
+
+**Before (broken):**
+```javascript
+// worker.ts
+const { proof: proofBytes, publicInputs } = await backend.generateProof(witness, {});
+// ❌ Defaulted to Poseidon2, generated 3680-byte VKs
+
+// derive-vks.mjs
+const PROOF_SETTINGS = {
+  oracleHashType: "poseidon2",  // ❌ Wrong for zkVerify
+};
 ```
-Expected input with 1888 bytes (15104 bits), found 3680 bytes
+
+**After (fixed):**
+```javascript
+// worker.ts
+const { proof: proofBytes, publicInputs } = await backend.generateProof(witness, { keccakZK: true });
+// ✅ Explicitly uses Keccak, generates 1888-byte VKs
+
+// derive-vks.mjs
+const PROOF_SETTINGS = {
+  oracleHashType: "keccak",  // ✅ Correct for zkVerify
+};
 ```
 
-This is a **version mismatch** between bb.js 3.0.x (what we use for browser proving) and what zkVerify's current pallet supports.
+---
+
+## 🔄 Current Status: Pending Redeployment
+
+### What's Done
+- Browser proves with correct format
+- All VKs registered with Kurier
+- Backend knows correct VK hashes
+
+### What's Pending
+
+**Task #27: Update VkRegistry and redeploy ZkVerifier**
+
+The on-chain VkRegistry still has old Poseidon2 hashes. Need to:
+
+1. Update `VkRegistry.sol` with new Keccak VK hashes
+2. Redeploy ZkVerifier contract on Horizen testnet
+3. Update deployment addresses in configs
+
+**Task #18: Test live proof submission**
+
+After redeployment:
+1. Generate supply proof in browser
+2. Submit to Kurier → verify reaches `Aggregated` status
+3. Call `verifyAndConsume` on-chain → verify `ProofConsumed` event
+4. Confirm full flow works end-to-end
 
 ---
 
-## Immediate Actions Required
+## 📋 Next Steps
 
-### 1. Contact Horizen/zkVerify Support
-**File:** `VK_SIZE_MISMATCH_ISSUE.md` contains full technical details
+### Phase 2 Completion (This Week)
 
-**Channels:**
-- Discord: discord.gg/zkverify
-- Email: kurier-support@horizenlabs.io
-- GitHub: https://github.com/zkVerify/zkVerify/issues
+1. **Redeploy contracts** with updated VK hashes
+2. **Test supply proof** end-to-end on Horizen testnet
+3. **Verify borrow proof** works with new format
+4. **Document the fix** in changelog
 
-**Questions to ask:**
-1. Is there a plan to update V3_0 or add V4_0 for 3680-byte VKs?
-2. What exact bb.js version should we use with current V3_0 (1888-byte)?
-3. Timeline for supporting bb.js 3.0.x VK format?
+### Phase 3: Deployment (Next Week)
 
-### 2. Interim Workarounds (While Waiting for Support Response)
+1. **Deploy backend** to Railway (prover-service + data-api)
+2. **Deploy frontend** to Vercel
+3. **Set up invite gate** for controlled access
+4. **Configure production secrets** (RPC, Kurier API key)
 
-**Option A: Mock Mode for Demo (Fastest)**
-- Set `ATTESTATION_MODE=mock` in data-api `.env`
-- Supply/borrow flows will work end-to-end for UI/UX demo
-- No real Kurier verification (synthetic receipts only)
-- Good for: Horizen Accelerator demo, UI testing
-- **Implementation:** 1 line change in `.env`
+### Phase 4: UX Refinement (Week 3-4)
 
-**Option B: Try bb.js 0.84.0 with UltraPlonk (Complex)**
-- Downgrade to `@aztec/bb.js@0.84.0`
-- Change proof system from UltraHonk to UltraPlonk
-- Recompile all 11 circuits with older nargo
-- Update prover worker to use 0.84.0 API (different from 3.0.x)
-- **Risk:** May break Noir 1.0.0-beta.18 compatibility
-- **Timeline:** 1-2 days minimum
+1. **Rebuild dapp interaction model** - better proof generation UX
+2. **Restyle frontend** - professional polish
+3. **Add wallet connection** improvements
+4. **Implement note management** UI
 
-**Option C: Search for Intermediate bb.js Version**
-- Look for bb.js 2.x or early 3.0-alpha versions
-- Test if any generate 1888-byte UltraHonk VKs
-- **Risk:** May not exist or be compatible with our circuits
-- **Timeline:** Several hours of trial and error
+### Phase 5: QA & Launch Prep (Week 5+)
+
+1. **Full QA pass** on testnet
+2. **Create evidence pack** (screen recordings, test results)
+3. **Write user documentation** (how to use the protocol)
+4. **Prepare for public testnet** announcement
 
 ---
 
-## Recommended Path Forward
+## 🎯 Goals
 
-1. **TODAY:** Contact Horizen support with `VK_SIZE_MISMATCH_ISSUE.md`
-2. **PARALLEL:** Enable mock mode for Accelerator demo preparation
-3. **IF URGENT:** Explore Option C (intermediate versions)
-4. **WAIT:** For Horizen response before attempting Option B
+**Primary Goal:** Privacy lending protocol on Horizen testnet  
+**Focus Assets:** USDC, ZEN, WETH (testnet versions)  
+**Privacy Model:** Commitments + nullifiers + ZK proofs via zkVerify  
+**Target Users:** Privacy-conscious DeFi users
 
----
-
-## Technical Artifacts Created
-
-All tools are ready for when Kurier is updated:
-
-1. **`code/dapp/scripts/derive-vks.mjs`**  
-   Derives VKs from circuit artifacts using bb.js Node.js WASM  
-   Already tested and working with bb.js 3.0.x
-
-2. **Updated VK files (3680 bytes each)**  
-   `code/circuits/*/target/vk` — ready for Kurier when pallet is updated
-
-3. **New Poseidon2 VK hashes**  
-   Printed by derive-vks.mjs for VkRegistry.sol update (optional)
-
-4. **Test script: `.vktest/test-vk-size.mjs`**  
-   Quickly test VK size for any bb.js version
+**Future Considerations (On Hold):**
+- CCN pivot (institutional RWA lending) - deferred until consumer protocol proven
+- Vela TEE proving integration - confirmed feasible, implementation Phase 3+
+- Mainnet deployment - pending testnet validation + audit
 
 ---
 
-## What Happens After Resolution
+## 📊 Technical Stack (Confirmed Working)
 
-Once Kurier supports 3680-byte VKs (or we find the right bb.js version):
-
-1. Run `cd code/backend/prover-service && npm run register-vks`
-2. Update `kurier-vk-hashes.ts` with new Kurier VK hashes
-3. Test supply proof submission → should reach `Aggregated` status
-4. Complete Phase 2: Get `ProofConsumed` event on Horizen testnet ZkVerifier
-5. Move to Phase 3: Deploy to Railway + Vercel
-
----
-
-## Files & Context
-
-- **Issue doc:** `VK_SIZE_MISMATCH_ISSUE.md`
-- **Derive script:** `code/dapp/scripts/derive-vks.mjs`
-- **Test script:** `.vktest/test-vk-size.mjs`
-- **Kurier schemas:** `code/backend/prover-service/src/kurier/schemas.ts`
-- **VK loader:** `code/backend/prover-service/src/circuits/vk-loader.ts`
-- **Register script:** `code/backend/prover-service/scripts/register-all-vks.ts`
-
-**Key insight:** The VK mismatch is NOT a bug in our code — it's a compatibility gap between modern bb.js (3.0.x) and zkVerify's current Substrate pallet implementation.
+| Component | Technology | Status |
+|-----------|-----------|--------|
+| Circuits | Noir 1.0.0-beta.18 | ✅ 11 circuits compiled |
+| Proving System | UltraHonk (Keccak oracle) | ✅ 1888-byte VKs |
+| Prover | bb.js 3.0.x | ✅ Browser + Node |
+| Verification | zkVerify Kurier API | ✅ All VKs registered |
+| Settlement Chain | Horizen testnet (2651420) | ✅ Proxy verified |
+| Contracts | Solidity 0.8.x | ✅ 11 contracts, 217/217 tests pass |
+| Oracle | Stork | ✅ Integrated |
+| Frontend | Next.js | ✅ Demo-grade UI |
+| Backend | Fastify 5 + MCP | ✅ Built |
 
 ---
 
-Generated: 2026-08-15
+## 🚫 What's NOT Current Focus
+
+- ❌ CCN / RWA / institutional pivot
+- ❌ Multi-chain deployment (Base, Polygon, etc.)
+- ❌ RedStone oracle integration
+- ❌ Auditor disclosure circuits
+- ❌ Proof-of-Non-Rehypothecation
+- ❌ ERC-4337 agent accounts (built but not priority)
+- ❌ Mainnet deployment
+
+These are **future directions** documented in `CCN_TECHNICAL_PIVOT.md` but on hold.
+
+---
+
+## 📁 Key Files
+
+**Source of Truth:**
+- `GROUND_TRUTH.md` - Canonical project state (updated 2026-08-19)
+- This file (`NEXT_STEPS.md`) - Current status + next actions
+
+**Implementation Patterns:**
+- `docs/ZENDEX_PATTERNS_ANALYSIS.md` - Production patterns from Zendex
+- `docs/LAYRS_PATTERNS_ANALYSIS.md` - Production patterns from Layrs
+
+**Technical Docs:**
+- `docs/ARCHITECTURE.md` - System architecture
+- `docs/DEPLOYMENTS.md` - Contract addresses + VK hashes
+- `GLOSSARY.md` - Technical terminology
+- `CHANGELOG.md` - Version history
+
+**Reference Only (Not Current Plan):**
+- `design-v2/` - Original design specs (archived)
+- `CCN_TECHNICAL_PIVOT.md` - Future institutional direction (on hold)
+
+---
+
+## 🔗 Critical Commits
+
+- **2026-08-19:** VK format fix (Keccak oracle hash)
+- **2026-08-03:** Horizen testnet aggregation proof verified
+- **2026-07-30:** All contracts deployed + tested
+
+---
+
+**Current blocker:** None  
+**Next action:** Redeploy VkRegistry with Keccak VK hashes  
+**ETA to Phase 3:** 2-3 days after redeployment + testing

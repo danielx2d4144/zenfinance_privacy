@@ -1,0 +1,48 @@
+
+> dapp@0.1.0 predev
+> node scripts/copy-circuit-artifacts.mjs
+
+[copy-circuits] 0 copied, 11 up-to-date, 0 missing
+
+> dapp@0.1.0 dev
+> next dev --webpack
+
+▲ Next.js 16.2.7 (webpack)
+- Local:         http://localhost:3000
+- Network:       http://10.164.72.62:3000
+- Environments: .env.local
+✓ Ready in 12.6s
+
+○ Compiling / ...
+ GET / 200 in 29.5s (next.js: 20.7s, application-code: 8.8s)
+ GET / 200 in 110s (next.js: 102s, application-code: 8.8s)
+ GET / 200 in 676ms (next.js: 90ms, application-code: 586ms)
+ HEAD / 200 in 692ms (next.js: 126ms, application-code: 566ms)
+ HEAD / 200 in 1185ms (next.js: 31ms, application-code: 1154ms)
+ HEAD / 200 in 1073ms (next.js: 31ms, application-code: 1042ms)
+ GET / 200 in 3.4s (next.js: 286ms, application-code: 3.2s)
+ HEAD / 200 in 973ms (next.js: 81ms, application-code: 892ms)
+ GET /supply 200 in 56s (next.js: 54s, application-code: 2.0s)
+ GET / 200 in 1464ms (next.js: 338ms, application-code: 1125ms)
+ GET / 200 in 914ms (next.js: 47ms, application-code: 867ms)
+ GET / 200 in 419ms (next.js: 16ms, application-code: 403ms)
+ GET / 200 in 971ms (next.js: 28ms, application-code: 943ms)
+ GET / 200 in 1001ms (next.js: 22ms, application-code: 979ms)
+ GET / 200 in 785ms (next.js: 93ms, application-code: 692ms)
+ GET /supply 200 in 522ms (next.js: 14ms, application-code: 508ms)
+ GET /supply 200 in 296ms (next.js: 25ms, application-code: 271ms)
+ GET /collateral 200 in 38.4s (next.js: 37.7s, application-code: 763ms)
+ GET / 200 in 2.9s (next.js: 1016ms, application-code: 1879ms)
+ GET / 200 in 788ms (next.js: 73ms, application-code: 716ms)
+ GET /collateral 200 in 1269ms (next.js: 157ms, application-code: 1111ms)
+ GET / 200 in 451ms (next.js: 30ms, application-code: 421ms)
+ GET / 200 in 5.0s (next.js: 1314ms, application-code: 3.7s)
+ GET /supply 200 in 1203ms (next.js: 546ms, application-code: 656ms)
+ GET / 200 in 1670ms (next.js: 53ms, application-code: 1616ms)
+ GET /supply 200 in 1281ms (next.js: 34ms, application-code: 1247ms)
+ GET / 200 in 1012ms (next.js: 30ms, application-code: 982ms)
+ GET / 200 in 653ms (next.js: 72ms, application-code: 581ms)
+ GET / 200 in 207ms (next.js: 22ms, application-code: 185ms)
+ GET /supply 200 in 517ms (next.js: 20ms, application-code: 496ms)
+ GET / 200 in 318ms (next.js: 67ms, application-code: 252ms)
+ GET / 200 in 148ms (next.js: 9ms, application-code: 139ms)

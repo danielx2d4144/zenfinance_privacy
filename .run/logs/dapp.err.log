@@ -1,0 +1,1167 @@
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+[browser] Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+[browser] Lit is in dev mode. Not recommended for production! See https://lit.dev/msg/dev-mode for more information.
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+⚠ ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+Module not found: Can't resolve 'pino-pretty' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\pino@7.11.0\node_modules\pino\lib'
+
+Import trace for requested module:
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/lib/tools.js
+./node_modules/.pnpm/pino@7.11.0/node_modules/pino/pino.js
+./node_modules/.pnpm/@walletconnect+logger@2.1.2/node_modules/@walletconnect/logger/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+universal-pr_034d522c98e7e79dc40725681f00c63a/node_modules/@walletconnect/universal-provider/dist/index.es.js
+./node_modules/.pnpm/@walletconnect+ethereum-pro_1f59e88dafb39ab016a6e1c20e29c7f5/node_modules/@walletconnect/ethereum-provider/dist/index.es.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/walletConnect.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempo.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+Module not found: Can't resolve '@react-native-async-storage/async-storage' in 'C:\Users\Hi\Desktop\team idea\code\dapp\node_modules\.pnpm\@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10\node_modules\@metamask\sdk\dist\browser\es'
+
+Import trace for requested module:
+./node_modules/.pnpm/@metamask+sdk@0.33.1_bufferutil@4.1.0_utf-8-validate@5.0.10/node_modules/@metamask/sdk/dist/browser/es/metamask-sdk.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/metaMask.js
+./node_modules/.pnpm/@wagmi+connectors@6.2.0_@ta_6cd984dc29188e49a0eadad70af826a6/node_modules/@wagmi/connectors/dist/esm/exports/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/connectors.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
+[browser] ./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+Critical dependency: the request of a dependency is an expression
+
+Import trace for requested module:
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/internal/virtualMasterPool.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/VirtualMaster.js
+./node_modules/.pnpm/ox@0.14.29_typescript@5.9.3_zod@4.4.3/node_modules/ox/_esm/tempo/index.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/tempo/chainConfig.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/definitions/tempoDevnet.js
+./node_modules/.pnpm/viem@2.52.2_bufferutil@4.1._f50ca4a88a912ed31134438c05908bff/node_modules/viem/_esm/chains/index.js
+./node_modules/.pnpm/wagmi@2.19.5_@tanstack+quer_a8fae74bed1b185d1dbf446bd712cb3f/node_modules/wagmi/dist/esm/exports/chains.js
+./node_modules/.pnpm/@rainbow-me+rainbowkit@2.2._67682abd7b152a6ce5ddaa89753ed320/node_modules/@rainbow-me/rainbowkit/dist/index.js
+./src/app/providers.tsx
