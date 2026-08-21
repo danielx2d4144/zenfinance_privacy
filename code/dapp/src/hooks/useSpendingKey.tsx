@@ -182,7 +182,22 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
           }
         }
 
-        // 2) Memo recovery — trial-decrypt every on-chain memo locally.
+        // 2) Hydrate IMTs from recovered leaves — CRITICAL for cross-session proofs.
+        // The local IMTs must mirror the on-chain tree state so proofFor() generates
+        // siblings against the correct root. Without this, proofs fail with "Cannot
+        // satisfy constraint" because the circuit's merkle_root check rejects siblings
+        // computed against an empty tree.
+        const sortedDeposits = [...view.depositLeaves].sort((a, b) => a.leafIndex - b.leafIndex);
+        for (const { commitment } of sortedDeposits) {
+          entryImtRef.current.insert(BigInt(commitment));
+        }
+        console.log("[useSpendingKey] IMT hydrated:", {
+          entryCount: sortedDeposits.length,
+          entryRoot: entryImtRef.current.currentRoot().toString(16),
+          leafCount: view.leafCount,
+        });
+
+        // 3) Memo recovery — trial-decrypt every on-chain memo locally.
         const { notes } = await recoverNotes({
           view,
           viewingKey: keys.viewingKey,
