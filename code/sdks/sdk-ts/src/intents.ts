@@ -37,7 +37,7 @@ export class IntentsApi {
     intentId: string,
     opts?: { deadlineMs?: number; pollMs?: number },
   ): Promise<IntentDetail> {
-    const deadline = Date.now() + (opts?.deadlineMs ?? 60_000);
+    const deadline = Date.now() + (opts?.deadlineMs ?? 300_000);
     const pollMs = opts?.pollMs ?? 250;
     while (Date.now() < deadline) {
       const row = await this.get(intentId);
