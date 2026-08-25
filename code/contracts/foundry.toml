@@ -46,3 +46,9 @@ tab_width = 4
 bracket_spacing = false
 int_types = "long"
 quote_style = "double"
+
+# Named RPC aliases so scripts can be run as `--rpc-url horizen` instead of
+# pasting the full URL. Long URLs wrap in terminals and get split across
+# lines, which silently drops whatever flags follow (--broadcast included).
+[rpc_endpoints]
+horizen = "https://horizen-testnet.rpc.caldera.xyz/http"
