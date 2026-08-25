@@ -108,6 +108,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
   const [recovery, setRecovery] = useState<RecoveryState>({ status: "idle" });
   const [isDeriving, setIsDeriving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [imtVersion, setImtVersion] = useState(0); // Force context re-memoization after IMT changes
 
   // Refs so the IMT instances + note store survive re-renders without
   // forcing fresh ones each time. On clear() we drop them all together.
@@ -196,6 +197,9 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
           entryRoot: entryImtRef.current.currentRoot().toString(16),
           leafCount: view.leafCount,
         });
+
+        // Force context re-memoization so components get fresh IMT refs
+        setImtVersion((v) => v + 1);
 
         // 3) Memo recovery — trial-decrypt every on-chain memo locally.
         const { notes } = await recoverNotes({
@@ -315,6 +319,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
   }, [address, chainId, signTypedDataAsync, runRecovery]);
 
   const clear = useCallback(() => {
+    console.log("[useSpendingKey] clear() called - resetting IMTs");
     setUnlocked(false);
     setSecretKey(null);
     setSpendingPubkey(null);
@@ -331,6 +336,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
     supplyImtRef.current = new LocalIMT();
     positionImtRef.current = new LocalIMT();
     noteStoreRef.current = new NoteStore();
+    setImtVersion((v) => v + 1); // Force context re-memoization after clearing
   }, []);
 
   const value = useMemo(
@@ -364,6 +370,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
       error,
       derive,
       clear,
+      imtVersion, // Re-memoize when IMTs are hydrated
     ],
   );
 

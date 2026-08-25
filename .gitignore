@@ -69,3 +69,26 @@ Thumbs.db
 .claude/
 !.claude/settings.json
 .gstack/
+
+# Local Postgres install + its data directory. The bundled binaries and the
+# cluster's data files are machine-local and enormous (postgres.zip alone is
+# ~190MB, well past GitHub's 100MB per-file hard limit).
+postgres/
+postgres.zip
+
+# Plaintext key notes. `design-v2/pivot-privatekey-testnetwallet` holds the
+# DEPLOYER key (DEFAULT_ADMIN_ROLE over the whole protocol) with no file
+# extension, so extension-based secret scans miss it. Never committed — keep
+# it that way. Move it out of the repo and into a password manager.
+*privatekey*
+*private-key*
+*PRIVATE_KEY*
+design-v2/pivot-privatekey-testnetwallet
+
+# One-off debugging scratch scripts. Kept out of the repo because they hardcode
+# addresses that go stale the moment contracts are redeployed — a live one is
+# worse than none (see BUG-TRACKER.md #6).
+/mock-api.mjs
+code/dapp/find-error.mjs
+code/dapp/seed-oracle.mjs
+code/dapp/test-supply-flow.mjs

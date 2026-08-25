@@ -4,6 +4,10 @@ import type { Abi, Address, Hex } from "viem";
 import { getChainClients } from "../../chain/clients.js";
 import { setMockProxyAllowed } from "../../chain/mock-proxy.js";
 import type { AggregationProofTuple } from "../../chain/zk-verifier.js";
+import {
+  AGGREGATION_PROXY_ABI,
+  ZK_VERIFIER_ABI,
+} from "../../chain/zk-verifier.js";
 import { withChainLock } from "../../chain/mutex.js";
 import { getConfig } from "../../config.js";
 import {
@@ -21,6 +25,17 @@ import {
 import type { CircuitName } from "../vk-registry.js";
 
 const ZERO_ROOT: Hex = "0x0000000000000000000000000000000000000000000000000000000000000000";
+
+/**
+ * How long to wait for the aggregation root to appear on the destination-chain
+ * proxy before giving up and attempting the tx anyway. Kurier's own poll
+ * timeout is 20 minutes (`KURIER_POLL_TIMEOUT_MS`); the publish lag after
+ * `Aggregated` is a much shorter tail, so 3 minutes is generous.
+ */
+const PROXY_WAIT_TIMEOUT_MS = 180_000;
+const PROXY_POLL_INTERVAL_MS = 5_000;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const POOL_ROOT_READ_ABI = [
   {
@@ -107,10 +122,17 @@ export async function verifyAndCall(args: VerifyAndCallArgs): Promise<void> {
 
     await updateIntentStatus(pool, intent.id, "aggregated");
 
-    const { account, publicClient, walletClient, mockProxy, domainId } =
+    const { account, publicClient, walletClient, mockProxy, domainId, zkVerifier } =
       getChainClients();
 
     const aggregationProof = receiptToTuple(receipt, domainId);
+
+    // Wait for the aggregation root to land on the destination-chain proxy.
+    // Deliberately outside withChainLock: this can block for minutes and
+    // holding the chain mutex would serialise every other intent behind it.
+    if (getConfig().ATTESTATION_MODE === "kurier") {
+      await waitForAggregationOnChain(aggregationProof, publicClient, zkVerifier);
+    }
 
     let depositHash: Hex;
     await withChainLock(async () => {
@@ -227,4 +249,69 @@ async function maybeFillRoot(
   const live = await resolveRootArg(args[idx], target, publicClient);
   if (live === args[idx]) return args;
   return args.map((v, i) => (i === idx ? live : v));
+}
+
+/**
+ * Attempts to observe the aggregation root on the destination-chain proxy
+ * before spending gas on the pool call.
+ *
+ * Why this exists: Kurier reporting `Aggregated` means zkVerify aggregated
+ * the proof — NOT that the root has landed on Horizen's proxy. That
+ * distinction was benign on Base Sepolia (the relayer pushes during
+ * `Aggregated`, see the status semantics note in prover-service's
+ * `kurier/schemas.ts`), so the original code submitted immediately. On
+ * Horizen testnet the publish lags, and submitting into that window costs a
+ * reverted tx: the pool's internal `verifyAndConsume` calls
+ * `proxy.verifyProofAggregation`, gets `false`, and reverts with
+ * `AggregationVerifyFailed()` (0x79993b73).
+ *
+ * `verifyProofAggregation` is `view`, so this dry-run is free apart from RPC
+ * round-trips.
+ *
+ * Returns `true` once the proxy accepts the witness. On timeout returns
+ * `false` rather than throwing: the caller still attempts the tx, so a proxy
+ * that answers differently under `eth_call` than in execution — or a chain
+ * whose publish we simply failed to observe — degrades to the old behaviour
+ * instead of turning a would-be success into a hard failure.
+ */
+async function waitForAggregationOnChain(
+  proof: AggregationProofTuple,
+  publicClient: ReturnType<typeof getChainClients>["publicClient"],
+  zkVerifier: Address,
+): Promise<boolean> {
+  let proxyAddress: Address;
+  try {
+    proxyAddress = (await publicClient.readContract({
+      address: zkVerifier,
+      abi: ZK_VERIFIER_ABI,
+      functionName: "proxy",
+    })) as Address;
+  } catch {
+    // Can't locate the proxy — skip the gate rather than block the tx.
+    return false;
+  }
+
+  const deadline = Date.now() + PROXY_WAIT_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    try {
+      const ok = (await publicClient.readContract({
+        address: proxyAddress,
+        abi: AGGREGATION_PROXY_ABI,
+        functionName: "verifyProofAggregation",
+        args: [
+          proof.domainId,
+          proof.aggregationId,
+          proof.leaf,
+          proof.merklePath,
+          proof.leafCount,
+          proof.leafIndex,
+        ],
+      })) as boolean;
+      if (ok) return true;
+    } catch {
+      // Transient RPC failure — treat like a negative and retry.
+    }
+    await sleep(PROXY_POLL_INTERVAL_MS);
+  }
+  return false;
 }

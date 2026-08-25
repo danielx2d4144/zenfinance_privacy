@@ -108,6 +108,7 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
     supplyImt,
     positionImt,
     noteStore,
+    recovery,
   } = useSpendingKey();
   const { tierWarning, isProving, prove } = useProver();
 
@@ -145,6 +146,8 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
         </p>
       </div>
     );
+
+  const isScanning = recovery.status === "scanning";
 
   const isBusy =
     stage === "proving" ||
@@ -278,10 +281,10 @@ export function LendingForm({ kind }: { kind: LendingFormKind }) {
 
         <button
           type="submit"
-          disabled={isBusy || !amount}
+          disabled={isBusy || isScanning || !amount}
           className="mt-5 rounded-md bg-emerald-500/90 px-4 py-2 text-sm font-medium text-black hover:bg-emerald-400 disabled:opacity-50"
         >
-          {isProving ? "Proving…" : isBusy ? `${copy.verb}ing…` : copy.verb}
+          {isScanning ? "Syncing…" : isProving ? "Proving…" : isBusy ? `${copy.verb}ing…` : copy.verb}
         </button>
       </form>
 
@@ -373,7 +376,16 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
   // identity (1 RAY / 1e15 = 1e12).
   const supplyIndexNow = snapshot.supplyIndices[p.slot] || 1_000_000_000_000n;
 
+  console.log("[prepareSupply] snapshot:", {
+    slot: p.slot,
+    supplyIndexRaw: snapshot.supplyIndices[p.slot],
+    supplyIndexNow,
+    assetId: p.assetId,
+    amount: p.amount,
+  });
+
   const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId, p.amount);
+  console.log("[prepareSupply] oldBalance:", oldBalance);
   const newBalanceSalt = randomSalt();
   const newSupplySalt = randomSalt();
   const residualAmount = oldBalance.amount >= p.amount ? oldBalance.amount - p.amount : 0n;
@@ -401,6 +413,15 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
 
   const balanceInsert = p.entryImt.proofFor(oldBalance.leafIdx);
   const rootBalance = p.entryImt.currentRoot();
+
+  console.log("[prepareSupply] proof details:", {
+    leafIdx: oldBalance.leafIdx,
+    oldBalanceCommit: oldBalanceCommitment.toString(16),
+    proofLeaf: balanceInsert.leaf.toString(16),
+    rootBalance: rootBalance.toString(16),
+    siblings: balanceInsert.siblings.map(s => s.toString(16)),
+    indexBits: balanceInsert.indexBits,
+  });
 
   const witness = buildSupplyWitness({
     assetId: p.assetId,
