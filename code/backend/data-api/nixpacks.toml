@@ -2,10 +2,16 @@
 nixPkgs = ['nodejs_22']
 
 [phases.install]
-cmds = ['npm ci']
+cmds = [
+  'cd ../prover-service && npm ci',
+  'cd ../data-api && npm ci'
+]
 
 [phases.build]
-cmds = ['npm run build']
+cmds = [
+  'cd ../prover-service && npm run build',
+  'cd ../data-api && npm run build'
+]
 
 [start]
-cmd = 'npm start'
+cmd = 'cd code/backend/data-api && npm start'
