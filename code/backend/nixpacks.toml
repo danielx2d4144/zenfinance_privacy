@@ -1,0 +1,17 @@
+[phases.setup]
+nixPkgs = ['nodejs_22']
+
+[phases.install]
+cmds = [
+  'cd prover-service && npm ci',
+  'cd ../data-api && npm ci'
+]
+
+[phases.build]
+cmds = [
+  'cd prover-service && npm run build',
+  'cd ../data-api && npm run build'
+]
+
+[start]
+cmd = 'cd data-api && npm start'
