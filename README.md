@@ -27,7 +27,26 @@ Unlike Aave or Compound where every transaction is public, NoctFinance keeps you
 |---------|----------|--------|
 | **Horizen Testnet** | 2651420 | 🟡 Testing Phase |
 
-**Current Phase:** Phase 2 completion - VK format fixed, pending contract redeployment + live proof testing  
+**Current release:** v3.0 — deployed 2026-08-24 at block 26008305, with Stork oracle integration.
+
+| Contract | Address |
+|----------|---------|
+| PrivacyEntry | `0xF774Ef76f52C819aA1cD14385F4D4Bc04Ec8E14b` |
+| ShieldedSupplyPool | `0xd3900432F473f9367DC837d403Dd04D3Dd629db0` |
+| ShieldedPositionPool | `0x42e8e79a7C0071930dAb7569100a7B4f4A674d09` |
+| LiquidationBoard | `0x139f5D6316f5c9C95Bb6070cC2710dBBD4a8C173` |
+| ZkVerifier | `0x8c8C4c860EF9749D7BaF82C35ef78232BDbd5077` |
+| Oracle | `0xef554bE4a2D2Eaa5f9A64C8017e60A5e5C24a9a2` |
+| RateModel | `0xD03cE597a99Da3BA67e0D46c1d0243Cd5600F4f9` |
+| AssetRegistry | `0xDF0f2F7BF0D4eC09871E2cb1b10648561492dBff` |
+| InsuranceFund | `0x0b0995aBb1240B3B6a2aF98658a94549998ffCbd` |
+| MockUSDC | `0xdE21524EADf00d726a69Ac5Ebd97cE02735d8391` |
+| MockCBBTC | `0xaC9AB44D3233de8CFD560E5a31Ec9AC4678c0e79` |
+| Stork (external) | `0xacC0a0cF13571d30B4b8637996F5D6D774d4fd62` |
+| zkVerify aggregation proxy | `0x3098A6974649478f0133046e44105AA84e868C21` |
+
+Full manifest: `code/contracts/deployments/horizen-testnet-2651420-v3-stork.json`
+
 **Testnet deployment** — contract addresses and parameters subject to change before mainnet.
 
 ---
@@ -172,15 +191,96 @@ All contracts verified on Horizen block explorer.
 
 ---
 
+## Repository Layout
+
+```
+code/
+├── circuits/          11 Noir circuits + lib_common (shared Poseidon2 helpers)
+├── contracts/         Foundry project — pools, PrivacyEntry, ZkVerifier, Oracle
+├── dapp/              Next.js 16 frontend; proves in-browser via bb.js
+├── backend/
+│   ├── data-api/      Fastify REST + MCP relayer: accepts proofs, submits on-chain
+│   ├── prover-service/ Kurier submission + aggregation polling (data-api dep)
+│   ├── price-keeper/   Pushes Stork/manual prices to keep the Oracle fresh
+│   └── subgraph/      Graph Protocol indexer for events
+├── sdks/              sdk-ts, sdk-py client libraries
+└── infra/             docker-compose data stack (Postgres, IPFS, graph-node, Anvil)
+```
+
+### Off-chain services
+
+**data-api** (`code/backend/data-api`) — the relayer. Browsers post proofs and
+public inputs here; it forwards them through prover-service to Kurier, waits for
+zkVerify aggregation, then submits the settlement transaction on Horizen using
+the funded relayer key. Users never pay gas directly and never expose their
+spending key. Requires Postgres for intent tracking and resume-after-restart.
+
+**prover-service** (`code/backend/prover-service`) — Kurier client. Submits
+UltraHonk proofs to zkVerify's REST API, polls for the aggregation receipt, and
+returns the Merkle path the on-chain `ZkVerifier` needs. Consumed by data-api as
+a `file:` dependency, so it must be built first.
+
+**price-keeper** (`code/backend/price-keeper`) — keeps `Oracle.getPrice()` from
+going stale. In hybrid mode it re-pushes manual prices; once Stork enables
+Horizen feeds it will push signed Stork updates instead.
+
+### Client-side proving and note recovery
+
+Proofs are generated in the browser with `@aztec/bb.js` — private witnesses never
+leave the device. Notes are stored in IndexedDB, but all state is derivable from
+the spending key alone: on unlock, the dapp scans from
+`NEXT_PUBLIC_HORIZEN_DEPLOY_BLOCK` forward, decrypts memo fields on
+`Deposited`/`SupplyDeposited`/`PositionUpdated` events, and **rehydrates the
+local Incremental Merkle Trees** in leaf-index order so Merkle paths match the
+on-chain root. This is what makes cross-session operations work — deposit in one
+session, supply in another.
+
+If a local tree ever desyncs (typically after a redeploy leaves stale IndexedDB
+state), clearing storage and re-unlocking rebuilds it from chain. See
+[IMT-SYNC-FIX.md](IMT-SYNC-FIX.md).
+
+---
+
 ## Supported Assets (Testnet)
 
-| Token | Role | Type |
-|-------|------|------|
-| USDC | Primary supply/borrow asset | ERC20 (testnet) |
-| ZEN | Native collateral (wrapped) | ERC20 (testnet) |
-| WETH | Alternative collateral | ERC20 (testnet) |
+Asset IDs are positional and must match `AssetRegistry` on-chain, the circuit
+witness builders, and the relayer handlers. Slots 2 and 3 are reserved but not
+yet registered on testnet.
 
-**Note:** Testnet versions of these tokens. More assets may be added based on testnet feedback.
+| Asset ID | Token | Role | Type |
+|----------|-------|------|------|
+| 0 | USDC | Primary supply/borrow asset | ERC20 (mock, testnet) |
+| 1 | cbBTC | Primary collateral | ERC20 (mock, testnet) |
+| 2 | WETH | Reserved — not registered | — |
+| 3 | ZEN | Reserved — not registered | — |
+
+**Note:** Testnet tokens are mocks with open `mint()`. More assets may be added
+based on testnet feedback.
+
+---
+
+## Price Oracle (Hybrid Mode)
+
+v3.0 integrates the Stork oracle, but Stork does not yet publish USDC or BTC
+feeds on Horizen testnet — querying it reverts with `0xc5723b51`. The Oracle
+therefore runs in **hybrid mode**:
+
+- Stork feed IDs are set to `bytes32(0)`, so `getPrice()` falls back to manual
+  prices in the `_priceData` mapping.
+- An address with `MANAGER_ROLE` pushes prices via `pushPrice(assetId, price)`.
+- **Prices expire after 1 hour** (3600s staleness window). Stale prices make
+  supply and borrow revert with `PriceStale` (`0x0868dfcf`).
+
+Refresh prices before testing:
+
+```bash
+cd code/contracts
+forge script script/RefreshOraclePrices.s.sol \
+  --rpc-url https://horizen-testnet.rpc.caldera.xyz/http \
+  --broadcast --legacy
+```
+
+Details and the migration path to full Stork: [ORACLE-HYBRID-MODE.md](ORACLE-HYBRID-MODE.md)
 
 ---
 
@@ -190,9 +290,9 @@ All contracts verified on Horizen block explorer.
 
 2. **User supplies USDC to lending pool.** Supply proof generated. Old commitment nullified, new commitment created with accrued interest.
 
-3. **User deposits ZEN collateral.** Collateral commitment created privately.
+3. **User deposits cbBTC collateral.** Collateral commitment created privately.
 
-4. **User borrows 500 USDC against ZEN.** Borrow proof checks collateralization. New debt commitment created.
+4. **User borrows 500 USDC against cbBTC.** Borrow proof checks collateralization. New debt commitment created.
 
 5. **User repays 500 USDC.** Repayment proof. Debt commitment nullified.
 
@@ -204,69 +304,77 @@ All contracts verified on Horizen block explorer.
 
 ## Documentation
 
+- **[Local Setup](LOCAL-SETUP.md)** — run the whole stack on your own machine
 - **[Current Status](NEXT_STEPS.md)** — project status and next steps
 - **[Ground Truth](GROUND_TRUTH.md)** — canonical project state (technical details)
 - **[Architecture Overview](docs/ARCHITECTURE.md)** — system design and data flow
 - **[Deployment Addresses](docs/DEPLOYMENTS.md)** — testnet contracts and VK hashes
+- **[Oracle Hybrid Mode](ORACLE-HYBRID-MODE.md)** — price feed configuration
+- **[Bug Tracker](BUG-TRACKER.md)** — known issues with root-cause analysis
 - **[Glossary](GLOSSARY.md)** — technical term definitions
 - **[Changelog](CHANGELOG.md)** — version history
-
-**Implementation Patterns:**
-- **[Zendex Patterns](docs/ZENDEX_PATTERNS_ANALYSIS.md)** — production patterns from Horizen ecosystem
-- **[Layrs Patterns](docs/LAYRS_PATTERNS_ANALYSIS.md)** — privacy patterns from prediction market
 
 ---
 
 ## Quick Start (Developers)
 
-**Prerequisites:**
-- Node.js 22+
-- Rust stable
-- Foundry
-- Noir 1.0.0-beta.18
+**Prerequisites:** Node.js 22.x, Foundry, Noir/nargo 1.0.0-beta.18 + bb 3.0.0-rc.6, Docker, Rust stable.
 
-**Setup:**
 ```bash
-git clone https://github.com/noctfinance/noctfinance.git
-cd noctfinance
-npm install
+git clone https://github.com/danielx2d4144/zenfinance_privacy.git
+cd zenfinance_privacy
 
-# Build circuits
-cd code/circuits
-nargo compile --workspace
+# 1. Compile circuits
+cd code/circuits && nargo compile --workspace && cd ../..
 
-# Run contract tests
-cd ../contracts
-forge test
+# 2. Contract tests
+cd code/contracts && forge build && forge test && cd ../..
 
-# Start local development
-cd ../dapp
-npm run dev
+# 3. Relayer (prover-service must build first — data-api depends on it)
+cd code/backend/data-api
+cp .env.horizen .env.local-horizen   # then fill in your own keys
+npm install && npm run build
+npm run migrate:up
+npm start                            # http://127.0.0.1:8787
+
+# 4. Frontend (separate terminal)
+cd code/dapp
+npm install && npm run dev           # http://localhost:3000
 ```
 
-See [Developer Guide](docs/DEVELOPER_GUIDE.md) for full setup instructions.
+**Full step-by-step instructions, including the local Anvil stack, Postgres
+setup, environment variables, funding a testnet wallet, and troubleshooting:
+[LOCAL-SETUP.md](LOCAL-SETUP.md)**
 
 ---
 
 ## Contributing
 
-We welcome contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for:
-- Code style guidelines
-- Testing requirements
-- PR process
-- Circuit change checklist
+Contributions are welcome. Before opening a PR:
+
+- Run `forge test` (contracts) and `npm test` in `code/dapp` and `code/backend/data-api`.
+- If you change a circuit, recompile it, regenerate the VK, and update the
+  matching hash in **both** `code/contracts/src/VkRegistry.sol` and
+  `code/backend/data-api/src/vk-registry.ts`. A mismatch between these two is
+  the single most common cause of `VkHashMismatch` at settlement time.
+- Match the surrounding code style; the codebase favors explanatory comments on
+  non-obvious cryptographic steps.
 
 ---
 
 ## Security
 
-**Responsible Disclosure:** security@noctfinance.xyz
+**Responsible disclosure:** security@noctfinance.xyz
 
-Please do NOT file public GitHub issues for security vulnerabilities. See [SECURITY.md](SECURITY.md) for our security model and disclosure policy.
+Please do NOT file public GitHub issues for security vulnerabilities.
 
-**Audit Status:** Pre-audit testnet phase. External audit planned before mainnet launch.
+**Audit status:** Pre-audit testnet phase. External audit planned before mainnet launch.
 
-**Bug Bounty:** Not yet active (testnet phase).
+**Bug bounty:** Not yet active (testnet phase).
+
+⚠️ Testnet keys, mock tokens, and manually-pushed oracle prices are in use. Do
+not treat this deployment as production-secure, and never reuse a testnet
+private key on mainnet.
 
 ---
 
@@ -292,7 +400,7 @@ Full glossary: [GLOSSARY.md](GLOSSARY.md)
 
 ## License
 
-MIT License — see [LICENSE](LICENSE) for details.
+MIT License.
 
 ---
 
@@ -308,6 +416,5 @@ Special thanks to the Horizen team for zkVerify support and guidance.
 ---
 
 **NoctFinance** — Privacy-preserving DeFi on Horizen  
-Website: [noctfinance.xyz](https://noctfinance.xyz) (coming soon)  
-Twitter: [@NoctFinance](https://twitter.com/NoctFinance) (coming soon)  
-Discord: [discord.gg/noctfinance](https://discord.gg/noctfinance) (coming soon)
+Website: [noctfinance.xyz](https://noctfinance.xyz)  
+Twitter: [@Noct_finance](https://twitter.com/Noct_finance)
