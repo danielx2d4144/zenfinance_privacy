@@ -1,0 +1,17 @@
+[variables]
+NODE_VERSION = '22'
+
+[phases.install]
+cmds = [
+  'cd code/backend/prover-service && npm ci',
+  'cd code/backend/data-api && npm ci'
+]
+
+[phases.build]
+cmds = [
+  'cd code/backend/prover-service && npm run build',
+  'cd code/backend/data-api && npm run build'
+]
+
+[start]
+cmd = 'cd code/backend/data-api && npm start'

@@ -12,7 +12,7 @@
     "typecheck": "tsc -p tsconfig.test.json --noEmit",
     "migrate:up": "tsx src/migrate.ts up",
     "migrate:down": "tsx src/migrate.ts down",
-    "start": "tsx src/server.ts",
+    "start": "tsx src/migrate.ts up && tsx src/server.ts",
     "dev": "tsx --watch src/server.ts",
     "test": "vitest run",
     "lint:openapi": "tsx scripts/dump-openapi.ts && spectral lint openapi/openapi.json --ruleset openapi/.spectral.yaml"
