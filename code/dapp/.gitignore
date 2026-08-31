@@ -20,6 +20,11 @@
 # production
 /build
 
+# Circuit artifacts are committed for Vercel deployment (no Noir toolchain there).
+# Re-run `npm run copy-circuits` locally after recompiling circuits.
+!/public/circuits/
+!/public/circuits/*.json
+
 # misc
 .DS_Store
 *.pem
@@ -43,3 +48,5 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+.vercel
