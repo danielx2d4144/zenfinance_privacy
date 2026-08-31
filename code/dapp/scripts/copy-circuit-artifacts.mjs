@@ -43,6 +43,22 @@ const CIRCUIT_NAMES = [
 ];
 
 function main() {
+  // DEBUG: Log environment info to diagnose Vercel build issues
+  console.log('[copy-circuits] DEBUG: cwd =', process.cwd());
+  console.log('[copy-circuits] DEBUG: __dirname =', __dirname);
+  console.log('[copy-circuits] DEBUG: CIRCUITS_DIR =', CIRCUITS_DIR);
+  console.log('[copy-circuits] DEBUG: DEST_DIR =', DEST_DIR);
+  console.log('[copy-circuits] DEBUG: CIRCUITS_DIR exists?', existsSync(CIRCUITS_DIR));
+
+  if (existsSync(CIRCUITS_DIR)) {
+    try {
+      const circuitsDirContents = readdirSync(CIRCUITS_DIR);
+      console.log('[copy-circuits] DEBUG: CIRCUITS_DIR contents:', circuitsDirContents.slice(0, 15).join(', '));
+    } catch (err) {
+      console.log('[copy-circuits] DEBUG: Error reading CIRCUITS_DIR:', err.message);
+    }
+  }
+
   if (!existsSync(DEST_DIR)) {
     mkdirSync(DEST_DIR, { recursive: true });
     console.log(`[copy-circuits] created ${DEST_DIR}`);
