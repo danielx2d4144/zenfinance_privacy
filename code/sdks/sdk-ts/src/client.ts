@@ -57,6 +57,12 @@ export class Client {
         body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
         signal: controller.signal,
       });
+    } catch (err) {
+      clearTimeout(timeout);
+      // Network errors (CORS, connection refused, timeout) throw before
+      // we get a response object. Wrap in ApiError for consistent handling.
+      const message = err instanceof Error ? err.message : String(err);
+      throw new ApiError(0, "NETWORK_ERROR", message);
     } finally {
       clearTimeout(timeout);
     }
