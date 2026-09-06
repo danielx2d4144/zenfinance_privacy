@@ -6,6 +6,7 @@ import { useProver } from "@/hooks/useProver";
 import { useSpendingKey } from "@/hooks/useSpendingKey";
 import { useWallet } from "@/hooks/useWallet";
 import { toUnits } from "@/lib/units";
+import { debugLog, infoLog } from "@/lib/debug";
 
 import { AssetSelector, ASSET_DECIMALS, type AssetSymbol } from "./AssetSelector";
 import { ConnectGate } from "./ConnectGate";
@@ -376,7 +377,7 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
   // identity (1 RAY / 1e15 = 1e12).
   const supplyIndexNow = snapshot.supplyIndices[p.slot] || 1_000_000_000_000n;
 
-  console.log("[prepareSupply] snapshot:", {
+  debugLog("prepareSupply", "snapshot", {
     slot: p.slot,
     supplyIndexRaw: snapshot.supplyIndices[p.slot],
     supplyIndexNow,
@@ -385,7 +386,7 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
   });
 
   const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId, p.amount);
-  console.log("[prepareSupply] oldBalance:", oldBalance);
+  debugLog("prepareSupply", "oldBalance", oldBalance);
 
   // Debug: check what's actually at this position in the IMT
   const leafAtPosition = p.entryImt.leafAt(oldBalance.leafIdx);
@@ -395,7 +396,7 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
     spendingPubkey: p.pk,
     salt: oldBalance.salt,
   });
-  console.log("[prepareSupply] IMT check:", {
+  debugLog("prepareSupply", "IMT check", {
     noteLeafIdx: oldBalance.leafIdx,
     leafAtPosition: leafAtPosition ? "0x" + leafAtPosition.toString(16) : "undefined",
     expectedCommitment: "0x" + expectedCommitment.toString(16),
@@ -442,7 +443,7 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
   const balanceInsert = p.entryImt.proofFor(oldBalance.leafIdx);
   const rootBalance = p.entryImt.currentRoot();
 
-  console.log("[prepareSupply] proof details:", {
+  debugLog("prepareSupply", "proof details", {
     leafIdx: oldBalance.leafIdx,
     oldBalanceCommit: oldBalanceCommitment.toString(16),
     proofLeaf: balanceInsert.leaf.toString(16),

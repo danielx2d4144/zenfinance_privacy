@@ -24,6 +24,7 @@ import { getChainConfig } from "@/lib/chain-config.ts";
 import { makeFetchLogs, makeScanClient } from "@/lib/recovery-adapter.ts";
 import { RecoveryScanner, recoverNotes } from "@/lib/recovery-scan.ts";
 import { buildCommitmentIndex, reconcileWal } from "@/lib/commitment-matcher.ts";
+import { debugLog, infoLog, warnLog, errorLog } from "@/lib/debug.ts";
 
 import { useWallet } from "./useWallet.ts";
 
@@ -195,7 +196,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
         // the local IMT sequentially, they get NEW indices (0, 1, 2...). We need to
         // track this mapping so notes can be updated with their correct local indices.
         const commitmentToLocalIdx = new Map<string, number>();
-        console.log("[useSpendingKey] Hydrating IMT with deposits:", sortedDeposits.length);
+        debugLog("useSpendingKey", `Hydrating IMT with deposits: ${sortedDeposits.length}`);
         for (let i = 0; i < sortedDeposits.length; i++) {
           const { commitment, leafIndex: onChainIdx } = sortedDeposits[i];
           const result = entryImtRef.current.insert(BigInt(commitment));
@@ -203,17 +204,17 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
 
           // Log first few to debug
           if (i < 5 || onChainIdx === 19) {
-            console.log(`  [${i}] on-chain idx=${onChainIdx}, local idx=${result.idx}, commitment=${commitment.substring(0, 10)}...`);
+            debugLog("useSpendingKey", `  [${i}] on-chain idx=${onChainIdx}, local idx=${result.idx}, commitment=${commitment.substring(0, 10)}...`);
           }
         }
 
         const localRoot = entryImtRef.current.currentRoot();
-        console.log("[useSpendingKey] IMT hydrated:", {
+        infoLog("useSpendingKey", "IMT hydrated", {
           entryCount: sortedDeposits.length,
           entryRoot: "0x" + localRoot.toString(16),
           leafCount: view.leafCount,
         });
-        console.log("[useSpendingKey] Commitment map size:", commitmentToLocalIdx.size);
+        debugLog("useSpendingKey", `Commitment map size: ${commitmentToLocalIdx.size}`);
 
         // Force context re-memoization so components get fresh IMT refs
         setImtVersion((v) => v + 1);
@@ -225,7 +226,7 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
           spendingKey: keys.spendingKey,
         });
         let recovered = 0;
-        console.log("[useSpendingKey] Processing notes:", notes.length);
+        debugLog("useSpendingKey", `Processing notes: ${notes.length}`);
         for (const note of notes) {
           if (note.spent) {
             noteStoreRef.current.forget(note.leafHex);
@@ -240,12 +241,12 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
           const originalIdx = note.preimage.leafIdx;
           const localIdx = commitmentToLocalIdx.get(note.leafHex.toLowerCase());
 
-          console.log(`  Note ${note.leafHex.substring(0, 10)}... original idx=${originalIdx}, local idx=${localIdx}, kind=${note.preimage.kind}`);
+          debugLog("useSpendingKey", `  Note ${note.leafHex.substring(0, 10)}... original idx=${originalIdx}, local idx=${localIdx}, kind=${note.preimage.kind}`);
 
           if (localIdx !== undefined) {
             note.preimage.leafIdx = localIdx;
           } else {
-            console.warn(`  WARNING: Note commitment not found in IMT map!`);
+            warnLog("useSpendingKey", `Note commitment not found in IMT map: ${note.leafHex.substring(0, 10)}...`);
           }
 
           // Register the note (with corrected leafIdx) whether it's new or already exists.
