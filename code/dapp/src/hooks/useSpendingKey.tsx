@@ -189,14 +189,31 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
         // satisfy constraint" because the circuit's merkle_root check rejects siblings
         // computed against an empty tree.
         const sortedDeposits = [...view.depositLeaves].sort((a, b) => a.leafIndex - b.leafIndex);
-        for (const { commitment } of sortedDeposits) {
-          entryImtRef.current.insert(BigInt(commitment));
+
+        // Build a map from commitment to the actual local IMT index after insertion.
+        // The recovery scan gives us on-chain leaf indices, but when we insert into
+        // the local IMT sequentially, they get NEW indices (0, 1, 2...). We need to
+        // track this mapping so notes can be updated with their correct local indices.
+        const commitmentToLocalIdx = new Map<string, number>();
+        console.log("[useSpendingKey] Hydrating IMT with deposits:", sortedDeposits.length);
+        for (let i = 0; i < sortedDeposits.length; i++) {
+          const { commitment, leafIndex: onChainIdx } = sortedDeposits[i];
+          const result = entryImtRef.current.insert(BigInt(commitment));
+          commitmentToLocalIdx.set(commitment.toLowerCase(), result.idx);
+
+          // Log first few to debug
+          if (i < 5 || onChainIdx === 19) {
+            console.log(`  [${i}] on-chain idx=${onChainIdx}, local idx=${result.idx}, commitment=${commitment.substring(0, 10)}...`);
+          }
         }
+
+        const localRoot = entryImtRef.current.currentRoot();
         console.log("[useSpendingKey] IMT hydrated:", {
           entryCount: sortedDeposits.length,
-          entryRoot: entryImtRef.current.currentRoot().toString(16),
+          entryRoot: "0x" + localRoot.toString(16),
           leafCount: view.leafCount,
         });
+        console.log("[useSpendingKey] Commitment map size:", commitmentToLocalIdx.size);
 
         // Force context re-memoization so components get fresh IMT refs
         setImtVersion((v) => v + 1);
@@ -208,15 +225,35 @@ export function SpendingKeyProvider({ children }: { children: ReactNode }) {
           spendingKey: keys.spendingKey,
         });
         let recovered = 0;
+        console.log("[useSpendingKey] Processing notes:", notes.length);
         for (const note of notes) {
           if (note.spent) {
             noteStoreRef.current.forget(note.leafHex);
             continue;
           }
+
+          // Update the note's leafIdx to match its actual position in the local IMT.
+          // CRITICAL: Do this BEFORE checking if the note exists, because existing
+          // notes loaded from IndexedDB have stale on-chain indices. The local IMT
+          // may have inserted deposits in a different order (sorted by on-chain index),
+          // so we must remap every recovered note to its actual local position.
+          const originalIdx = note.preimage.leafIdx;
+          const localIdx = commitmentToLocalIdx.get(note.leafHex.toLowerCase());
+
+          console.log(`  Note ${note.leafHex.substring(0, 10)}... original idx=${originalIdx}, local idx=${localIdx}, kind=${note.preimage.kind}`);
+
+          if (localIdx !== undefined) {
+            note.preimage.leafIdx = localIdx;
+          } else {
+            console.warn(`  WARNING: Note commitment not found in IMT map!`);
+          }
+
+          // Register the note (with corrected leafIdx) whether it's new or already exists.
+          // registerHex overwrites existing entries, ensuring IndexedDB is updated.
           if (!noteStoreRef.current.get(note.leafHex)) {
-            noteStoreRef.current.registerHex(note.leafHex, note.preimage);
             recovered += 1;
           }
+          noteStoreRef.current.registerHex(note.leafHex, note.preimage);
         }
 
         // Persist the cursor so the next unlock skips already-scanned blocks.

@@ -387,6 +387,23 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
   const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId, p.amount);
   console.log("[prepareSupply] oldBalance:", oldBalance);
 
+  // Debug: check what's actually at this position in the IMT
+  const leafAtPosition = p.entryImt.leafAt(oldBalance.leafIdx);
+  const expectedCommitment = balanceCommitment({
+    assetId: oldBalance.assetId,
+    amount: oldBalance.amount,
+    spendingPubkey: p.pk,
+    salt: oldBalance.salt,
+  });
+  console.log("[prepareSupply] IMT check:", {
+    noteLeafIdx: oldBalance.leafIdx,
+    leafAtPosition: leafAtPosition ? "0x" + leafAtPosition.toString(16) : "undefined",
+    expectedCommitment: "0x" + expectedCommitment.toString(16),
+    match: leafAtPosition === expectedCommitment,
+    imtSize: p.entryImt.nextLeafIndex(),
+    imtRoot: "0x" + p.entryImt.currentRoot().toString(16),
+  });
+
   // Validate that the note's leafIdx is valid for the current IMT state
   const imtSize = p.entryImt.nextLeafIndex();
   if (oldBalance.leafIdx < 0 || oldBalance.leafIdx >= imtSize) {
