@@ -386,6 +386,17 @@ async function prepareSupply(p: Prep): Promise<PreparedIntent> {
 
   const oldBalance = mustGetBalanceFor(p.noteStore, p.assetId, p.amount);
   console.log("[prepareSupply] oldBalance:", oldBalance);
+
+  // Validate that the note's leafIdx is valid for the current IMT state
+  const imtSize = p.entryImt.nextLeafIndex();
+  if (oldBalance.leafIdx < 0 || oldBalance.leafIdx >= imtSize) {
+    throw new Error(
+      `Note has invalid leafIdx ${oldBalance.leafIdx} (IMT has ${imtSize} leaves). ` +
+      `Your session data is out of sync. Please clear storage: ` +
+      `Run in console: indexedDB.deleteDatabase('zenfinance-notes-v1'); localStorage.clear(); location.reload();`
+    );
+  }
+
   const newBalanceSalt = randomSalt();
   const newSupplySalt = randomSalt();
   const residualAmount = oldBalance.amount >= p.amount ? oldBalance.amount - p.amount : 0n;
